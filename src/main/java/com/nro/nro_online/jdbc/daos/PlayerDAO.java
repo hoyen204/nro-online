@@ -74,13 +74,6 @@ public class PlayerDAO {
             dataMagicTree.add(5);//curr_pea
             String magicTree = dataMagicTree.toJSONString();
 
-            /**
-             *
-             * [
-             * {"temp_id":"1","option":[[5,7],[7,3]],"create_time":"49238749283748957""},
-             * {"temp_id":"1","option":[[5,7],[7,3]],"create_time":"49238749283748957""},
-             * {"temp_id":"-1","option":[],"create_time":"0""}, ... ]
-             */
             int idAo = gender == 0 ? 0 : gender == 1 ? 1 : 2;
             int idQuan = gender == 0 ? 6 : gender == 1 ? 7 : 8;
             int def = gender == 2 ? 3 : 2;

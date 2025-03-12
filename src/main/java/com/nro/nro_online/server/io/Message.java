@@ -1,31 +1,24 @@
-package nro.server.io;
+package com.nro.nro_online.server.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 
-/**
- *
- * @Build Arriety
- */
+import com.nro.nro_online.utils.Log;
+
 public class Message {
-
     public byte command;
-
     public boolean isBigMsg;
-
     private ByteArrayOutputStream os;
-
     private DataOutputStream dos;
-
     private ByteArrayInputStream is;
-
     private DataInputStream dis;
 
     public Message() {
-        this.os = new ByteArrayOutputStream();
-        this.dos = new DataOutputStream(os);
+        os = new ByteArrayOutputStream();
+        dos = new DataOutputStream(os);
     }
 
     public Message(int command) {
@@ -34,14 +27,14 @@ public class Message {
 
     public Message(byte command) {
         this.command = command;
-        this.os = new ByteArrayOutputStream();
-        this.dos = new DataOutputStream(os);
+        os = new ByteArrayOutputStream();
+        dos = new DataOutputStream(os);
     }
 
     public Message(byte command, byte[] data) {
         this.command = command;
-        this.is = new ByteArrayInputStream(data);
-        this.dis = new DataInputStream(is);
+        is = new ByteArrayInputStream(data);
+        dis = new DataInputStream(is);
     }
 
     public DataOutputStream writer() {
@@ -53,7 +46,7 @@ public class Message {
     }
 
     public byte[] getData() {
-        return this.os.toByteArray();
+        return os.toByteArray();
     }
 
     public void transformData() {
@@ -61,20 +54,19 @@ public class Message {
 
     public void cleanup() {
         try {
-            if (dis != null) {
+            if (dis != null)
                 dis.close();
-            }
-            if (dos != null) {
+            if (dos != null)
                 dos.close();
-            }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(this.getClass(), e);
         }
     }
 
     public void dispose() {
-        this.dis = null;
-        this.is = null;
-        this.dos = null;
-        this.os = null;
+        dis = null;
+        is = null;
+        dos = null;
+        os = null;
     }
 }

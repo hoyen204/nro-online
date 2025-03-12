@@ -1,8 +1,11 @@
 package com.nro.nro_online.models.item;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.nro.nro_online.services.ItemService;
 import com.nro.nro_online.utils.Util;
 
 public class ItemOption {
@@ -25,6 +28,11 @@ public class ItemOption {
     public ItemOption(int tempId, int param) {
         this.optionTemplate = ItemService.gI().getItemOptionTemplate(tempId);
         this.param = param;
+    }
+
+    public ItemOption(ResultSet rs) throws SQLException {
+        this.optionTemplate = ItemService.gI().getItemOptionTemplate(rs.getInt(2));
+        this.param = rs.getInt(3);
     }
 
     public String getOptionString() {

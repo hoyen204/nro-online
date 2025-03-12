@@ -1,52 +1,41 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package nro.server.model;
+package com.nro.nro_online.server.io;
 
-import nro.utils.Util;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @Build Arriety
- */
 public class AntiLogin {
-
     private static final byte MAX_WRONG = 5;
-    private static final int TIME_ANTI = 900000;
+    private static final int TIME_ANTI = 900_000; // 15 phút, thêm underscore cho dễ đọc 😜
 
-    private long lastTimeLogin;
-    private int timeCanLogin;
+    private volatile long lastTimeLogin = -1; // Thread-safe cho server multi-user
+    private volatile int timeCanLogin;
+    private volatile byte wrongLogin; // Byte nhỏ gọn, đủ dùng
 
-    public byte wrongLogin;
-
-    public boolean canLogin() {
-        if (lastTimeLogin != -1) {
-            if (Util.canDoWithTime(lastTimeLogin, timeCanLogin)) {
-                this.reset();
-                return true;
-            }
+    public synchronized boolean canLogin() { // Đồng bộ để tránh race condition
+        if (lastTimeLogin != -1 && !Util.canDoWithTime(lastTimeLogin, timeCanLogin)) {
+            return false; // Chưa hết thời gian khóa, cút! 😤
         }
+        reset(); // Hết khóa thì reset luôn
         return wrongLogin < MAX_WRONG;
     }
 
-    public void wrong() {
+    public synchronized void wrong() {
         wrongLogin++;
         if (wrongLogin >= MAX_WRONG) {
-            this.lastTimeLogin = System.currentTimeMillis();
-            this.timeCanLogin = TIME_ANTI;
+            lastTimeLogin = System.currentTimeMillis();
+            timeCanLogin = TIME_ANTI;
         }
     }
 
-    public void reset() {
-        this.wrongLogin = 0;
-        this.lastTimeLogin = -1;
-        this.timeCanLogin = 0;
+    public synchronized void reset() {
+        wrongLogin = 0;
+        lastTimeLogin = -1;
+        timeCanLogin = 0;
     }
 
     public String getNotifyCannotLogin() {
-        return "Bạn đã đăng nhập tài khoản sai quá nhiều lần. Vui lòng thử lại sau ít phút";
+        int remainingSeconds = (int) ((lastTimeLogin + timeCanLogin - System.currentTimeMillis()) / 1000);
+        return remainingSeconds > 0
+                ? "Sai quá nhiều rồi, chờ " + remainingSeconds + " giây nữa nhé!"
+                : "Bạn đã đăng nhập sai quá nhiều, thử lại sau ít phút!";
     }
-
 }

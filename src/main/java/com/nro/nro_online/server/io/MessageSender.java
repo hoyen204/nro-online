@@ -1,33 +1,27 @@
-package nro.server.io;
-
-import static nro.server.io.Session.KEYS;
-import nro.utils.Log;
+package com.nro.nro_online.server.io;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-/**
- *
- * @Build Arriety
- *
- */
-public class MessageSender implements Runnable {
+import static nro.server.io.Session.KEYS;
+import com.nro.nro_online.utils.Log;
 
+public class MessageSender implements Runnable {
     private Session session;
     private ArrayList<Message> sendingMessage;
     DataOutputStream dos;
 
     public int getNumMessage() {
-        return this.sendingMessage.size();
+        return sendingMessage.size();
     }
 
     public MessageSender(Session session, Socket socket) {
         sendingMessage = new ArrayList<>();
         try {
             this.session = session;
-            this.dos = new DataOutputStream(socket.getOutputStream());
+            dos = new DataOutputStream(socket.getOutputStream());
         } catch (Exception e) {
             Log.error(MessageSender.class, e);
         }
@@ -36,8 +30,7 @@ public class MessageSender implements Runnable {
     public void addMessage(Message message) {
         try {
             sendingMessage.add(message);
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
     }
 
     @Override
@@ -45,48 +38,35 @@ public class MessageSender implements Runnable {
         Message message;
         while (session != null && session.connected) {
             try {
-                while ((message = sendingMessage.remove(0)) != null) {
+                while (!(sendingMessage.isEmpty()) && (message = sendingMessage.remove(0)) != null) {
                     doSendMessage(message);
                 }
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
             try {
                 Thread.sleep(10);
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
     }
 
     public void doSendMessage(Message msg) {
         try {
             byte[] data = msg.getData();
-            if (session.connected) {
-                byte b = writeKey(msg.command);
-                dos.writeByte(b);
-            } else {
-                dos.writeByte(msg.command);
-            }
+            dos.writeByte(session.connected ? writeKey(msg.command) : msg.command);
             if (data != null) {
                 int size = data.length;
-                if (msg.command == -32 || msg.command == -66 || msg.command == -74 || msg.command == 11 || msg.command == -67 || msg.command == -87 || msg.command == 66) {
-                    byte b = writeKey((byte) (size));
-                    dos.writeByte(b - 128);
-                    byte b2 = writeKey((byte) (size >> 8));
-                    dos.writeByte(b2 - 128);
-                    byte b3 = writeKey((byte) (size >> 16));
-                    dos.writeByte(b3 - 128);
+                if (msg.command == -32 || msg.command == -66 || msg.command == -74 || msg.command == 11 ||
+                        msg.command == -67 || msg.command == -87 || msg.command == 66) {
+                    dos.writeByte(writeKey((byte) size) - 128);
+                    dos.writeByte(writeKey((byte) (size >> 8)) - 128);
+                    dos.writeByte(writeKey((byte) (size >> 16)) - 128);
                 } else if (session.connected) {
-                    int byte1 = writeKey((byte) (size >> 8));
-                    dos.writeByte(byte1);
-                    int byte2 = writeKey((byte) (size & 255));
-                    dos.writeByte(byte2);
+                    dos.writeByte(writeKey((byte) (size >> 8)));
+                    dos.writeByte(writeKey((byte) (size & 255)));
                 } else {
                     dos.writeShort(size);
                 }
                 if (session.connected) {
-                    for (int i = 0; i < data.length; i++) {
-                        data[i] = writeKey(data[i]);
-                    }
+                    for (int i = 0; i < data.length; i++) data[i] = writeKey(data[i]);
                 }
                 dos.write(data);
             } else {
@@ -94,16 +74,12 @@ public class MessageSender implements Runnable {
             }
             dos.flush();
             msg.cleanup();
-        } catch (Exception e) {
-//            Client.gI().kickSession(session);
-        }
+        } catch (Exception e) {}
     }
 
     private byte writeKey(byte b) {
-        byte i = (byte) ((Session.KEYS[session.curW++] & 255) ^ (b & 255));
-        if (session.curW >= Session.KEYS.length) {
-            session.curW %= Session.KEYS.length;
-        }
+        byte i = (byte) ((KEYS[session.curW++] & 255) ^ (b & 255));
+        if (session.curW >= KEYS.length) session.curW %= KEYS.length;
         return i;
     }
 
@@ -122,19 +98,14 @@ public class MessageSender implements Runnable {
             msg.cleanup();
             session.connected = true;
             session.sendThread.start();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
     }
 
     void close() throws IOException {
-        if (this.dos != null) {
-            this.dos.close();
-        }
-        this.dos = null;
-        this.session = null;
-        if (this.sendingMessage != null) {
-            this.sendingMessage.clear();
-        }
-        this.sendingMessage = null;
+        if (dos != null) dos.close();
+        dos = null;
+        session = null;
+        if (sendingMessage != null) sendingMessage.clear();
+        sendingMessage = null;
     }
 }

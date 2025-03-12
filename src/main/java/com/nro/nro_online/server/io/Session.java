@@ -1,20 +1,4 @@
-package nro.server.io;
-
-import nro.data.DataGame;
-import nro.jdbc.daos.GodGK;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.player.Player;
-import nro.resources.Resources;
-import nro.server.*;
-import nro.server.model.AntiLogin;
-import nro.utils.Log;
-import nro.utils.Util;
-import lombok.Setter;
-import nro.services.ItemService;
-import nro.services.ItemTimeService;
-import nro.services.Service;
-import nro.services.TaskService;
+package com.nro.nro_online.server.io;
 
 import java.net.Socket;
 import java.util.ArrayList;
@@ -22,13 +6,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import nro.manager.SieuHangManager;
-import nro.manager.TopCoin;
-import nro.services.RewardService;
+
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
+import lombok.Setter;
 
 public class Session {
 
-    private static final Map<String, AntiLogin> ANTILOGIN = new HashMap<>();
+    private static final Map<String, AntiLogin> ANTI_LOGIN_MAP = new HashMap<>();
 
     private static final int TIME_WAIT_READ_MESSAGE = 180_000;
 
@@ -107,7 +95,7 @@ public class Session {
                 if (subItemInfo.length == 2) {
                     String[] options = subItemInfo[1].split(",");
                     for (String opt : options) {
-                        if (opt == null || opt.equals("")) {
+                        if (opt == null || opt.isEmpty()) {
                             continue;
                         }
                         String[] optInfo = opt.split(":");
@@ -119,7 +107,7 @@ public class Session {
                 this.itemsReward.add(item);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(this.getClass(), e);
         }
     }
 
@@ -255,10 +243,10 @@ public class Session {
             return;
         }
         logging = true;
-        AntiLogin al = ANTILOGIN.get(this.ipAddress);
+        AntiLogin al = ANTI_LOGIN_MAP.get(this.ipAddress);
         if (al == null) {
             al = new AntiLogin();
-            ANTILOGIN.put(this.ipAddress, al);
+            ANTI_LOGIN_MAP.put(this.ipAddress, al);
         }
         if (!al.canLogin()) {
             Service.getInstance().sendThongBaoOK(this, al.getNotifyCannotLogin());
@@ -343,16 +331,14 @@ public class Session {
             // nhận quà đăng nhập hàng ngày
             RewardService.gI().rewardFirstTimeLoginPerDay(player);
             SieuHangManager.GetRewardDay(player);
-
         }
     }
 
     public void CheckTop(Player player) {
         String topPlayer = TopCoin.getInstance().getNamePlayer();
-        if (!Util.isNullOrEmpty(topPlayer)) {
-            if (Objects.equals(player.name, topPlayer)) {
+        if (!Util.isNullOrEmpty(topPlayer) && Objects.equals(player.name, topPlayer)) {
                 Service.getInstance().sendThongBaoAllPlayer("[THÔNG BÁO] Top 1 hiến máu tên " + player.name + " vừa đăng nhập vào game");
             }
-        }
+
     }
 }

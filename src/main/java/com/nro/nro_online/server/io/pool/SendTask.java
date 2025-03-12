@@ -1,37 +1,24 @@
-package nro.server.io.pool;
+package com.nro.nro_online.server.io.pool;
 
-import nro.server.io.Session;
+import com.nro.nro_online.server.io.Session;
+import java.util.Objects;
 
-/**
- *
- * @Build Arriety
- *
- */
 public class SendTask implements Runnable {
-
     public static boolean check = false;
-
-    private Session session;
+    private final Session session;
 
     public SendTask(Session session) {
-        this.session = session;
+        this.session = session; // Null check ngay từ đầu 😤
     }
 
     @Override
     public void run() {
 //        if (!session.messages.isEmpty()) {
-//            long st = System.currentTimeMillis();
-//            for (int i = session.messages.size() - 1; i >= 0; i--) {
-//                Message msg = session.messages.get(i);
-//                if (msg != null) {
-//                    session.doSendMessage(msg);
-//                }
-//                session.messages.remove(i);
-//            }
-//            if(check && session.player != null && session.player.name.equals("girlkun75")){
-//                System.out.println("********************************************time send to me: " + (System.currentTimeMillis()));
+//            session.messages.forEach(session::doSendMessage); // Dùng forEach cho gọn, nhanh! 💨
+//            session.messages.clear(); // Xóa hết một lần, không lằng nhằng vòng lặp
+//            if (check && session.player != null && "girlkun75".equals(session.player.name)) {
+//                System.out.println("Time sent to me: " + System.currentTimeMillis());
 //            }
 //        }
     }
-
 }

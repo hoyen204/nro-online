@@ -12,7 +12,7 @@ import com.nro.nro_online.utils.Log;
 
 public class AccountDAO {
 
-    public static void updateAccount(Session session) {
+    public static void updateAccount(Session``` session) {
         PreparedStatement ps = null;
         try (Connection con = DBService.gI().getConnectionForGetPlayer();) {
             ps = con.prepareStatement("update account set password = ? where id = ? and username = ?");

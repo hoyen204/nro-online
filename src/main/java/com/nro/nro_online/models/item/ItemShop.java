@@ -1,9 +1,12 @@
 package com.nro.nro_online.models.item;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.nro.nro_online.models.shop.TabShop;
+import com.nro.nro_online.services.ItemService;
 
 public class ItemShop {
 
@@ -33,6 +36,17 @@ public class ItemShop {
         for (ItemOption io : itemShop.options) {
             this.options.add(new ItemOption(io));
         }
+    }
+
+    public ItemShop(ResultSet rs, TabShop tabShop) throws SQLException {
+        this.tabShop = tabShop;
+        this.id = rs.getInt(1);
+        this.temp = ItemService.gI().getTemplate(rs.getShort(2));
+        this.gold = rs.getInt(3);
+        this.gem = rs.getInt(4);
+        this.isNew = rs.getBoolean(5);
+        this.itemExchange = rs.getInt(6);
+        this.options = new ArrayList<>();
     }
 
     public byte getLevelSkill() {
