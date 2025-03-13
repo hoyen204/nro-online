@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import com.nro.nro_online.utils.Log;
 
-public class Message {
+public class Message implements AutoCloseable{
     public byte command;
     public boolean isBigMsg;
     private ByteArrayOutputStream os;
@@ -52,21 +52,25 @@ public class Message {
     public void transformData() {
     }
 
-    public void cleanup() {
+    @Override
+    public void close() {
         try {
             if (dis != null)
                 dis.close();
             if (dos != null)
                 dos.close();
+            if (is != null)
+                is.close();
+            if (os != null)
+                os.close();
         } catch (IOException e) {
             Log.error(this.getClass(), e);
         }
-    }
-
-    public void dispose() {
-        dis = null;
-        is = null;
-        dos = null;
-        os = null;
+        finally {
+            dis = null;
+            dos = null;
+            is = null;
+            os = null;
+        }
     }
 }

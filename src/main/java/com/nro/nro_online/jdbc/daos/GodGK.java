@@ -9,42 +9,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.nro.nro_online.card.Card;
+import com.nro.nro_online.card.CollectionBook;
 import com.nro.nro_online.jdbc.DBService;
-import nro.card.Card;
-import nro.card.CollectionBook;
-import nro.consts.ConstMap;
-import nro.consts.ConstPlayer;
-import nro.jdbc.DBService;
-import nro.manager.AchiveManager;
-import nro.manager.PetFollowManager;
-import nro.models.clan.Clan;
-import nro.models.clan.ClanMember;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.item.ItemTime;
-import nro.models.npc.specialnpc.BillEgg;
-import nro.models.npc.specialnpc.EggLinhThu;
-import nro.models.npc.specialnpc.MabuEgg;
-import nro.models.npc.specialnpc.MagicTree;
-import nro.models.player.*;
-import nro.models.player.PetFollow;
-import nro.models.skill.Skill;
-import nro.models.task.Achivement;
-import nro.models.task.AchivementTemplate;
-import nro.models.task.TaskMain;
-import nro.server.Client;
-import nro.server.Manager;
-import nro.server.io.Session;
-import nro.server.model.AntiLogin;
-import nro.services.*;
-import nro.utils.SkillUtil;
-import nro.utils.TimeUtil;
+import com.nro.nro_online.manager.PetFollowManager;
+import com.nro.nro_online.models.player.MiniPet;
+import com.nro.nro_online.models.player.PetFollow;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.AntiLogin;
+import com.nro.nro_online.server.io.Session;
 
 public class GodGK {
 
@@ -514,7 +488,7 @@ public class GodGK {
                         achivement.setDetail(a.getDetail());
                         achivement.setMaxCount(a.getMaxCount());
                         achivement.setMoney(a.getMoney());
-                        player.playerTask.achivements.add(achivement);
+                        player.playerTask.achievements.add(achivement);
                     }
 
                     List<AchivementTemplate> listAchivements = AchiveManager.getInstance().getList();
@@ -531,7 +505,7 @@ public class GodGK {
                                 achivement.setDetail(a.getDetail());
                                 achivement.setMaxCount(a.getMaxCount());
                                 achivement.setMoney(a.getMoney());
-                                player.playerTask.achivements.add(achivement);
+                                player.playerTask.achievements.add(achivement);
                             }
                         }
                     }
@@ -641,8 +615,8 @@ public class GodGK {
                         player.setPetFollow(pet);
                     }
 
-                    player.canGeFirstTimeLogin = false;
-                    player.firstTimeLogin = rs.getTimestamp("firstTimeLogin");
+                    player.canGetFirstTimeLogin = false;
+                    player.firstTimeLogin = rs.getTimestamp("firstTimeLogin").toLocalDateTime();
 
                     dataArray = (JSONArray) JSONValue.parse(rs.getString("buy_limit"));
                     for (int i = 0; i < dataArray.size(); i++) {

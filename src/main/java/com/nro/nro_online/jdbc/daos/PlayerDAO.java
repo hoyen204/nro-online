@@ -12,6 +12,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.google.gson.Gson;
+import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.player.Friend;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.utils.Util;
 import nro.consts.ConstMap;
 import nro.jdbc.DBService;
 import nro.manager.AchiveManager;
@@ -679,7 +687,7 @@ public class PlayerDAO {
                     String sideTask = dataSideTask.toJSONString();
 
                     JSONArray dataAchive = new JSONArray();
-                    for (Achivement a : player.playerTask.achivements) {
+                    for (Achivement a : player.playerTask.achievements) {
                         JSONObject jobj = new JSONObject();
                         jobj.put("id", a.getId());
                         jobj.put("count", a.getCount());
@@ -795,7 +803,7 @@ public class PlayerDAO {
                         jPetInfo.put("type_fusion", player.fusion.typeFusion);
                         jPetInfo.put("level", player.pet.getLever());
                         int timeLeftFusion = (int) (Fusion.TIME_FUSION - (System.currentTimeMillis() - player.fusion.lastTimeFusion));
-                        jPetInfo.put("left_fusion", timeLeftFusion < 0 ? 0 : timeLeftFusion);
+                        jPetInfo.put("left_fusion", Math.max(timeLeftFusion, 0));
                         petInfo = jPetInfo.toJSONString();
 
                         jPetPoint.put("power", player.pet.nPoint.power);
@@ -985,7 +993,7 @@ public class PlayerDAO {
     }
 
     public static boolean subVND2(Player player, int ruby) {
-        try (Connection con = DBService.gI().getConnectionForSaveData(); PreparedStatement ps = con.prepareStatement("UPDATE account SET vnd = (vnd - ?), active = ? WHERE id = ?")) {
+        try (Connection con = DBService.gI().getConnectionForSaveData(); PreparedStatement ps = con.prepareStatement("UPDATE account SET vnd = (vnd - ?), is_active = ? WHERE id = ?")) {
             if (!player.getSession().actived) {
                 player.getSession().actived = true;
             }
@@ -1035,7 +1043,7 @@ public class PlayerDAO {
     public static void subGoldBar(Player player, int num) {
         PreparedStatement ps = null;
         try (Connection con = DBService.gI().getConnectionForSaveData();) {
-            ps = con.prepareStatement("update account set thoi_vang = (thoi_vang - ?) where id = ?");
+            ps = con.prepareStatement("update account set gold_bar = (gold_bar - ?) where id = ?");
             ps.setInt(1, num);
             ps.setInt(2, player.getSession().userId);
             ps.executeUpdate();

@@ -13,7 +13,6 @@ public class ItemOption {
     private static final Map<String, String> optionStringMap = new HashMap<>();
 
     public int param;
-
     public ItemOptionTemplate optionTemplate;
     public byte activeCard;
 

@@ -1,0 +1,37 @@
+package com.nro.nro_online.lib;
+
+import java.util.NavigableMap;
+import java.util.Random;
+import java.util.TreeMap;
+
+public class RandomCollection<E> {
+
+    private final NavigableMap<Double, E> map = new TreeMap<>();
+    private final Random random;
+    private double total = 0;
+
+    public RandomCollection() {
+        this(new Random());
+    }
+
+    public RandomCollection(Random random) {
+        this.random = random != null ? random : new Random();
+    }
+
+    public RandomCollection<E> add(double weight, E result) {
+        if (weight <= 0 || result == null) return this;
+        total += weight;
+        map.put(total, result);
+        return this;
+    }
+
+    public RandomCollection<E> add(double weight, E result, String function) {
+        return add(weight, result);
+    }
+
+    public E next() {
+        if (map.isEmpty()) return null;
+        double value = random.nextDouble() * total;
+        return map.higherEntry(value).getValue();
+    }
+}
