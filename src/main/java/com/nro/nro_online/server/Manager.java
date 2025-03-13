@@ -1,21 +1,7 @@
-package com.nro.nro_online.server;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
+import java.sql.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -87,10 +73,10 @@ public class Manager {
     public static boolean debug;
 
     public static short[][] POINT_MABU_MAP = {
-        {196, 259},
-        {340, 259},
-        {413, 236},
-        {532, 259}
+            { 196, 259 },
+            { 340, 259 },
+            { 413, 236 },
+            { 532, 259 }
     };
 
     public static final List<String> TOP_PLAYERS = new ArrayList<>();
@@ -135,7 +121,7 @@ public class Manager {
             loadProperties();
             gameConfig = new GameConfig();
         } catch (IOException ex) {
-            Log.error(Manager.class, ex, "Lỗi load properites");
+            Log.error(Manager.class, ex, "Lỗi load properties");
             System.exit(0);
         }
         loadDatabase();
@@ -210,341 +196,330 @@ public class Manager {
     private void loadDatabase() {
         long st = System.currentTimeMillis();
         JSONValue jv = new JSONValue();
-        JSONArray dataArray = null;
-        JSONObject dataObject = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try (Connection con = DBService.gI().getConnectionForGame();) {
-            //load part
+        try (Connection con = DBService.gI().getConnectionForGame()) {
+            // load part
             PartManager.getInstance().load();
 
-            //load map template
-            ps = con.prepareStatement("select count(id) from map_template", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            rs = ps.executeQuery();
-            if (rs.first()) {
-                int countRow = rs.getShort(1);
-                MAP_TEMPLATES = new MapTemplate[countRow];
-                ps = con.prepareStatement("select * from map_template");
-                rs = ps.executeQuery();
-                short i = 0;
+            // load map template
+            try (PreparedStatement ps = con.prepareStatement("select count(id) from map_template",
+                    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                    ResultSet rs = ps.executeQuery()) {
+                if (rs.first()) {
+                    int countRow = rs.getShort(1);
+                    MAP_TEMPLATES = new MapTemplate[countRow];
+                    try (PreparedStatement psMap = con.prepareStatement("select * from map_template");
+                            ResultSet rsMap = psMap.executeQuery()) {
+                        short i = 0;
+                        while (rsMap.next()) {
+                            MapTemplate mapTemplate = new MapTemplate();
+                            int mapId = rsMap.getInt("id");
+                            String mapName = rsMap.getString("name");
+                            mapTemplate.id = mapId;
+                            mapTemplate.name = mapName;
+                            // load data
+                            JSONArray dataArray = (JSONArray) jv.parse(rsMap.getString("data"));
+                            mapTemplate.type = Byte.parseByte(String.valueOf(dataArray.get(0)));
+                            mapTemplate.planetId = Byte.parseByte(String.valueOf(dataArray.get(1)));
+                            mapTemplate.bgType = Byte.parseByte(String.valueOf(dataArray.get(2)));
+                            mapTemplate.tileId = Byte.parseByte(String.valueOf(dataArray.get(3)));
+                            mapTemplate.bgId = Byte.parseByte(String.valueOf(dataArray.get(4)));
+                            dataArray.clear();
+                            mapTemplate.zones = rsMap.getByte("zones");
+                            mapTemplate.maxPlayerPerZone = rsMap.getByte("max_player");
+                            // load waypoints
+                            dataArray = (JSONArray) jv.parse(rsMap.getString("waypoints")
+                                    .replaceAll("\\[\"\\[", "[[")
+                                    .replaceAll("\\]\"\\]", "]]")
+                                    .replaceAll("\",\"", ","));
+                            for (int j = 0; j < dataArray.size(); j++) {
+                                WayPoint wp = new WayPoint();
+                                JSONArray dtwp = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
+                                wp.name = String.valueOf(dtwp.get(0));
+                                wp.minX = Short.parseShort(String.valueOf(dtwp.get(1)));
+                                wp.minY = Short.parseShort(String.valueOf(dtwp.get(2)));
+                                wp.maxX = Short.parseShort(String.valueOf(dtwp.get(3)));
+                                wp.maxY = Short.parseShort(String.valueOf(dtwp.get(4)));
+                                wp.isEnter = Byte.parseByte(String.valueOf(dtwp.get(5))) == 1;
+                                wp.isOffline = Byte.parseByte(String.valueOf(dtwp.get(6))) == 1;
+                                wp.goMap = Short.parseShort(String.valueOf(dtwp.get(7)));
+                                wp.goX = Short.parseShort(String.valueOf(dtwp.get(8)));
+                                wp.goY = Short.parseShort(String.valueOf(dtwp.get(9)));
+                                mapTemplate.wayPoints.add(wp);
+                                dtwp.clear();
+                            }
+                            dataArray.clear();
+                            // load mobs
+                            dataArray = (JSONArray) jv.parse(rsMap.getString("mobs").replaceAll("\\\"", ""));
+                            mapTemplate.mobTemp = new byte[dataArray.size()];
+                            mapTemplate.mobLevel = new byte[dataArray.size()];
+                            mapTemplate.mobHp = new int[dataArray.size()];
+                            mapTemplate.mobX = new short[dataArray.size()];
+                            mapTemplate.mobY = new short[dataArray.size()];
+                            for (int j = 0; j < dataArray.size(); j++) {
+                                JSONArray dtm = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
+                                mapTemplate.mobTemp[j] = Byte.parseByte(String.valueOf(dtm.get(0)));
+                                mapTemplate.mobLevel[j] = Byte.parseByte(String.valueOf(dtm.get(1)));
+                                mapTemplate.mobHp[j] = Integer.parseInt(String.valueOf(dtm.get(2)));
+                                mapTemplate.mobX[j] = Short.parseShort(String.valueOf(dtm.get(3)));
+                                mapTemplate.mobY[j] = Short.parseShort(String.valueOf(dtm.get(4)));
+                                dtm.clear();
+                            }
+                            dataArray.clear();
+                            // load npc
+                            dataArray = (JSONArray) jv.parse(rsMap.getString("npcs").replaceAll("\\\"", ""));
+                            mapTemplate.npcId = new byte[dataArray.size()];
+                            mapTemplate.npcX = new short[dataArray.size()];
+                            mapTemplate.npcY = new short[dataArray.size()];
+                            mapTemplate.npcAvatar = new short[dataArray.size()];
+                            for (int j = 0; j < dataArray.size(); j++) {
+                                JSONArray dtn = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
+                                mapTemplate.npcId[j] = Byte.parseByte(String.valueOf(dtn.get(0)));
+                                mapTemplate.npcX[j] = Short.parseShort(String.valueOf(dtn.get(1)));
+                                mapTemplate.npcY[j] = Short.parseShort(String.valueOf(dtn.get(2)));
+                                mapTemplate.npcAvatar[j] = Short.parseShort(String.valueOf(dtn.get(3)));
+                                dtn.clear();
+                            }
+                            dataArray.clear();
+
+                            dataArray = (JSONArray) jv.parse(rsMap.getString("effect"));
+                            for (int j = 0; j < dataArray.size(); j++) {
+                                EffectMap em = new EffectMap();
+                                JSONObject dataObject = (JSONObject) jv.parse(dataArray.get(j).toString());
+                                em.setKey(String.valueOf(dataObject.get("key")));
+                                em.setValue(String.valueOf(dataObject.get("value")));
+                                mapTemplate.effectMaps.add(em);
+                            }
+                            if (Manager.EVENT_SEVER == 3) {
+                                EffectMap em = new EffectMap();
+                                em.setKey("beff");
+                                em.setValue("11");
+                                mapTemplate.effectMaps.add(em);
+                            }
+                            dataArray.clear();
+                            dataObject.clear();
+
+                            MAP_TEMPLATES[i++] = mapTemplate;
+                        }
+                        Log.success("Load map template thành công (" + MAP_TEMPLATES.length + ")");
+                    }
+                }
+            }
+
+            // load skill
+            try (PreparedStatement ps = con.prepareStatement("select * from skill_template order by nclass_id, slot");
+                    ResultSet rs = ps.executeQuery()) {
+                byte nClassId = -1;
+                NClass nClass = null;
                 while (rs.next()) {
-                    MapTemplate mapTemplate = new MapTemplate();
-                    int mapId = rs.getInt("id");
-                    String mapName = rs.getString("name");
-                    mapTemplate.id = mapId;
-                    mapTemplate.name = mapName;
-                    //load data
-                    dataArray = (JSONArray) jv.parse(rs.getString("data"));
-                    mapTemplate.type = Byte.parseByte(String.valueOf(dataArray.get(0)));
-                    mapTemplate.planetId = Byte.parseByte(String.valueOf(dataArray.get(1)));
-                    mapTemplate.bgType = Byte.parseByte(String.valueOf(dataArray.get(2)));
-                    mapTemplate.tileId = Byte.parseByte(String.valueOf(dataArray.get(3)));
-                    mapTemplate.bgId = Byte.parseByte(String.valueOf(dataArray.get(4)));
-                    dataArray.clear();
-                    mapTemplate.zones = rs.getByte("zones");
-                    mapTemplate.maxPlayerPerZone = rs.getByte("max_player");
-                    //load waypoints
-                    dataArray = (JSONArray) jv.parse(rs.getString("waypoints")
-                            .replaceAll("\\[\"\\[", "[[")
-                            .replaceAll("\\]\"\\]", "]]")
-                            .replaceAll("\",\"", ",")
-                    );
+                    byte id = rs.getByte("nclass_id");
+                    if (id != nClassId) {
+                        nClassId = id;
+                        nClass = new NClass();
+                        nClass.name = id == ConstPlayer.TRAI_DAT ? "Trái Đất"
+                                : id == ConstPlayer.NAMEC ? "Namếc" : "Xayda";
+                        nClass.classId = nClassId;
+                        NCLASS.add(nClass);
+                    }
+                    SkillTemplate skillTemplate = new SkillTemplate();
+                    skillTemplate.classId = nClassId;
+                    skillTemplate.id = rs.getByte("id");
+                    skillTemplate.name = rs.getString("name");
+                    skillTemplate.maxPoint = rs.getByte("max_point");
+                    skillTemplate.manaUseType = rs.getByte("mana_use_type");
+                    skillTemplate.type = rs.getByte("type");
+                    skillTemplate.iconId = rs.getShort("icon_id");
+                    skillTemplate.damInfo = rs.getString("dam_info");
+                    skillTemplate.description = rs.getString("desc");
+                    nClass.skillTemplatess.add(skillTemplate);
+
+                    JSONArray dataArray = (JSONArray) JSONValue.parse(rs.getString("skills"));
                     for (int j = 0; j < dataArray.size(); j++) {
-                        WayPoint wp = new WayPoint();
-                        JSONArray dtwp = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
-                        wp.name = String.valueOf(dtwp.get(0));
-                        wp.minX = Short.parseShort(String.valueOf(dtwp.get(1)));
-                        wp.minY = Short.parseShort(String.valueOf(dtwp.get(2)));
-                        wp.maxX = Short.parseShort(String.valueOf(dtwp.get(3)));
-                        wp.maxY = Short.parseShort(String.valueOf(dtwp.get(4)));
-                        wp.isEnter = Byte.parseByte(String.valueOf(dtwp.get(5))) == 1;
-                        wp.isOffline = Byte.parseByte(String.valueOf(dtwp.get(6))) == 1;
-                        wp.goMap = Short.parseShort(String.valueOf(dtwp.get(7)));
-                        wp.goX = Short.parseShort(String.valueOf(dtwp.get(8)));
-                        wp.goY = Short.parseShort(String.valueOf(dtwp.get(9)));
-                        mapTemplate.wayPoints.add(wp);
-                        dtwp.clear();
+                        JSONObject dts = (JSONObject) jv.parse(String.valueOf(dataArray.get(j)));
+                        Skill skill = new Skill();
+                        skill.template = skillTemplate;
+                        skill.skillId = Short.parseShort(String.valueOf(dts.get("id")));
+                        skill.point = Byte.parseByte(String.valueOf(dts.get("point")));
+                        skill.powRequire = Long.parseLong(String.valueOf(dts.get("power_require")));
+                        skill.manaUse = Integer.parseInt(String.valueOf(dts.get("mana_use")));
+                        skill.coolDown = Integer.parseInt(String.valueOf(dts.get("cool_down")));
+                        skill.dx = Integer.parseInt(String.valueOf(dts.get("dx")));
+                        skill.dy = Integer.parseInt(String.valueOf(dts.get("dy")));
+                        skill.maxFight = Integer.parseInt(String.valueOf(dts.get("max_fight")));
+                        skill.damage = Short.parseShort(String.valueOf(dts.get("damage")));
+                        skill.price = Short.parseShort(String.valueOf(dts.get("price")));
+                        skill.moreInfo = String.valueOf(dts.get("info"));
+                        skillTemplate.skillss.add(skill);
                     }
-                    dataArray.clear();
-                    //load mobs
-                    dataArray = (JSONArray) jv.parse(rs.getString("mobs").replaceAll("\\\"", ""));
-                    mapTemplate.mobTemp = new byte[dataArray.size()];
-                    mapTemplate.mobLevel = new byte[dataArray.size()];
-                    mapTemplate.mobHp = new int[dataArray.size()];
-                    mapTemplate.mobX = new short[dataArray.size()];
-                    mapTemplate.mobY = new short[dataArray.size()];
-                    for (int j = 0; j < dataArray.size(); j++) {
-                        JSONArray dtm = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
-                        mapTemplate.mobTemp[j] = Byte.parseByte(String.valueOf(dtm.get(0)));
-                        mapTemplate.mobLevel[j] = Byte.parseByte(String.valueOf(dtm.get(1)));
-                        mapTemplate.mobHp[j] = Integer.parseInt(String.valueOf(dtm.get(2)));
-                        mapTemplate.mobX[j] = Short.parseShort(String.valueOf(dtm.get(3)));
-                        mapTemplate.mobY[j] = Short.parseShort(String.valueOf(dtm.get(4)));
-                        dtm.clear();
+                }
+                Log.success("Load skill thành công (" + NCLASS.size() + ")");
+            }
+
+            // load head avatar
+            try (PreparedStatement ps = con.prepareStatement("select * from head_avatar");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    HeadAvatar headAvatar = new HeadAvatar(rs.getInt("head_id"), rs.getInt("avatar_id"));
+                    HEAD_AVATARS.add(headAvatar);
+                }
+                Log.success("Load head avatar thành công (" + HEAD_AVATARS.size() + ")");
+            }
+
+            // load flag bag
+            try (PreparedStatement ps = con.prepareStatement("select * from flag_bag");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    FlagBag flagBag = new FlagBag();
+                    flagBag.id = rs.getByte("id");
+                    flagBag.name = rs.getString("name");
+                    flagBag.gold = rs.getInt("gold");
+                    flagBag.gem = rs.getInt("gem");
+                    flagBag.iconId = rs.getShort("icon_id");
+                    String[] iconData = rs.getString("icon_data").split(",");
+                    flagBag.iconEffect = new short[iconData.length];
+                    for (int j = 0; j < iconData.length; j++) {
+                        flagBag.iconEffect[j] = Short.parseShort(iconData[j].trim());
                     }
-                    dataArray.clear();
-                    //load npc
-                    dataArray = (JSONArray) jv.parse(rs.getString("npcs").replaceAll("\\\"", ""));
-                    mapTemplate.npcId = new byte[dataArray.size()];
-                    mapTemplate.npcX = new short[dataArray.size()];
-                    mapTemplate.npcY = new short[dataArray.size()];
-                    mapTemplate.npcAvatar = new short[dataArray.size()];
-                    for (int j = 0; j < dataArray.size(); j++) {
-                        JSONArray dtn = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
-                        mapTemplate.npcId[j] = Byte.parseByte(String.valueOf(dtn.get(0)));
-                        mapTemplate.npcX[j] = Short.parseShort(String.valueOf(dtn.get(1)));
-                        mapTemplate.npcY[j] = Short.parseShort(String.valueOf(dtn.get(2)));
-                        mapTemplate.npcAvatar[j] = Short.parseShort(String.valueOf(dtn.get(3)));
-                        dtn.clear();
+                    FLAGS_BAGS.add(flagBag);
+                }
+                Log.success("Load flag bag thành công (" + FLAGS_BAGS.size() + ")");
+            }
+
+            // load cải trang
+            try (PreparedStatement ps = con.prepareStatement("select * from cai_trang");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    CaiTrang caiTrang = new CaiTrang(rs.getInt("id_temp"),
+                            rs.getInt("head"), rs.getInt("body"), rs.getInt("leg"), rs.getInt("bag"));
+                    CAI_TRANGS.add(caiTrang);
+                }
+                Log.success("Load cải trang thành công (" + CAI_TRANGS.size() + ")");
+            }
+
+            // load intrinsic
+            try (PreparedStatement ps = con.prepareStatement("select * from intrinsic");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Intrinsic intrinsic = new Intrinsic();
+                    intrinsic.id = rs.getByte("id");
+                    intrinsic.name = rs.getString("name");
+                    intrinsic.paramFrom1 = rs.getShort("param_from_1");
+                    intrinsic.paramTo1 = rs.getShort("param_to_1");
+                    intrinsic.paramFrom2 = rs.getShort("param_from_2");
+                    intrinsic.paramTo2 = rs.getShort("param_to_2");
+                    intrinsic.icon = rs.getShort("icon");
+                    intrinsic.gender = rs.getByte("gender");
+                    switch (intrinsic.gender) {
+                        case ConstPlayer.TRAI_DAT:
+                            INTRINSIC_TD.add(intrinsic);
+                            break;
+                        case ConstPlayer.NAMEC:
+                            INTRINSIC_NM.add(intrinsic);
+                            break;
+                        case ConstPlayer.XAYDA:
+                            INTRINSIC_XD.add(intrinsic);
+                            break;
+                        default:
+                            INTRINSIC_TD.add(intrinsic);
+                            INTRINSIC_NM.add(intrinsic);
+                            INTRINSIC_XD.add(intrinsic);
                     }
-                    dataArray.clear();
-
-                    dataArray = (JSONArray) jv.parse(rs.getString("effect"));
-                    for (int j = 0; j < dataArray.size(); j++) {
-                        EffectMap em = new EffectMap();
-                        dataObject = (JSONObject) jv.parse(dataArray.get(j).toString());
-                        em.setKey(String.valueOf(dataObject.get("key")));
-                        em.setValue(String.valueOf(dataObject.get("value")));
-                        mapTemplate.effectMaps.add(em);
-                    }
-                    if (Manager.EVENT_SEVER == 3) {
-                        EffectMap em = new EffectMap();
-                        em.setKey("beff");
-                        em.setValue("11");
-                        mapTemplate.effectMaps.add(em);
-                    }
-                    dataArray.clear();
-                    dataObject.clear();
-
-                    MAP_TEMPLATES[i++] = mapTemplate;
+                    INTRINSICS.add(intrinsic);
                 }
-                Log.success("Load map template thành công (" + MAP_TEMPLATES.length + ")");
+                Log.success("Load intrinsic thành công (" + INTRINSICS.size() + ")");
             }
 
-            //load skill
-            ps = con.prepareStatement("select * from skill_template order by nclass_id, slot");
-            rs = ps.executeQuery();
-            byte nClassId = -1;
-            NClass nClass = null;
-            while (rs.next()) {
-                byte id = rs.getByte("nclass_id");
-                if (id != nClassId) {
-                    nClassId = id;
-                    nClass = new NClass();
-                    nClass.name = id == ConstPlayer.TRAI_DAT ? "Trái Đất" : id == ConstPlayer.NAMEC ? "Namếc" : "Xayda";
-                    nClass.classId = nClassId;
-                    NCLASS.add(nClass);
-                }
-                SkillTemplate skillTemplate = new SkillTemplate();
-                skillTemplate.classId = nClassId;
-                skillTemplate.id = rs.getByte("id");
-                skillTemplate.name = rs.getString("name");
-                skillTemplate.maxPoint = rs.getByte("max_point");
-                skillTemplate.manaUseType = rs.getByte("mana_use_type");
-                skillTemplate.type = rs.getByte("type");
-                skillTemplate.iconId = rs.getShort("icon_id");
-                skillTemplate.damInfo = rs.getString("dam_info");
-                skillTemplate.description = rs.getString("desc");
-                nClass.skillTemplatess.add(skillTemplate);
-
-                dataArray = (JSONArray) JSONValue.parse(
-                        rs.getString("skills"));
-                for (int j = 0; j < dataArray.size(); j++) {
-                    JSONObject dts = (JSONObject) jv.parse(String.valueOf(dataArray.get(j)));
-                    Skill skill = new Skill();
-                    skill.template = skillTemplate;
-                    skill.skillId = Short.parseShort(String.valueOf(dts.get("id")));
-                    skill.point = Byte.parseByte(String.valueOf(dts.get("point")));
-                    skill.powRequire = Long.parseLong(String.valueOf(dts.get("power_require")));
-                    skill.manaUse = Integer.parseInt(String.valueOf(dts.get("mana_use")));
-                    skill.coolDown = Integer.parseInt(String.valueOf(dts.get("cool_down")));
-                    skill.dx = Integer.parseInt(String.valueOf(dts.get("dx")));
-                    skill.dy = Integer.parseInt(String.valueOf(dts.get("dy")));
-                    skill.maxFight = Integer.parseInt(String.valueOf(dts.get("max_fight")));
-                    skill.damage = Short.parseShort(String.valueOf(dts.get("damage")));
-                    skill.price = Short.parseShort(String.valueOf(dts.get("price")));
-                    skill.moreInfo = String.valueOf(dts.get("info"));
-                    skillTemplate.skillss.add(skill);
-                }
-            }
-            rs.close();
-            ps.close();
-            Log.success("Load skill thành công (" + NCLASS.size() + ")");
-
-            //load head avatar
-            ps = con.prepareStatement("select * from head_avatar");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                HeadAvatar headAvatar = new HeadAvatar(rs.getInt("head_id"), rs.getInt("avatar_id"));
-                HEAD_AVATARS.add(headAvatar);
-            }
-            rs.close();
-            ps.close();
-            Log.success("Load head avatar thành công (" + HEAD_AVATARS.size() + ")");
-
-            //load flag bag
-            ps = con.prepareStatement("select * from flag_bag");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                FlagBag flagBag = new FlagBag();
-                flagBag.id = rs.getByte("id");
-                flagBag.name = rs.getString("name");
-                flagBag.gold = rs.getInt("gold");
-                flagBag.gem = rs.getInt("gem");
-                flagBag.iconId = rs.getShort("icon_id");
-                String[] iconData = rs.getString("icon_data").split(",");
-                flagBag.iconEffect = new short[iconData.length];
-                for (int j = 0; j < iconData.length; j++) {
-                    flagBag.iconEffect[j] = Short.parseShort(iconData[j].trim());
-                }
-                FLAGS_BAGS.add(flagBag);
-            }
-            rs.close();
-            ps.close();
-            Log.success("Load flag bag thành công (" + FLAGS_BAGS.size() + ")");
-
-            //load cải trang
-            ps = con.prepareStatement("select * from cai_trang");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                CaiTrang caiTrang = new CaiTrang(rs.getInt("id_temp"),
-                        rs.getInt("head"), rs.getInt("body"), rs.getInt("leg"), rs.getInt("bag"));
-                CAI_TRANGS.add(caiTrang);
-            }
-            rs.close();
-            ps.close();
-            Log.success("Load cải trang thành công (" + CAI_TRANGS.size() + ")");
-
-            //load intrinsic
-            ps = con.prepareStatement("select * from intrinsic");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                Intrinsic intrinsic = new Intrinsic();
-                intrinsic.id = rs.getByte("id");
-                intrinsic.name = rs.getString("name");
-                intrinsic.paramFrom1 = rs.getShort("param_from_1");
-                intrinsic.paramTo1 = rs.getShort("param_to_1");
-                intrinsic.paramFrom2 = rs.getShort("param_from_2");
-                intrinsic.paramTo2 = rs.getShort("param_to_2");
-                intrinsic.icon = rs.getShort("icon");
-                intrinsic.gender = rs.getByte("gender");
-                switch (intrinsic.gender) {
-                    case ConstPlayer.TRAI_DAT:
-                        INTRINSIC_TD.add(intrinsic);
-                        break;
-                    case ConstPlayer.NAMEC:
-                        INTRINSIC_NM.add(intrinsic);
-                        break;
-                    case ConstPlayer.XAYDA:
-                        INTRINSIC_XD.add(intrinsic);
-                        break;
-                    default:
-                        INTRINSIC_TD.add(intrinsic);
-                        INTRINSIC_NM.add(intrinsic);
-                        INTRINSIC_XD.add(intrinsic);
-                }
-                INTRINSICS.add(intrinsic);
-            }
-            rs.close();
-            ps.close();
-            Log.success("Load intrinsic thành công (" + INTRINSICS.size() + ")");
-
-            //load task
-            ps = con.prepareStatement("SELECT id, task_main_template.name, detail, "
+            // load task
+            try (PreparedStatement ps = con.prepareStatement("SELECT id, task_main_template.name, detail, "
                     + "task_sub_template.name AS 'sub_name', max_count, notify, npc_id, map "
                     + "FROM task_main_template JOIN task_sub_template ON task_main_template.id = "
                     + "task_sub_template.task_main_id");
-            rs = ps.executeQuery();
-            int taskId = -1;
-            TaskMain task = null;
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                if (id != taskId) {
-                    taskId = id;
-                    task = new TaskMain();
-                    task.id = taskId;
-                    task.name = rs.getString("name");
-                    task.detail = rs.getString("detail");
-                    TASKS.add(task);
+                    ResultSet rs = ps.executeQuery()) {
+                int taskId = -1;
+                TaskMain task = null;
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    if (id != taskId) {
+                        taskId = id;
+                        task = new TaskMain();
+                        task.id = taskId;
+                        task.name = rs.getString("name");
+                        task.detail = rs.getString("detail");
+                        TASKS.add(task);
+                    }
+                    SubTaskMain subTask = new SubTaskMain();
+                    subTask.name = rs.getString("sub_name");
+                    subTask.maxCount = rs.getShort("max_count");
+                    subTask.notify = rs.getString("notify");
+                    subTask.npcId = rs.getByte("npc_id");
+                    subTask.mapId = rs.getShort("map");
+                    task.subTasks.add(subTask);
                 }
-                SubTaskMain subTask = new SubTaskMain();
-                subTask.name = rs.getString("sub_name");
-                subTask.maxCount = rs.getShort("max_count");
-                subTask.notify = rs.getString("notify");
-                subTask.npcId = rs.getByte("npc_id");
-                subTask.mapId = rs.getShort("map");
-                task.subTasks.add(subTask);
+                Log.success("Load task thành công (" + TASKS.size() + ")");
             }
-            rs.close();
-            ps.close();
-            Log.success("Load task thành công (" + TASKS.size() + ")");
 
-            //load side task
-            ps = con.prepareStatement("select * from side_task_template");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                SideTaskTemplate sideTask = new SideTaskTemplate();
-                sideTask.id = rs.getInt("id");
-                sideTask.name = rs.getString("name");
-                String[] mc1 = rs.getString("max_count_lv1").split("-");
-                String[] mc2 = rs.getString("max_count_lv2").split("-");
-                String[] mc3 = rs.getString("max_count_lv3").split("-");
-                String[] mc4 = rs.getString("max_count_lv4").split("-");
-                String[] mc5 = rs.getString("max_count_lv5").split("-");
-                sideTask.count[0][0] = Integer.parseInt(mc1[0]);
-                sideTask.count[0][1] = Integer.parseInt(mc1[1]);
-                sideTask.count[1][0] = Integer.parseInt(mc2[0]);
-                sideTask.count[1][1] = Integer.parseInt(mc2[1]);
-                sideTask.count[2][0] = Integer.parseInt(mc3[0]);
-                sideTask.count[2][1] = Integer.parseInt(mc3[1]);
-                sideTask.count[3][0] = Integer.parseInt(mc4[0]);
-                sideTask.count[3][1] = Integer.parseInt(mc4[1]);
-                sideTask.count[4][0] = Integer.parseInt(mc5[0]);
-                sideTask.count[4][1] = Integer.parseInt(mc5[1]);
-                SIDE_TASKS_TEMPLATE.add(sideTask);
+            // load side task
+            try (PreparedStatement ps = con.prepareStatement("select * from side_task_template");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    SideTaskTemplate sideTask = new SideTaskTemplate();
+                    sideTask.id = rs.getInt("id");
+                    sideTask.name = rs.getString("name");
+                    String[] mc1 = rs.getString("max_count_lv1").split("-");
+                    String[] mc2 = rs.getString("max_count_lv2").split("-");
+                    String[] mc3 = rs.getString("max_count_lv3").split("-");
+                    String[] mc4 = rs.getString("max_count_lv4").split("-");
+                    String[] mc5 = rs.getString("max_count_lv5").split("-");
+                    sideTask.count[0][0] = Integer.parseInt(mc1[0]);
+                    sideTask.count[0][1] = Integer.parseInt(mc1[1]);
+                    sideTask.count[1][0] = Integer.parseInt(mc2[0]);
+                    sideTask.count[1][1] = Integer.parseInt(mc2[1]);
+                    sideTask.count[2][0] = Integer.parseInt(mc3[0]);
+                    sideTask.count[2][1] = Integer.parseInt(mc3[1]);
+                    sideTask.count[3][0] = Integer.parseInt(mc4[0]);
+                    sideTask.count[3][1] = Integer.parseInt(mc4[1]);
+                    sideTask.count[4][0] = Integer.parseInt(mc5[0]);
+                    sideTask.count[4][1] = Integer.parseInt(mc5[1]);
+                    SIDE_TASKS_TEMPLATE.add(sideTask);
+                }
+                Log.success("Load side task thành công (" + SIDE_TASKS_TEMPLATE.size() + ")");
             }
-            rs.close();
-            ps.close();
-            Log.success("Load side task thành công (" + SIDE_TASKS_TEMPLATE.size() + ")");
 
-            //load item template
-            ps = con.prepareStatement("select * from item_template");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                ItemTemplate itemTemp = new ItemTemplate();
-                itemTemp.id = rs.getShort("id");
-                itemTemp.type = rs.getByte("type");
-                itemTemp.gender = rs.getByte("gender");
-                itemTemp.name = rs.getString("name");
-                itemTemp.description = rs.getString("description");
-                itemTemp.iconID = rs.getShort("icon_id");
-                itemTemp.part = rs.getShort("part");
-                itemTemp.isUpToUp = rs.getBoolean("is_up_to_up");
-                itemTemp.strRequire = rs.getInt("power_require");
-                ITEM_TEMPLATES.add(itemTemp);
+            // load item template
+            try (PreparedStatement ps = con.prepareStatement("select * from item_template");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ItemTemplate itemTemp = new ItemTemplate();
+                    itemTemp.id = rs.getShort("id");
+                    itemTemp.type = rs.getByte("type");
+                    itemTemp.gender = rs.getByte("gender");
+                    itemTemp.name = rs.getString("name");
+                    itemTemp.description = rs.getString("description");
+                    itemTemp.iconID = rs.getShort("icon_id");
+                    itemTemp.part = rs.getShort("part");
+                    itemTemp.isUpToUp = rs.getBoolean("is_up_to_up");
+                    itemTemp.strRequire = rs.getInt("power_require");
+                    ITEM_TEMPLATES.add(itemTemp);
+                }
+                Log.success("Load item template thành công (" + ITEM_TEMPLATES.size() + ")");
             }
-            rs.close();
-            ps.close();
-            Log.success("Load map item template thành công (" + ITEM_TEMPLATES.size() + ")");
 
-            //load item option template
-            ps = con.prepareStatement("select id, name from item_option_template");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                ItemOptionTemplate optionTemp = new ItemOptionTemplate();
-                optionTemp.id = rs.getInt("id");
-                optionTemp.name = rs.getString("name");
-                ITEM_OPTION_TEMPLATES.add(optionTemp);
+            // load item option template
+            try (PreparedStatement ps = con.prepareStatement("select id, name from item_option_template");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ItemOptionTemplate optionTemp = new ItemOptionTemplate();
+                    optionTemp.id = rs.getInt("id");
+                    optionTemp.name = rs.getString("name");
+                    ITEM_OPTION_TEMPLATES.add(optionTemp);
+                }
+                Log.success("Load item option template thành công (" + ITEM_OPTION_TEMPLATES.size() + ")");
             }
-            rs.close();
-            ps.close();
-            Log.success("Load map item option template thành công (" + ITEM_OPTION_TEMPLATES.size() + ")");
 
-            //load shop
+            // load shop
             SHOPS = ShopDAO.getShops(con);
             Log.success("Load shop thành công (" + SHOPS.size() + ")");
 
-            //load reward lucky round
+            // load reward lucky round
             File folder = new File("resources/data/nro/data_lucky_round_reward");
             for (File fileEntry : folder.listFiles()) {
                 if (!fileEntry.isDirectory()) {
@@ -581,179 +556,154 @@ public class Manager {
                 }
             }
 
-            //load reward mob
+            // load reward mob
             folder = new File("resources/data/nro/data_mob_reward");
             for (File fileEntry : folder.listFiles()) {
                 if (!fileEntry.isDirectory()) {
-                    BufferedReader br = new BufferedReader(new FileReader(fileEntry));
-                    String line = null;
-                    while ((line = br.readLine()) != null) {
-                        line = line.replaceAll("[{}\\[\\]]", "");
-                        String[] arrSub = line.split("\\|");
-                        int tempId = Integer.parseInt(arrSub[0]);
-                        boolean haveMobReward = false;
-                        MobReward mobReward = null;
-                        for (MobReward m : MOB_REWARDS) {
-                            if (m.tempId == tempId) {
-                                mobReward = m;
-                                haveMobReward = true;
-                                break;
-                            }
-                        }
-                        if (!haveMobReward) {
-                            mobReward = new MobReward();
-                            mobReward.tempId = tempId;
-                            MOB_REWARDS.add(mobReward);
-                        }
-                        for (int i = 1; i < arrSub.length; i++) {
-                            String[] dataItem = arrSub[i].split(",");
-                            String[] mapsId = dataItem[0].split(";");
-
-                            String[] itemId = dataItem[1].split(";");
-                            for (int j = 0; j < itemId.length; j++) {
-                                ItemReward itemReward = new ItemReward();
-                                itemReward.mapId = new int[mapsId.length];
-                                for (int k = 0; k < mapsId.length; k++) {
-                                    itemReward.mapId[k] = Integer.parseInt(mapsId[k]);
+                    try (BufferedReader br = new BufferedReader(new FileReader(fileEntry))) {
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            line = line.replaceAll("[{}\\[\\]]", "");
+                            String[] arrSub = line.split("\\|");
+                            int tempId = Integer.parseInt(arrSub[0]);
+                            boolean haveMobReward = false;
+                            MobReward mobReward = null;
+                            for (MobReward m : MOB_REWARDS) {
+                                if (m.tempId == tempId) {
+                                    mobReward = m;
+                                    haveMobReward = true;
+                                    break;
                                 }
-                                itemReward.tempId = Integer.parseInt(itemId[j]);
-                                itemReward.ratio = Integer.parseInt(dataItem[2]);
-                                itemReward.typeRatio = Integer.parseInt(dataItem[3]);
-                                itemReward.forAllGender = Integer.parseInt(dataItem[4]) == 1;
-                                if (itemReward.tempId == 76
-                                        || itemReward.tempId == 188
-                                        || itemReward.tempId == 189
-                                        || itemReward.tempId == 190) {
-                                    mobReward.goldRewards.add(itemReward);
-                                } else if (itemReward.tempId == 380) {
-                                    mobReward.capsuleKyBi.add(itemReward);
-                                } else if (itemReward.tempId >= 663 && itemReward.tempId <= 667) {
-                                    mobReward.foods.add(itemReward);
-                                } else if (itemReward.tempId == 590) {
-                                    mobReward.biKieps.add(itemReward);
-                                } else {
-                                    mobReward.itemRewards.add(itemReward);
+                            }
+                            if (!haveMobReward) {
+                                mobReward = new MobReward();
+                                mobReward.tempId = tempId;
+                                MOB_REWARDS.add(mobReward);
+                            }
+                            for (int i = 1; i < arrSub.length; i++) {
+                                String[] dataItem = arrSub[i].split(",");
+                                String[] mapsId = dataItem[0].split(";");
+
+                                String[] itemId = dataItem[1].split(";");
+                                for (int j = 0; j < itemId.length; j++) {
+                                    ItemReward itemReward = new ItemReward();
+                                    itemReward.mapId = new int[mapsId.length];
+                                    for (int k = 0; k < mapsId.length; k++) {
+                                        itemReward.mapId[k] = Integer.parseInt(mapsId[k]);
+                                    }
+                                    itemReward.tempId = Integer.parseInt(itemId[j]);
+                                    itemReward.ratio = Integer.parseInt(dataItem[2]);
+                                    itemReward.typeRatio = Integer.parseInt(dataItem[3]);
+                                    itemReward.forAllGender = Integer.parseInt(dataItem[4]) == 1;
+                                    if (itemReward.tempId == 76
+                                            || itemReward.tempId == 188
+                                            || itemReward.tempId == 189
+                                            || itemReward.tempId == 190) {
+                                        mobReward.goldRewards.add(itemReward);
+                                    } else if (itemReward.tempId == 380) {
+                                        mobReward.capsuleKyBi.add(itemReward);
+                                    } else if (itemReward.tempId >= 663 && itemReward.tempId <= 667) {
+                                        mobReward.foods.add(itemReward);
+                                    } else if (itemReward.tempId == 590) {
+                                        mobReward.biKieps.add(itemReward);
+                                    } else {
+                                        mobReward.itemRewards.add(itemReward);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-            Log.success("Load reward lucky round thành công (" + MOB_REWARDS.size() + ")");
+            Log.success("Load reward mob thành công (" + MOB_REWARDS.size() + ")");
 
-            //load mob template
-            ps = con.prepareStatement("select * from mob_template");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                MobTemplate mobTemp = new MobTemplate();
-                mobTemp.id = rs.getByte("id");
-                mobTemp.type = rs.getByte("type");
-                mobTemp.name = rs.getString("name");
-                mobTemp.hp = rs.getInt("hp");
-                mobTemp.rangeMove = rs.getByte("range_move");
-                mobTemp.speed = rs.getByte("speed");
-                mobTemp.dartType = rs.getByte("dart_type");
-                mobTemp.percentDame = rs.getByte("percent_dame");
-                mobTemp.percentTiemNang = rs.getByte("percent_tiem_nang");
-                MOB_TEMPLATES.add(mobTemp);
+            // load mob template
+            try (PreparedStatement ps = con.prepareStatement("select * from mob_template");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    MobTemplate mobTemp = new MobTemplate();
+                    mobTemp.id = rs.getByte("id");
+                    mobTemp.type = rs.getByte("type");
+                    mobTemp.name = rs.getString("name");
+                    mobTemp.hp = rs.getInt("hp");
+                    mobTemp.rangeMove = rs.getByte("range_move");
+                    mobTemp.speed = rs.getByte("speed");
+                    mobTemp.dartType = rs.getByte("dart_type");
+                    mobTemp.percentDame = rs.getByte("percent_dame");
+                    mobTemp.percentTiemNang = rs.getByte("percent_tiem_nang");
+                    MOB_TEMPLATES.add(mobTemp);
+                }
+                Log.success("Load mob template thành công (" + MOB_TEMPLATES.size() + ")");
             }
-            rs.close();
-            ps.close();
-            Log.success("Load mob template thành công (" + MOB_TEMPLATES.size() + ")");
 
-            //load npc template
-            ps = con.prepareStatement("select * from npc_template");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                NpcTemplate npcTemp = new NpcTemplate();
-                npcTemp.id = rs.getByte("id");
-                npcTemp.name = rs.getString("name");
-                npcTemp.head = rs.getShort("head");
-                npcTemp.body = rs.getShort("body");
-                npcTemp.leg = rs.getShort("leg");
-                NPC_TEMPLATES.add(npcTemp);
+            // load npc template
+            try (PreparedStatement ps = con.prepareStatement("select * from npc_template");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    NpcTemplate npcTemp = new NpcTemplate();
+                    npcTemp.id = rs.getByte("id");
+                    npcTemp.name = rs.getString("name");
+                    npcTemp.head = rs.getShort("head");
+                    npcTemp.body = rs.getShort("body");
+                    npcTemp.leg = rs.getShort("leg");
+                    NPC_TEMPLATES.add(npcTemp);
+                }
+                Log.success("Load npc template thành công (" + NPC_TEMPLATES.size() + ")");
             }
-            rs.close();
-            ps.close();
-            Log.success("Load npc template thành công (" + NPC_TEMPLATES.size() + ")");
             initMap();
 
-            //load clan
-            ps = con.prepareStatement("select * from clan_sv" + SERVER);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                Clan clan = new Clan();
-                clan.id = rs.getInt("id");
-                clan.name = rs.getString("name");
-                clan.slogan = rs.getString("slogan");
-                clan.imgId = rs.getByte("img_id");
-                clan.powerPoint = rs.getLong("power_point");
-                clan.maxMember = rs.getByte("max_member");
-                clan.clanPoint = rs.getInt("clan_point");
-                clan.level = rs.getInt("level");
-                clan.createTime = (int) (rs.getTimestamp("create_time").getTime() / 1000);
-                dataArray = (JSONArray) JSONValue.parse(rs.getString("members"));
-                for (int i = 0; i < dataArray.size(); i++) {
-                    dataObject = (JSONObject) JSONValue.parse(String.valueOf(dataArray.get(i)));
-                    ClanMember cm = new ClanMember();
-                    cm.clan = clan;
-                    cm.id = Integer.parseInt(String.valueOf(dataObject.get("id")));
-                    cm.name = String.valueOf(dataObject.get("name"));
-                    cm.head = Short.parseShort(String.valueOf(dataObject.get("head")));
-                    cm.body = Short.parseShort(String.valueOf(dataObject.get("body")));
-                    cm.leg = Short.parseShort(String.valueOf(dataObject.get("leg")));
-                    cm.role = Byte.parseByte(String.valueOf(dataObject.get("role")));
-                    cm.donate = Integer.parseInt(String.valueOf(dataObject.get("donate")));
-                    cm.receiveDonate = Integer.parseInt(String.valueOf(dataObject.get("receive_donate")));
-                    cm.memberPoint = Integer.parseInt(String.valueOf(dataObject.get("member_point")));
-                    cm.clanPoint = Integer.parseInt(String.valueOf(dataObject.get("clan_point")));
-                    cm.joinTime = Integer.parseInt(String.valueOf(dataObject.get("join_time")));
-                    cm.timeAskPea = Long.parseLong(String.valueOf(dataObject.get("ask_pea_time")));
-                    try {
-                        cm.powerPoint = Long.parseLong(String.valueOf(dataObject.get("power")));
-                    } catch (Exception e) {
+            // load clan
+            try (PreparedStatement ps = con.prepareStatement("select * from clan_sv" + SERVER);
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Clan clan = new Clan();
+                    clan.id = rs.getInt("id");
+                    clan.name = rs.getString("name");
+                    clan.slogan = rs.getString("slogan");
+                    clan.imgId = rs.getByte("img_id");
+                    clan.powerPoint = rs.getLong("power_point");
+                    clan.maxMember = rs.getByte("max_member");
+                    clan.clanPoint = rs.getInt("clan_point");
+                    clan.level = rs.getInt("level");
+                    clan.createTime = (int) (rs.getTimestamp("create_time").getTime() / 1000);
+                    JSONArray dataArray = (JSONArray) JSONValue.parse(rs.getString("members"));
+                    for (int i = 0; i < dataArray.size(); i++) {
+                        JSONObject dataObject = (JSONObject) JSONValue.parse(String.valueOf(dataArray.get(i)));
+                        ClanMember cm = new ClanMember();
+                        cm.clan = clan;
+                        cm.id = Integer.parseInt(String.valueOf(dataObject.get("id")));
+                        cm.name = String.valueOf(dataObject.get("name"));
+                        cm.head = Short.parseShort(String.valueOf(dataObject.get("head")));
+                        cm.body = Short.parseShort(String.valueOf(dataObject.get("body")));
+                        cm.leg = Short.parseShort(String.valueOf(dataObject.get("leg")));
+                        cm.role = Byte.parseByte(String.valueOf(dataObject.get("role")));
+                        cm.donate = Integer.parseInt(String.valueOf(dataObject.get("donate")));
+                        cm.receiveDonate = Integer.parseInt(String.valueOf(dataObject.get("receive_donate")));
+                        cm.memberPoint = Integer.parseInt(String.valueOf(dataObject.get("member_point")));
+                        cm.clanPoint = Integer.parseInt(String.valueOf(dataObject.get("clan_point")));
+                        cm.joinTime = Integer.parseInt(String.valueOf(dataObject.get("join_time")));
+                        cm.timeAskPea = Long.parseLong(String.valueOf(dataObject.get("ask_pea_time")));
+                        try {
+                            cm.powerPoint = Long.parseLong(String.valueOf(dataObject.get("power")));
+                        } catch (Exception e) {
+                        }
+                        clan.addClanMember(cm);
                     }
-                    clan.addClanMember(cm);
+                    CLANS.add(clan);
+                    dataArray.clear();
+                    dataObject.clear();
                 }
-                CLANS.add(clan);
-                dataArray.clear();
-                dataObject.clear();
-            }
-            rs.close();
-            ps.close();
-
-            ps = con.prepareStatement("select id from clan_sv" + SERVER + " order by id desc limit 1");
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                Clan.NEXT_ID = rs.getInt("id") + 1;
+                Log.success("Load clan thành công (" + CLANS.size() + ")");
             }
 
-            rs.close();
-            ps.close();
-
-            Log.success("Load clan thành công (" + CLANS.size() + "), clan next id: " + Clan.NEXT_ID);
-
-            try {
-                if (rs != null) {
-                    rs.close();
+            try (PreparedStatement ps = con
+                    .prepareStatement("select id from clan_sv" + SERVER + " order by id desc limit 1");
+                    ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Clan.NEXT_ID = rs.getInt("id") + 1;
                 }
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
+                Log.success("Clan next id: " + Clan.NEXT_ID);
             }
-            CardManager.getInstance().load();
-            PowerLimitManager.getInstance().load();
-            CaptionManager.getInstance().load();
-            AttributeTemplateManager.getInstance().load();
-            loadAttributeServer();
-            loadEventCount();
-            EffectEventManager.gI().load();
-            NotiManager.getInstance().load();
-            ConsignManager.getInstance().load();
-            AchiveManager.getInstance().load();
-            MiniPetManager.gI().load();
         } catch (Exception e) {
             Log.error(Manager.class, e, "Lỗi load database");
             System.exit(0);
@@ -771,9 +721,9 @@ public class Manager {
     }
 
     public static void loadEventCount() {
-        try {
-            PreparedStatement ps = DBService.gI().getConnectionForGame().prepareStatement("select * from event where server =" + SERVER);
-            ResultSet rs = ps.executeQuery();
+        try (PreparedStatement ps = DBService.gI().getConnectionForGame()
+                .prepareStatement("select * from event where server =" + SERVER);
+                ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 EVENT_COUNT_QUY_LAO_KAME = rs.getInt("kame");
                 EVENT_COUNT_THAN_HUY_DIET = rs.getInt("bill");
@@ -781,24 +731,21 @@ public class Manager {
                 EVENT_COUNT_THUONG_DE = rs.getInt("thuongde");
                 EVENT_COUNT_THAN_VU_TRU = rs.getInt("thanvutru");
             }
-            rs.close();
-            ps.close();
         } catch (Exception e) {
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
     public void updateEventCount() {
-        try {
-            PreparedStatement ps = DBService.gI().getConnectionForGame().prepareStatement("UPDATE event SET kame = ?, bill = ?, karin = ?, thuongde = ?, thanvutru = ? WHERE `server` = ?");
+        try (PreparedStatement ps = DBService.gI().getConnectionForGame().prepareStatement(
+                "UPDATE event SET kame = ?, bill = ?, karin = ?, thuongde = ?, thanvutru = ? WHERE `server` = ?")) {
             ps.setInt(1, EVENT_COUNT_QUY_LAO_KAME);
-            ps.setInt(3, EVENT_COUNT_THAN_HUY_DIET);
-            ps.setInt(2, EVENT_COUNT_THAN_MEO);
+            ps.setInt(2, EVENT_COUNT_THAN_HUY_DIET);
+            ps.setInt(3, EVENT_COUNT_THAN_MEO);
             ps.setInt(4, EVENT_COUNT_THUONG_DE);
             ps.setInt(5, EVENT_COUNT_THAN_VU_TRU);
             ps.setInt(6, SERVER);
             ps.executeUpdate();
-            ps.close();
         } catch (SQLException ex) {
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -807,27 +754,26 @@ public class Manager {
     public void loadAttributeServer() {
         try {
             AttributeManager am = new AttributeManager();
-            PreparedStatement ps = DBService.gI().getConnectionForGame().prepareStatement("SELECT * FROM `attribute_server`");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                int templateID = rs.getInt("attribute_template_id");
-                int value = rs.getInt("value");
-                int time = rs.getInt("time");
-                Attribute at = Attribute.builder()
-                        .id(id)
-                        .templateID(templateID)
-                        .value(value)
-                        .time(time)
-                        .build();
-                am.add(at);
+            try (PreparedStatement ps = DBService.gI().getConnectionForGame()
+                    .prepareStatement("SELECT * FROM `attribute_server`");
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int templateID = rs.getInt("attribute_template_id");
+                    int value = rs.getInt("value");
+                    int time = rs.getInt("time");
+                    Attribute at = Attribute.builder()
+                            .id(id)
+                            .templateID(templateID)
+                            .value(value)
+                            .time(time)
+                            .build();
+                    am.add(at);
+                }
             }
-            rs.close();
-            ps.close();
             ServerManager.gI().setAttributeManager(am);
         } catch (SQLException ex) {
-            Logger.getLogger(Manager.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -855,7 +801,6 @@ public class Manager {
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, "Lỗi cập nhật attributes vào DB", ex);
         }
     }
-
 
     public void loadProperties() throws IOException {
         Properties properties = new Properties();
@@ -908,11 +853,9 @@ public class Manager {
         DOMAIN = properties.getProperty("server.domain", "localhost");
     }
 
-
     private int[][] readTileIndexTileType(int tileTypeFocus) {
         int[][] tileIndexTileType = null;
-        try {
-            DataInputStream dis = new DataInputStream(new FileInputStream("resources/data/nro/map/tile_set_info"));
+        try (DataInputStream dis = new DataInputStream(new FileInputStream("resources/data/nro/map/tile_set_info"))) {
             int numTileMap = dis.readByte();
             tileIndexTileType = new int[numTileMap][];
             for (int i = 0; i < numTileMap; i++) {
@@ -969,7 +912,6 @@ public class Manager {
 
     public static int getNumClan() {
         return CLANS.size();
-
     }
 
     public static Costume getCaiTrangByItemId(int itemId) {
