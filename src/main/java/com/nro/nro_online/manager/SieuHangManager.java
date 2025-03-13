@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -17,6 +18,22 @@ import org.json.simple.JSONValue;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.nro.nro_online.card.Card;
+import com.nro.nro_online.card.CollectionBook;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.player.Fusion;
+import com.nro.nro_online.models.player.MiniPet;
+import com.nro.nro_online.models.player.Pet;
+import com.nro.nro_online.models.player.PetFollow;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.sieu_hang.SieuHangModel;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
 import nro.card.Card;
 import nro.card.CollectionBook;
 import nro.consts.ConstPlayer;
@@ -151,8 +168,6 @@ public class SieuHangManager {
                 top.rank = rs.getInt("rank");
                 top.message = rs.getString("message");
 
-                top.player = new Player();
-
                 top.player.name = rs.getString("name");
                 top.player.head = rs.getShort("head");
 
@@ -171,10 +186,10 @@ public class SieuHangManager {
                         }
                         item.createTime = Long.parseLong(String.valueOf(dataObject.get("create_time")));
                         if (ItemService.gI().isOutOfDateTime(item)) {
-                            item = ItemService.gI().createItemNull();
+                            item = ItemService.gI().createNullItem();
                         }
                     } else {
-                        item = ItemService.gI().createItemNull();
+                        item = ItemService.gI().createNullItem();
                     }
                     top.player.inventory.itemsBody.add(item);
                 }
@@ -387,10 +402,10 @@ public class SieuHangManager {
                             }
                             item.createTime = Long.parseLong(String.valueOf(dataObject.get("create_time")));
                             if (ItemService.gI().isOutOfDateTime(item)) {
-                                item = ItemService.gI().createItemNull();
+                                item = ItemService.gI().createNullItem();
                             }
                         } else {
-                            item = ItemService.gI().createItemNull();
+                            item = ItemService.gI().createNullItem();
                         }
                         player.inventory.itemsBody.add(item);
                     }
@@ -437,16 +452,12 @@ public class SieuHangManager {
                     }.getType());
 
                     CollectionBook book = new CollectionBook(player);
-                    if (cards != null) {
-                        book.setCards(cards);
-                    } else {
-                        book.setCards(new ArrayList<>());
-                    }
+                    book.setCards(Objects.requireNonNullElseGet(cards, () -> new ArrayList<>()));
                     book.init();
                     player.setCollectionBook(book);
                     List<Item> itemsBody = player.inventory.itemsBody;
                     while (itemsBody.size() < 11) {
-                        itemsBody.add(ItemService.gI().createItemNull());
+                        itemsBody.add(ItemService.gI().createNullItem());
                     }
 
                     if (itemsBody.get(9).isNotNullItem()) {
@@ -509,10 +520,10 @@ public class SieuHangManager {
                                 }
                                 item.createTime = Long.parseLong(String.valueOf(dataObject.get("create_time")));
                                 if (ItemService.gI().isOutOfDateTime(item)) {
-                                    item = ItemService.gI().createItemNull();
+                                    item = ItemService.gI().createNullItem();
                                 }
                             } else {
-                                item = ItemService.gI().createItemNull();
+                                item = ItemService.gI().createNullItem();
                             }
                             pet.inventory.itemsBody.add(item);
                         }

@@ -1,5 +1,11 @@
 package com.nro.nro_online.services;
 
+import com.nro.nro_online.consts.ConstPet;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.models.player.Pet;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 import nro.consts.ConstPet;
 import nro.consts.ConstPlayer;
 import nro.models.player.Pet;
@@ -318,7 +324,7 @@ public class PetService {
         pet.nPoint.defg = data[3];
         pet.nPoint.critg = data[4];
         for (int i = 0; i < 7; i++) {
-            pet.inventory.itemsBody.add(ItemService.gI().createItemNull());
+            pet.inventory.itemsBody.add(ItemService.gI().createNullItem());
         }
         pet.playerSkill.skills.add(SkillUtil.createSkill(17, 1));
         if (petLevel != 0) {
@@ -336,6 +342,4 @@ public class PetService {
 
         player.pet = pet;
     }
-
-    //--------------------------------------------------------------------------
 }

@@ -1,5 +1,15 @@
 package com.nro.nro_online.models.map.war;
 
+import com.nro.nro_online.consts.ConstItem;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.manager.NamekBallManager;
+import com.nro.nro_online.models.clan.Clan;
+import com.nro.nro_online.models.dragon.Poruga;
+import com.nro.nro_online.models.map.NamekBall;
+import com.nro.nro_online.models.npc.Npc;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
 import lombok.Getter;
 import nro.consts.ConstItem;
 import nro.consts.ConstPlayer;
@@ -64,14 +74,14 @@ public class NamekBallWar {
                 Service.getInstance().sendThongBao(player, "Đã xảy ra lỗi!");
             }
         }
-        NamekBall oneStar = NamekBallManager.gI().findByID(ConstItem.NGOC_RONG_NAMEK_1_SAO);
+        NamekBall oneStar = NamekBallManager.gI().findById(ConstItem.NGOC_RONG_NAMEK_1_SAO);
         if (!oneStar.isCleaning()) {
             oneStar.setCleaning(true);
             oneStar.setCleaningTime(9 * 60);
             npc.npcChat(player, "Hãy đợi 9 phút em lau sạch ngọc rồng,trong thời gian lau ngọc nếu một trong các viên ngọc bị rơi sẽ làm mới thời gian lau");
             return;
         }
-        if (oneStar.isCleaning() && oneStar.getCleaningTime() == 0) {
+        if (oneStar.getCleaningTime() == 0) {
             new Poruga(player).summon();
         }
     }

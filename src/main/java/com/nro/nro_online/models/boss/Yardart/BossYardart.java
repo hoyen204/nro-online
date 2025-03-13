@@ -1,5 +1,15 @@
 package com.nro.nro_online.models.boss.Yardart;
 
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.player.Pet;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 import nro.consts.ConstRatio;
 import nro.models.boss.Boss;
 import nro.models.boss.BossData;
@@ -43,7 +53,7 @@ public class BossYardart extends Boss {
 
     @Override
     public void joinMapByZone(Zone zone, int x) {
-        ChangeMapService.gI().changeMap((Player) this, zone, this.xMoveMin + (this.xMoveMax - this.xMoveMin) / 2, this.location.y);
+        ChangeMapService.gI().changeMap(this, zone, this.xMoveMin + (this.xMoveMax - this.xMoveMin) / 2, this.location.y);
     }
     protected long lastTimeDropItem;
 

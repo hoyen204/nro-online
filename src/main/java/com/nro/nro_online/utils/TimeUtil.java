@@ -3,13 +3,17 @@ package com.nro.nro_online.utils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 /**
  * Build Arriety
  */
 public class TimeUtil {
+
+    public static final ZoneId zoneId = ZoneId.systemDefault();
 
     public enum TimeUnit {
         SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR
@@ -25,6 +29,12 @@ public class TimeUtil {
             case MONTH -> ChronoUnit.MONTHS.between(d1, d2);
             case YEAR -> ChronoUnit.YEARS.between(d1, d2);
         };
+    }
+
+    public static long diffDate(Date d1, Date d2, TimeUnit unit) {
+        LocalDateTime date1 = d1.toInstant().atZone(zoneId).toLocalDateTime();
+        LocalDateTime date2 = d2.toInstant().atZone(zoneId).toLocalDateTime();
+        return diffDate(date1, date2, unit);
     }
 
     /** Kiểm tra thời gian hiện tại có nằm trong khoảng không */

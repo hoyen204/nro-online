@@ -10,6 +10,7 @@ import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.consts.ConstTask;
 import com.nro.nro_online.data.DataGame;
 import com.nro.nro_online.dialog.ConfirmDialog;
+import com.nro.nro_online.models.DragonNamecWar.TranhNgocService;
 import com.nro.nro_online.models.boss.event.EscortedBoss;
 import com.nro.nro_online.models.boss.event.noel.NoelBossBall;
 import com.nro.nro_online.models.clan.Buff;
@@ -20,16 +21,19 @@ import com.nro.nro_online.models.item.Costume;
 import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.item.ItemTime;
+import com.nro.nro_online.models.map.ItemMap;
 import com.nro.nro_online.models.map.TrapMap;
 import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.map.mabu.MabuWar;
 import com.nro.nro_online.models.map.mabu.MabuWar14h;
 import com.nro.nro_online.models.map.war.BlackBallWar;
+import com.nro.nro_online.models.map.war.NamekBallWar;
 import com.nro.nro_online.models.mob.MobMe;
 import com.nro.nro_online.models.npc.specialnpc.BillEgg;
 import com.nro.nro_online.models.npc.specialnpc.EggLinhThu;
 import com.nro.nro_online.models.npc.specialnpc.MabuEgg;
 import com.nro.nro_online.models.npc.specialnpc.MagicTree;
+import com.nro.nro_online.models.pvp.PVP;
 import com.nro.nro_online.models.skill.PlayerSkill;
 import com.nro.nro_online.models.task.TaskPlayer;
 import com.nro.nro_online.server.Client;
@@ -38,10 +42,12 @@ import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.server.io.Session;
 import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.RewardService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.services.TaskService;
 import com.nro.nro_online.services.func.ChangeMapService;
 import com.nro.nro_online.services.func.CombineNew;
+import com.nro.nro_online.services.func.PVPServcice;
 import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.Util;
 import lombok.Getter;
@@ -856,9 +862,7 @@ public class Player {
             int y = this.zone.map.yPhysicInTop(x, this.location.y - 24);
             ItemMap itemMap = new ItemMap(this.zone, 579, 1, x, y, pl.id);
             RewardService.gI().initBaseOptionClothes(itemMap.itemTemplate.id, itemMap.itemTemplate.type, itemMap.options);
-            if (itemMap != null) {
-                Service.getInstance().dropItemMap(zone, itemMap);
-            }
+            Service.getInstance().dropItemMap(zone, itemMap);
         }
     }
 
@@ -868,9 +872,7 @@ public class Player {
             int y = this.zone.map.yPhysicInTop(x, this.location.y - 24);
             ItemMap itemMap = new ItemMap(this.zone, 516, 1, x, y, pl.id);
             RewardService.gI().initBaseOptionClothes(itemMap.itemTemplate.id, itemMap.itemTemplate.type, itemMap.options);
-            if (itemMap != null) {
-                Service.getInstance().dropItemMap(zone, itemMap);
-            }
+            Service.getInstance().dropItemMap(zone, itemMap);
         }
     }
 

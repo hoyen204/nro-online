@@ -1,187 +1,127 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.nro.nro_online.models.DragonNamecWar;
+
+import com.nro.nro_online.consts.ConstTranhNgocNamek;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.ServerManager;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.ItemMapService;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 import java.util.List;
 
-import nro.consts.ConstTranhNgocNamek;
-import nro.models.item.Item;
-import nro.models.map.ItemMap;
-import nro.models.player.Player;
-import nro.server.ServerManager;
-import nro.server.io.Message;
-import nro.services.InventoryService;
-import nro.services.ItemMapService;
-import nro.services.ItemService;
-import nro.services.Service;
-import nro.utils.Util;
-
-/**
- *
- * @Build Arriety
- */
 public class TranhNgocService {
 
-    private static TranhNgocService instance;
+    private static final TranhNgocService INSTANCE = new TranhNgocService();
 
     public static TranhNgocService getInstance() {
-        if (instance == null) {
-            instance = new TranhNgocService();
-        }
-        return instance;
+        return INSTANCE;
     }
 
+    private TranhNgocService() {}
+
     public void sendCreatePhoBan(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(20);
+        sendMessage(pl, 20, msg -> {
             msg.writer().writeByte(0);
             msg.writer().writeByte(0);
             msg.writer().writeShort(ConstTranhNgocNamek.MAP_ID);
-            msg.writer().writeUTF(ConstTranhNgocNamek.CADIC); // team 1
-            msg.writer().writeUTF(ConstTranhNgocNamek.FIDE); // team 2
+            msg.writer().writeUTF(ConstTranhNgocNamek.CADIC);
+            msg.writer().writeUTF(ConstTranhNgocNamek.FIDE);
             msg.writer().writeInt(ConstTranhNgocNamek.MAX_LIFE);
             msg.writer().writeShort(ConstTranhNgocNamek.TIME_SECOND);
             msg.writer().writeByte(ConstTranhNgocNamek.MAX_POINT);
-            pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public void sendUpdateLift(Player pl) {
-        Message msg;
-        try {
-            final TranhNgoc tn = ServerManager.gI().getTranhNgocManager().findByPLayerId(pl.id);
-            if (tn != null) {
-                msg = new Message(20);
+        TranhNgoc tn = getTranhNgoc(pl);
+        if (tn != null) {
+            sendMessageToZone(pl.zone, 20, msg -> {
                 msg.writer().writeByte(0);
                 msg.writer().writeByte(1);
                 msg.writer().writeInt((int) tn.getPlayersCadic().stream().filter(p -> p != null && !p.isDie()).count());
                 msg.writer().writeInt((int) tn.getPlayersFide().stream().filter(p -> p != null && !p.isDie()).count());
-                Service.getInstance().sendMessAllPlayerInMap(pl.zone, msg);
-                msg.cleanup();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            });
         }
     }
 
     public void sendEndPhoBan(TranhNgoc zone, byte type, boolean isFide) {
-        Message msg;
-        try {
-            msg = new Message(20);
+        if (zone == null) return;
+        List<Player> players = isFide ? zone.getPlayersFide() : zone.getPlayersCadic();
+        sendMessageToPlayers(players, 20, msg -> {
             msg.writer().writeByte(0);
             msg.writer().writeByte(2);
             msg.writer().writeByte(type);
-            if (zone != null) {
-                List<Player> players = isFide ? zone.getPlayersFide() : zone.getPlayersCadic();
-                synchronized (players) {
-                    for (Player pl : players) {
-                        if (pl != null) {
-                            pl.sendMessage(msg);
-                        }
-                    }
-                }
-                msg.cleanup();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public void sendUpdateTime(Player pl, short second) {
-        Message msg;
-        try {
-            msg = new Message(20);
+        sendMessageToZone(pl.zone, 20, msg -> {
             msg.writer().writeByte(0);
             msg.writer().writeByte(5);
             msg.writer().writeShort(second);
-            Service.getInstance().sendMessAllPlayerInMap(pl.zone, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public void sendUpdatePoint(Player pl) {
-        Message msg;
-        try {
-            TranhNgoc tn = ServerManager.gI().getTranhNgocManager().findByPLayerId(pl.id);
-
-            msg = new Message(20);
-            msg.writer().writeByte(0);
-            msg.writer().writeByte(4);
-            msg.writer().writeByte(tn.pointCadic);
-            msg.writer().writeByte(tn.pointFide);
-            Service.getInstance().sendMessAllPlayerInMap(pl.zone, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        TranhNgoc tn = getTranhNgoc(pl);
+        if (tn != null) {
+            sendMessageToZone(pl.zone, 20, msg -> {
+                msg.writer().writeByte(0);
+                msg.writer().writeByte(4);
+                msg.writer().writeByte(tn.pointCadic);
+                msg.writer().writeByte(tn.pointFide);
+            });
         }
     }
 
     public void givePrice(List<Player> players, byte type, int point) {
         switch (type) {
-            case ConstTranhNgocNamek.LOSE:
-                int pointDiff = ConstTranhNgocNamek.MAX_POINT - point;
-                for (Player pl : players) {
-                    if (pl != null) {
-                        Item mcl = InventoryService.gI().findItemBagByTemp(pl, 2000);
-                        if (mcl != null) {
-                            InventoryService.gI().subQuantityItemsBag(pl, mcl, pointDiff);
-                            InventoryService.gI().sendItemBags(pl);
-                            Service.getInstance().sendThongBao(pl, "Haizzz thật là nhục nhã\nkiểu này sao báo lại với đội trưởng đây");
-                        } else {
-                            Service.getInstance().sendThongBao(pl, "Bạn không có mảnh chiến lực\nnên tôi xóa đi 1 item trong túi bạn");
-                        }
-                    }
-                }
-                break;
-            case ConstTranhNgocNamek.WIN:
-                for (Player pl : players) {
-                    if (pl != null) {
-                        Item mcl = ItemService.gI().createNewItem((short) 2000);
-                        mcl.quantity = point;
-                        InventoryService.gI().addItemBag(pl, mcl, 0);
-                        InventoryService.gI().sendItemBags(pl);
-                        Service.getInstance().sendThongBao(pl, "Chúc mừng bạn đã nhận được " + mcl.template.name);
-                    }
-                }
-                break;
-//            case ConstTranhNgocNamek.DRAW:
-//                for (Player pl : players) {
-//                    if (pl != null) {
-//                        Item mcl = ItemService.gI().createNewItem((short) 2000);
-//                        mcl.quantity = point;
-//                        InventoryService.gI().addItemBag(pl, mcl, 99999);
-//                        InventoryService.gI().sendItemBags(pl);
-//                        TranhNgoc.gI().removePlayersCadic(pl);
-//                        TranhNgoc.gI().removePlayersFide(pl);
-//                    }
-//                }
-//                break;
-            default:
-                break;
+        case ConstTranhNgocNamek.LOSE -> handleLose(players, point);
+        case ConstTranhNgocNamek.WIN -> handleWin(players, point);
+        default -> {}
+        }
+    }
+
+    private void handleLose(List<Player> players, int point) {
+        int pointDiff = ConstTranhNgocNamek.MAX_POINT - point;
+        for (Player pl : players) {
+            if (pl == null) continue;
+            Item mcl = InventoryService.gI().findItemBagByTemp(pl, 2000);
+            if (mcl != null) {
+                InventoryService.gI().subQuantityItemsBag(pl, mcl, pointDiff);
+                InventoryService.gI().sendItemBags(pl);
+                Service.getInstance().sendThongBao(pl, "Haizzz thật là nhục nhã\nkiểu này sao báo lại với đội trưởng đây");
+            } else {
+                Service.getInstance().sendThongBao(pl, "Bạn không có mảnh chiến lực\nnên tôi xóa đi 1 item trong túi bạn");
+            }
+        }
+    }
+
+    private void handleWin(List<Player> players, int point) {
+        for (Player pl : players) {
+            if (pl == null) continue;
+            Item mcl = ItemService.gI().createNewItem((short) 2000, point);
+            InventoryService.gI().addItemBag(pl, mcl, 0);
+            InventoryService.gI().sendItemBags(pl);
+            Service.getInstance().sendThongBao(pl, "Chúc mừng bạn đã nhận được " + mcl.template.name);
         }
     }
 
     public void pickBall(Player player, ItemMap item) {
-        final TranhNgoc tn = ServerManager.gI().getTranhNgocManager().findByPLayerId(player.id);
-        if (player.isHoldNamecBallTranhDoat || (!tn.isCadic(player) && !tn.isFide(player))) {
-            return;
-        }
+        TranhNgoc tn = getTranhNgoc(player);
+        if (player.isHoldNamecBallTranhDoat || (!tn.isCadic(player) && !tn.isFide(player))) return;
+
         if (item.typeHaveBallTranhDoat != -1 && (tn.isCadic(player) || tn.isFide(player))) {
-            if (tn.isCadic(player)) {
-                tn.pointFide--;
-            } else if (tn.isFide(player)) {
-                tn.pointCadic--;
-            }
+            if (tn.isCadic(player)) tn.pointFide--;
+            else tn.pointCadic--;
             sendUpdatePoint(player);
         }
+
         player.tempIdNamecBallHoldTranhDoat = item.itemTemplate.id;
         player.isHoldNamecBallTranhDoat = true;
         ItemMapService.gI().removeItemMapAndSendClient(item);
@@ -190,18 +130,57 @@ public class TranhNgocService {
     }
 
     public void dropBall(Player player, byte a) {
-        if (player.tempIdNamecBallHoldTranhDoat != -1) {
-            player.isHoldNamecBallTranhDoat = false;
-        }
+        if (player.tempIdNamecBallHoldTranhDoat == -1) return;
+
+        player.isHoldNamecBallTranhDoat = false;
         int x = Util.nextInt(20, player.zone.map.mapWidth);
         int y = player.zone.map.yPhysicInTop(x, player.zone.map.mapHeight / 2);
-        ItemMap itemMap = new ItemMap(player.zone, player.tempIdNamecBallHoldTranhDoat, 1, x, y, -1);
+        ItemMap itemMap = new ItemMap(player.zone, player.tempIdNamecBallHoldTranhDoat, 1, player.location.x, player.location.y, -1);
         itemMap.isNamecBallTranhDoat = true;
         itemMap.typeHaveBallTranhDoat = a;
-        itemMap.x = player.location.x;
-        itemMap.y = player.location.y;
+
         Service.getInstance().dropItemMap(player.zone, itemMap);
         Service.getInstance().sendFlagBag(player);
         player.tempIdNamecBallHoldTranhDoat = -1;
+    }
+
+    private TranhNgoc getTranhNgoc(Player pl) {
+        return ServerManager.gI().getTranhNgocManager().findByPLayerId(pl.id);
+    }
+
+    private void sendMessage(Player pl, int cmd, MessageConsumer consumer) {
+        try (Message msg = new Message(cmd)) {
+            consumer.accept(msg);
+            pl.sendMessage(msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMessageToZone(com.nro.nro_online.models.map.Zone zone, int cmd, MessageConsumer consumer) {
+        try (Message msg = new Message(cmd)) {
+            consumer.accept(msg);
+            Service.getInstance().sendMessAllPlayerInMap(zone, msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMessageToPlayers(List<Player> players, int cmd, MessageConsumer consumer) {
+        try (Message msg = new Message(cmd)) {
+            consumer.accept(msg);
+            synchronized (players) {
+                for (Player pl : players) {
+                    if (pl != null) pl.sendMessage(msg);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FunctionalInterface
+    private interface MessageConsumer {
+        void accept(Message msg) throws Exception;
     }
 }

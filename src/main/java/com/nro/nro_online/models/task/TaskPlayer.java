@@ -8,7 +8,6 @@ import com.nro.nro_online.models.player.Player;
 public class TaskPlayer {
 
     public TaskMain taskMain;
-
     public SideTask sideTask;
     public List<Achievement> achievements;
 

@@ -380,7 +380,7 @@ public class Zone {
 
                         Item item = ItemService.gI().createItemFromItemMap(itemMap);
                         int maxQuantity = 0;
-                        if (ItemService.gI().isItemNoLimitQuantity(item.template.id)) {
+                        if (ItemService.gI().isUnLimitQuantity(item.template.id)) {
                             maxQuantity = 99999;
                         }
                         boolean picked = InventoryService.gI().addItemBag(player, item, maxQuantity);

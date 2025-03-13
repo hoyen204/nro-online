@@ -1,12 +1,7 @@
 package com.nro.nro_online.models.boss.iboss;
 
-import nro.models.player.Player;
+import com.nro.nro_online.models.player.Player;
 
-/**
- *
- * Arriety
- *
- */
 public interface BossInterface extends IBossStatus {
 
     void update();

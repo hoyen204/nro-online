@@ -1,12 +1,7 @@
 package com.nro.nro_online.models.npc;
 
-import nro.models.player.Player;
+import com.nro.nro_online.models.player.Player;
 
-/**
- *
- * Arriety
- *
- */
 public interface IAtionNpc {
 
     void openBaseMenu(Player player);

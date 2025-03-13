@@ -1,29 +1,18 @@
 package com.nro.nro_online.manager;
 
 import com.nro.nro_online.consts.ConstItem;
+import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.NamekBall;
 import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.map.war.NamekBallWar;
+import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.services.ItemMapService;
 import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.PlayerService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.utils.Util;
-import nro.consts.ConstItem;
-import nro.consts.ConstPlayer;
-import nro.models.map.Map;
-import nro.models.map.NamekBall;
-import nro.models.map.Zone;
-import nro.models.map.war.NamekBallWar;
-import nro.models.player.Player;
-import nro.services.ItemMapService;
-import nro.services.MapService;
-import nro.services.PlayerService;
-import nro.services.Service;
-import nro.utils.Util;
 
-/**
- * @build by arriety
- */
 public class NamekBallManager extends AbsManager<NamekBall> {
 
     private static final NamekBallManager INSTANCE = new NamekBallManager();

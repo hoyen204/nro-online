@@ -1,6 +1,7 @@
 package com.nro.nro_online.dialog;
 
 import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.utils.Log;
 import lombok.Getter;

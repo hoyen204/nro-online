@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.pvp.PVP;
 import nro.consts.ConstNpc;
 import nro.consts.ConstTranhNgocNamek;
 import nro.models.map.Zone;

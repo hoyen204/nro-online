@@ -3,38 +3,32 @@ package com.nro.nro_online.models.boss;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nro.nro_online.consts.ConstItem;
+import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.consts.ConstRatio;
+import com.nro.nro_online.lib.RandomCollection;
 import com.nro.nro_online.models.boss.Yardart.BossYardart;
 import com.nro.nro_online.models.boss.cdrd.CBoss;
 import com.nro.nro_online.models.boss.iboss.BossInterface;
 import com.nro.nro_online.models.boss.mabu_war.BossMabuWar;
+import com.nro.nro_online.models.map.ItemMap;
 import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.map.mabu.MabuWar14h;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.models.skill.Skill;
 import com.nro.nro_online.server.ServerNotify;
+import com.nro.nro_online.services.EffectSkillService;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.RewardService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.SkillService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.SkillUtil;
 import com.nro.nro_online.utils.Util;
 import lombok.Setter;
-import nro.consts.ConstItem;
-import nro.consts.ConstMap;
-import nro.consts.ConstPlayer;
-import nro.consts.ConstRatio;
-import nro.lib.RandomCollection;
-import nro.models.boss.Yardart.BossYardart;
-import nro.models.boss.cdrd.CBoss;
-import nro.models.boss.iboss.BossInterface;
-import nro.models.boss.mabu_war.BossMabuWar;
-import nro.models.map.ItemMap;
-import nro.models.map.Zone;
-import nro.models.map.mabu.MabuWar14h;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.server.ServerNotify;
-import nro.services.*;
-import nro.services.func.ChangeMapService;
-import nro.utils.Log;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
 
 /**
  * Arriety
@@ -356,7 +350,7 @@ public abstract class Boss extends Player implements BossInterface {
     }
 
     public void nextMabu(boolean isDie) {
-        if ((isDie ? this.isDie() : true) && this.head != 427 && !Util.canDoWithTime(this.timeStartDie, 3200)) {
+        if ((!isDie || this.isDie()) && this.head != 427 && !Util.canDoWithTime(this.timeStartDie, 3200)) {
             if (this.startDie) {
                 this.startDie = false;
                 Service.getInstance().hsChar(this, -1, -1);

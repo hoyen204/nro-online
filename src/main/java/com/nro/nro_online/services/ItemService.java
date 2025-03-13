@@ -10,6 +10,11 @@ import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.item.ItemOptionTemplate;
 import com.nro.nro_online.models.item.ItemShop;
 import com.nro.nro_online.models.item.ItemTemplate;
+import com.nro.nro_online.models.kygui.ConsignmentItem;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.utils.TimeUtil;
 import com.nro.nro_online.utils.Util;
 
 
@@ -348,7 +353,7 @@ public class ItemService {
         }
     }
 
-    public void setCadic(Player player) throws Exception {
+    public void setCadic(Player player) {
         Item hq = InventoryService.gI().findItem(player.inventory.itemsBag, 1228);
         Item ao = ItemService.gI().otpKH((short) 2);
         Item quan = ItemService.gI().otpKH((short) 8);
@@ -386,7 +391,7 @@ public class ItemService {
         }
     }
 
-    public void setNappa(Player player) throws Exception {
+    public void setNappa(Player player) {
         Item hq = InventoryService.gI().findItem(player.inventory.itemsBag, 1228);
         Item ao = ItemService.gI().otpKH((short) 2);
         Item quan = ItemService.gI().otpKH((short) 8);
@@ -424,7 +429,7 @@ public class ItemService {
         }
     }
 
-    public Item DoThienSu(int itemId, int gender, int perSuccess, int perLucky) {
+    public Item angelClothes(int itemId, int gender, int perSuccess, int perLucky) {
         Item dots = createItemSetKichHoat(itemId, 1);
         List<Integer> ao = Arrays.asList(1048, 1049, 1050);
         List<Integer> quan = Arrays.asList(1051, 1052, 1053);
@@ -655,19 +660,12 @@ public class ItemService {
 
     public int getPercentTrainArmor(Item item) {
         if (item != null) {
-            switch (item.template.id) {
-                case 529:
-                case 534:
-                    return 10;
-                case 530:
-                case 535:
-                    return 20;
-                case 531:
-                case 536:
-                    return 30;
-                default:
-                    return 0;
-            }
+            return switch (item.template.id) {
+                case 529, 534 -> 10;
+                case 530, 535 -> 20;
+                case 531, 536 -> 30;
+                default -> 0;
+            };
         } else {
             return 0;
         }
@@ -675,17 +673,10 @@ public class ItemService {
 
     public boolean isTrainArmor(Item item) {
         if (item != null) {
-            switch (item.template.id) {
-                case 529:
-                case 534:
-                case 530:
-                case 535:
-                case 531:
-                case 536:
-                    return true;
-                default:
-                    return false;
-            }
+            return switch (item.template.id) {
+                case 529, 534, 530, 535, 531, 536 -> true;
+                default -> false;
+            };
         } else {
             return false;
         }
@@ -696,7 +687,7 @@ public class ItemService {
         if (item != null) {
             for (ItemOption io : item.itemOptions) {
                 if (io.optionTemplate.id == 93) {
-                    int dayPass = (int) TimeUtil.diffDate(new Date(), new Date(item.createTime), TimeUtil.DAY);
+                    int dayPass = (int) TimeUtil.diffDate(new Date(), new Date(item.createTime), TimeUtil.TimeUnit.DAY);
                     if (dayPass != 0) {
                         io.param -= dayPass;
                         if (io.param <= 0) {
@@ -716,10 +707,8 @@ public class ItemService {
         return false;
     }
 
-    public boolean isItemNoLimitQuantity(int id) {// item k giới hạn số lượng
-        if (id >= 1066 && id <= 1070) {// mảnh trang bị thiên sứ
-            return true;
-        }
-        return false;
+    public boolean isUnLimitQuantity(int id) {// item k giới hạn số lượng
+        // mảnh trang bị thiên sứ
+        return id >= 1066 && id <= 1070;
     }
 }

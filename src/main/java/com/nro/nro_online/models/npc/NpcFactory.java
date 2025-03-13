@@ -5,9 +5,30 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.nro.nro_online.services.func.SummonDragon.BLACK_SHENRON_SAY;
+import static com.nro.nro_online.services.func.SummonDragon.BLACK_SHENRON_WISHES;
+import static com.nro.nro_online.services.func.SummonDragon.ICE_SHENRON_SAY;
+import static com.nro.nro_online.services.func.SummonDragon.ICE_SHENRON_WISHES;
+import static com.nro.nro_online.services.func.SummonDragon.SHENRON_1_STAR_WISHES_1;
+import static com.nro.nro_online.services.func.SummonDragon.SHENRON_1_STAR_WISHES_2;
+import static com.nro.nro_online.services.func.SummonDragon.SHENRON_SAY;
 import static nro.server.Manager.*;
 import static nro.services.func.SummonDragon.*;
 
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.dialog.ConfirmDialog;
+import com.nro.nro_online.dialog.MenuDialog;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.npc.NpcForge.GhiDanh;
+import com.nro.nro_online.models.npc.NpcForge.NoiBanh;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.NpcService;
+import com.nro.nro_online.services.PetService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.SummonDragon;
+import com.nro.nro_online.utils.Log;
 import nro.attr.AttributeManager;
 import nro.consts.*;
 import nro.dialog.ConfirmDialog;
@@ -331,7 +352,7 @@ public class NpcFactory {
                         ConfirmDialog confirmDialog = player.getConfirmDialog();
                         if (confirmDialog != null) {
                             if (confirmDialog instanceof MenuDialog menu) {
-                                menu.getRunable().setIndexSelected(select);
+                                menu.getRunnable().setIndexSelected(select);
                                 menu.run();
                                 return;
                             }

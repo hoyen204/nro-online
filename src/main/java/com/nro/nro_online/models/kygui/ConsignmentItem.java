@@ -1,12 +1,9 @@
 package com.nro.nro_online.models.kygui;
 
+import com.nro.nro_online.models.item.Item;
 import lombok.Getter;
 import lombok.Setter;
-import nro.models.item.Item;
 
-/**
- * Debug Arriety
- */
 @Setter
 @Getter
 public class ConsignmentItem extends Item {

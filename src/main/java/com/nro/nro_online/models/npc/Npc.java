@@ -1,44 +1,30 @@
 package com.nro.nro_online.models.npc;
 
 import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.models.map.Map;
+import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.services.func.ShopService;
+import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.Util;
-import nro.consts.ConstNpc;
-import nro.models.map.Map;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.server.Manager;
-import nro.server.io.Message;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.services.func.ShopService;
-import nro.utils.Log;
-import nro.utils.Util;
 
-/**
- *
- * @Stole Arriety
- *
- */
 public abstract class Npc implements IAtionNpc {
 
     public int mapId;
     public Map map;
-
     public int status;
-
     public int cx;
-
     public int cy;
-
     public int tempId;
-
     public int avartar;
-
     public BaseMenu baseMenu;
+    private final Message message = new Message(32);
+    private final Message chatMessage = new Message(124);
 
     protected Npc(int mapId, int status, int cx, int cy, int tempId, int avartar) {
         this.map = MapService.gI().getMapById(mapId);
@@ -64,18 +50,15 @@ public abstract class Npc implements IAtionNpc {
     }
 
     public void createOtherMenu(Player player, int indexMenu, String npcSay, String... menuSelect) {
-        Message msg;
         try {
             player.iDMark.setIndexMenu(indexMenu);
-            msg = new Message(32);
-            msg.writer().writeShort(tempId);
-            msg.writer().writeUTF(npcSay);
-            msg.writer().writeByte(menuSelect.length);
+            message.writer().writeShort(tempId);
+            message.writer().writeUTF(npcSay);
+            message.writer().writeByte(menuSelect.length);
             for (String menu : menuSelect) {
-                msg.writer().writeUTF(menu);
+                message.writer().writeUTF(menu);
             }
-            player.sendMessage(msg);
-            msg.cleanup();
+            player.sendMessage(message);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,18 +66,15 @@ public abstract class Npc implements IAtionNpc {
 
     public void createOtherMenu(Player player, int indexMenu, String npcSay, String[] menuSelect, Object object) {
         NpcFactory.PLAYERID_OBJECT.put(player.id, object);
-        Message msg;
         try {
             player.iDMark.setIndexMenu(indexMenu);
-            msg = new Message(32);
-            msg.writer().writeShort(tempId);
-            msg.writer().writeUTF(npcSay);
-            msg.writer().writeByte(menuSelect.length);
+            message.writer().writeShort(tempId);
+            message.writer().writeUTF(npcSay);
+            message.writer().writeByte(menuSelect.length);
             for (String menu : menuSelect) {
-                msg.writer().writeUTF(menu);
+                message.writer().writeUTF(menu);
             }
-            player.sendMessage(msg);
-            msg.cleanup();
+            player.sendMessage(message);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -108,14 +88,11 @@ public abstract class Npc implements IAtionNpc {
                 if (baseMenu != null) {
                     baseMenu.openMenu(player);
                 } else {
-                    Message msg;
-                    msg = new Message(32);
-                    msg.writer().writeShort(tempId);
-                    msg.writer().writeUTF("Bạn gặp tôi có việc gì vậy?");
-                    msg.writer().writeByte(1);
-                    msg.writer().writeUTF("Đóng");
-                    player.sendMessage(msg);
-                    msg.cleanup();
+                    message.writer().writeShort(tempId);
+                    message.writer().writeUTF("Bạn gặp tôi có việc gì vậy?");
+                    message.writer().writeByte(1);
+                    message.writer().writeUTF("Đóng");
+                    player.sendMessage(message);
                 }
             } catch (Exception e) {
                 Log.error(Npc.class, e);
@@ -124,13 +101,10 @@ public abstract class Npc implements IAtionNpc {
     }
 
     public void npcChat(Player player, String text) {
-        Message msg;
         try {
-            msg = new Message(124);
-            msg.writer().writeShort(tempId);
-            msg.writer().writeUTF(text);
-            player.sendMessage(msg);
-            msg.cleanup();
+            chatMessage.writer().writeShort(tempId);
+            chatMessage.writer().writeUTF(text);
+            player.sendMessage(chatMessage);
         } catch (Exception e) {
             Log.error(Service.class, e);
         }
@@ -140,26 +114,13 @@ public abstract class Npc implements IAtionNpc {
 
     public void AutoChat() {
         try {
-            switch (tempId) {
-                case 13:
-                    for (int i = Client.gI().getPlayers().size() - 1; i >= 0; i--) {
-                        try {
-                            Player pl = Client.gI().getPlayers().get(i);
-                            if (pl != null && pl.zone != null && pl.zone.map != null) {
-                                if (pl.zone.map.mapId == mapId && pl.isPl()) {
-                                    if (System.currentTimeMillis() - LastTimeAutoChat > 5000) {
-                                        LastTimeAutoChat = System.currentTimeMillis();
-                                    }
-                                    npcChat(pl, getText(tempId));
-                                }
-                            }
-                        } catch (NullPointerException e) {
-                            e.printStackTrace();
-                        }
+            if (tempId == 13 && System.currentTimeMillis() - LastTimeAutoChat > 5000) {
+                LastTimeAutoChat = System.currentTimeMillis();
+                for (Player pl : Client.gI().getPlayers()) {
+                    if (pl != null && pl.zone != null && pl.zone.map != null && pl.zone.map.mapId == mapId && pl.isPl()) {
+                        npcChat(pl, getText(tempId));
                     }
-                    break;
-                default:
-                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -167,44 +128,36 @@ public abstract class Npc implements IAtionNpc {
     }
 
     private String getText(int id) {
-        switch (id) {
-            case 13:
-                return textQuyLao[Util.nextInt(0, textQuyLao.length - 1)];
-            default:
-                return "";
+        if (id == 13) {
+            return textQuyLao[Util.nextInt(0, textQuyLao.length - 1)];
         }
+        return "";
     }
 
     private static final String[] textQuyLao = new String[]{
-        "Lá Là La...",
-        "Ngày tươi đẹp nhất là ngày được may mắn nhìn thấy em",
-        "Tình yêu không cần phải hoàn hảo, chỉ cần sự chân thật. ",
-        "Tôi là một ngọn lửa cháy lên, nhưng sẽ không thể bị lụi tàn. "
+            "Lá Là La...",
+            "Ngày tươi đẹp nhất là ngày được may mắn nhìn thấy em",
+            "Tình yêu không cần phải hoàn hảo, chỉ cần sự chân thật. ",
+            "Tôi là một ngọn lửa cháy lên, nhưng sẽ không thể bị lụi tàn. "
     };
 
     public void npcChat(Zone zone, String text) {
-        Message msg;
         try {
-            msg = new Message(124);
-            msg.writer().writeShort(tempId);
-            msg.writer().writeUTF(text);
-            Service.getInstance().sendMessAllPlayerInMap(zone, msg);
-            msg.cleanup();
+            chatMessage.writer().writeShort(tempId);
+            chatMessage.writer().writeUTF(text);
+            Service.getInstance().sendMessAllPlayerInMap(zone, chatMessage);
         } catch (Exception e) {
             Log.error(Service.class, e);
         }
     }
 
     public void npcChat(String text) {
-        Message msg;
         try {
-            msg = new Message(124);
-            msg.writer().writeShort(tempId);
-            msg.writer().writeUTF(text);
+            chatMessage.writer().writeShort(tempId);
+            chatMessage.writer().writeUTF(text);
             for (Zone zone : map.zones) {
-                Service.getInstance().sendMessAllPlayerInMap(zone, msg);
+                Service.getInstance().sendMessAllPlayerInMap(zone, chatMessage);
             }
-            msg.cleanup();
         } catch (Exception e) {
             Log.error(Service.class, e);
         }
@@ -224,22 +177,10 @@ public abstract class Npc implements IAtionNpc {
 
     public boolean canOpenNpc(Player player) {
         if (this.tempId == ConstNpc.DAU_THAN) {
-            if (player.zone.map.mapId == 21 || player.zone.map.mapId == 22 || player.zone.map.mapId == 23) {
-                return true;
-            } else {
-                Service.getInstance().hideWaitDialog(player);
-                Service.getInstance().sendThongBao(player, "Không thể thực hiện");
-                return false;
-            }
+            int playerMapId = player.zone.map.mapId;
+            return playerMapId == 21 || playerMapId == 22 || playerMapId == 23;
         }
-        if (player.zone.map.mapId == this.mapId
-                && Util.getDistance(this.cx, this.cy, player.location.x, player.location.y) <= 60) {
-            return true;
-        } else {
-            Service.getInstance().hideWaitDialog(player);
-            Service.getInstance().sendThongBao(player, "Không thể thực hiện khi đứng quá xa");
-            return false;
-        }
+        return player.zone.map.mapId == this.mapId
+                && Util.getDistance(this.cx, this.cy, player.location.x, player.location.y) <= 60;
     }
-
 }

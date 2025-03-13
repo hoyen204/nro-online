@@ -1,34 +1,27 @@
 package com.nro.nro_online.models.npc;
 
-import nro.models.player.Player;
-import nro.server.io.Message;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Log;
 
-/**
- *
- * Arriety
- *
- */
 public class BaseMenu {
 
     public int npcId;
-
     public String npcSay;
-
     public String[] menuSelect;
+    private final Message message = new Message(32);
 
     public void openMenu(Player player) {
-        Message msg;
         try {
-            msg = new Message(32);
-            msg.writer().writeShort(npcId);
-            msg.writer().writeUTF(npcSay);
-            msg.writer().writeByte(menuSelect.length);
+            message.writer().writeShort(npcId);
+            message.writer().writeUTF(npcSay);
+            message.writer().writeByte(menuSelect.length);
             for (String menu : menuSelect) {
-                msg.writer().writeUTF(menu);
+                message.writer().writeUTF(menu);
             }
-            player.sendMessage(msg);
-            msg.cleanup();
+            player.sendMessage(message);
         } catch (Exception e) {
+            Log.error(this.getClass(), e);
         }
     }
 }

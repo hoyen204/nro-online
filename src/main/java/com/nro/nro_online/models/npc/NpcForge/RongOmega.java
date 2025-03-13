@@ -4,6 +4,9 @@
  */
 package com.nro.nro_online.models.npc.NpcForge;
 
+import com.nro.nro_online.models.map.war.BlackBallWar;
+import com.nro.nro_online.models.npc.Npc;
+import com.nro.nro_online.models.player.Player;
 import nro.consts.ConstMap;
 import nro.consts.ConstNpc;
 import nro.models.map.war.BlackBallWar;
@@ -26,7 +29,6 @@ public class RongOmega extends Npc {
     @Override
     public void openBaseMenu(Player player) {
         if (canOpenNpc(player)) {
-            BlackBallWar.gI().setTime();
             if (this.mapId == 24 || this.mapId == 25 || this.mapId == 26) {
                 try {
                     long now = System.currentTimeMillis();

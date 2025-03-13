@@ -153,4 +153,8 @@ public class Util {
     public static boolean isNullOrEmpty(String str) {
         return str == null || str.isEmpty() || str.equals("null");
     }
+
+    public static int getOne(int n1, int n2) {
+        return rand.nextInt() % 2 == 0 ? n1 : n2;
+    }
 }

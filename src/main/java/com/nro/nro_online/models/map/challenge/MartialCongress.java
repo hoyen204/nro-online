@@ -1,5 +1,7 @@
 package com.nro.nro_online.models.map.challenge;
 
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.player.Player;
 import lombok.Getter;
 import lombok.Setter;
 import nro.consts.ConstItem;

@@ -1,22 +1,20 @@
 package com.nro.nro_online.models.dragon;
 
 import java.io.IOException;
-
+import com.nro.nro_online.login.Cmd;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 import lombok.Getter;
 import lombok.Setter;
-import nro.consts.Cmd;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.Service;
-import nro.utils.Util;
-
-/**
- * @build by arriety
- */
 
 @Setter
 @Getter
 public abstract class AbsDragon implements Runnable {
+
+    private static final long APPEARANCE_DURATION_MS = 60000 * 5;
 
     private String content;
     private String[] wishes;
@@ -47,6 +45,7 @@ public abstract class AbsDragon implements Runnable {
                     + summoner.zone.map.mapName + " khu vực " + summoner.zone.zoneId);
             Service.getInstance().sendMessAllPlayerIgnoreMe(summoner, m);
         } catch (IOException e) {
+            Log.error(AbsDragon.class, e, "Error sending notification");
         }
     }
 
@@ -57,7 +56,7 @@ public abstract class AbsDragon implements Runnable {
     @Override
     public void run() {
         while (isAppear()) {
-            if (Util.canDoWithTime(lastTimeAppear, 60000 * 5)) {
+            if (Util.canDoWithTime(lastTimeAppear, APPEARANCE_DURATION_MS)) {
                 leave();
             }
         }

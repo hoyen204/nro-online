@@ -4,10 +4,21 @@
  */
 package com.nro.nro_online.models.DragonNamecWar;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import com.nro.nro_online.consts.ConstTranhNgocNamek;
+import com.nro.nro_online.models.map.Map;
+import com.nro.nro_online.models.map.tranhngoc.TranhNgocZone;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.ServerManager;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.TimeUtil;
 import lombok.Getter;
 import lombok.Setter;
 import nro.consts.ConstTranhNgocNamek;
@@ -35,9 +46,9 @@ public class TranhNgoc {
     private boolean is_finish;
     private boolean closed;
 
-    private static long TIME_OPEN;
-    private static long TIME_CLOSE;
-    private static long TIME_REGISTER;
+    private static LocalDateTime TIME_OPEN;
+    private static LocalDateTime TIME_CLOSE;
+    private static LocalDateTime TIME_REGISTER;
 
     public static final byte HOUR_REGISTER = 19;
     public static final byte MIN_REGISTER = 0;
@@ -47,8 +58,10 @@ public class TranhNgoc {
     public static final byte HOUR_CLOSE = 20;
     public static final byte MIN_CLOSE = 0;
 
-    private List<Player> playersFide;
-    private List<Player> playersCadic;
+    @Getter
+    private final List<Player> playersFide;
+    @Getter
+    private final List<Player> playersCadic;
     private TranhNgocZone zone;
 
     public int numOfPlayers;
@@ -72,14 +85,6 @@ public class TranhNgoc {
         final Map map = MapService.gI().getMapById(ConstTranhNgocNamek.MAP_ID);
         final TranhNgocZone road = new TranhNgocZone(map, this.id, 10);
         this.zone = road;
-    }
-
-    public List<Player> getPlayersCadic() {
-        return this.playersCadic;
-    }
-
-    public List<Player> getPlayersFide() {
-        return this.playersFide;
     }
 
     public boolean isCadic(Player player) {
@@ -146,9 +151,10 @@ public class TranhNgoc {
 
     public void setTime() {
         try {
-            TranhNgoc.TIME_OPEN = TimeUtil.getTime(TimeUtil.getTimeNow("dd/MM/yyyy") + " " + HOUR_OPEN + ":" + MIN_OPEN + ":" + 0, "dd/MM/yyyy HH:mm:ss");
-            TranhNgoc.TIME_CLOSE = TimeUtil.getTime(TimeUtil.getTimeNow("dd/MM/yyyy") + " " + HOUR_CLOSE + ":" + MIN_CLOSE + ":" + 0, "dd/MM/yyyy HH:mm:ss");
-            TranhNgoc.TIME_REGISTER = TimeUtil.getTime(TimeUtil.getTimeNow("dd/MM/yyyy") + " " + HOUR_REGISTER + ":" + MIN_REGISTER + ":" + 0, "dd/MM/yyyy HH:mm:ss");
+            String format = TimeUtil.getTimeNow("dd/MM/yyyy");
+            TranhNgoc.TIME_OPEN = TimeUtil.getTime( format + " " + HOUR_OPEN + ":" + MIN_OPEN + ":" + 0, "dd/MM/yyyy HH:mm:ss");
+            TranhNgoc.TIME_CLOSE = TimeUtil.getTime(format + " " + HOUR_CLOSE + ":" + MIN_CLOSE + ":" + 0, "dd/MM/yyyy HH:mm:ss");
+            TranhNgoc.TIME_REGISTER = TimeUtil.getTime(format + " " + HOUR_REGISTER + ":" + MIN_REGISTER + ":" + 0, "dd/MM/yyyy HH:mm:ss");
 
             TimeUtil.getTime(TimeUtil.getTimeNow("dd/MM/yyyy") + " " + HOUR_REGISTER + ":" + MIN_REGISTER + ":" + 0, "dd/MM/yyyy HH:mm:ss");
         } catch (Exception e) {

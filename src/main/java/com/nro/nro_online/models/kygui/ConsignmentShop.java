@@ -9,6 +9,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nro.nro_online.consts.ConstItem;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.player.Inventory;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.NpcService;
+import com.nro.nro_online.services.Service;
 import lombok.Getter;
 import nro.consts.ConstItem;
 import nro.dialog.ConfirmDialog;
@@ -256,7 +266,7 @@ public class ConsignmentShop {
                 items.add(item);
             }
         }
-        Collections.sort(items, (item1, item2) -> Boolean.compare(item2.template.isUpToUp, item1.template.isUpToUp));
+        items.sort((item1, item2) -> Boolean.compare(item2.template.isUpToUp, item1.template.isUpToUp));
         switch (max.length) {
             case 2: {
                 int startIndex = Math.min(max[0], items.size());
@@ -284,11 +294,9 @@ public class ConsignmentShop {
 
     private List<ConsignmentItem> getItemCanConsign(Player player) {
         List<ConsignmentItem> items = new ArrayList<>();
-        list.stream().filter((it) -> (it != null && it.getConsignorID() == player.id)).forEachOrdered((it) -> {
-            items.add(it);
-        });
+        list.stream().filter((it) -> (it != null && it.getConsignorID() == player.id)).forEachOrdered(items::add);
 
-        player.inventory.itemsBag.stream().filter(item -> item.isNotNullItem()).forEach(item -> {
+        player.inventory.itemsBag.stream().filter(Item::isNotNullItem).forEach(item -> {
             item.itemOptions.forEach(itemOption -> {
                 if (itemOption.optionTemplate.id == 31) {
                     if (itemOption.param >= 32767) {
@@ -333,7 +341,7 @@ public class ConsignmentShop {
 
     public void buy(Player player, short itemID, byte monneyType, int money) {
         for (ConsignmentItem item : list) {
-            if (item.getConsignID() == itemID && monneyType == monneyType && money == money) {
+            if (item.getConsignID() == itemID) {
                 if (player.inventory.ruby < 1_000_000) {
                     Service.getInstance().sendThongBao(player, "Người bạn không đủ 1tr hồng ngọc");
                     show(player);
