@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.nro.nro_online.models.item.Item;
+import lombok.Getter;
 import nro.models.item.Item;
 
 /**
@@ -27,8 +28,11 @@ public class Inventory {
 
     public List<Item> itemsBoxCrackBall;
 
+    @Getter
     public long gold, goldLimit;
+    @Getter
     public int gem;
+    @Getter
     public int ruby;
 
     public Inventory(Player player) {
@@ -39,16 +43,12 @@ public class Inventory {
         itemsBoxCrackBall = new ArrayList<>();
     }
 
-    public int getGem() {
-        return this.gem;
-    }
-
-    public int getRuby() {
-        return this.ruby;
-    }
-
-    public long getGold() {
-        return this.gold;
+    public int getQuantity(int tempId) {
+        Item item = itemsBag.stream()
+                .filter(i -> i.template.id == tempId)
+                .findFirst()
+                .orElse(null);
+        return item != null ? item.quantity : 0;
     }
 
     public long getGoldLimit() {

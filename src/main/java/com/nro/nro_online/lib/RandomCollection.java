@@ -25,10 +25,6 @@ public class RandomCollection<E> {
         return this;
     }
 
-    public RandomCollection<E> add(double weight, E result, String function) {
-        return add(weight, result);
-    }
-
     public E next() {
         if (map.isEmpty()) return null;
         double value = random.nextDouble() * total;

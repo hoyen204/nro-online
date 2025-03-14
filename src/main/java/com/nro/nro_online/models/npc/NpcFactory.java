@@ -5,54 +5,43 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.nro.nro_online.services.func.SummonDragon.BLACK_SHENRON_SAY;
-import static com.nro.nro_online.services.func.SummonDragon.BLACK_SHENRON_WISHES;
-import static com.nro.nro_online.services.func.SummonDragon.ICE_SHENRON_SAY;
-import static com.nro.nro_online.services.func.SummonDragon.ICE_SHENRON_WISHES;
-import static com.nro.nro_online.services.func.SummonDragon.SHENRON_1_STAR_WISHES_1;
-import static com.nro.nro_online.services.func.SummonDragon.SHENRON_1_STAR_WISHES_2;
-import static com.nro.nro_online.services.func.SummonDragon.SHENRON_SAY;
-import static nro.server.Manager.*;
-import static nro.services.func.SummonDragon.*;
+import static com.nro.nro_online.server.Manager.*;
+import static com.nro.nro_online.services.func.SummonDragon.*;
 
 import com.nro.nro_online.consts.ConstNpc;
 import com.nro.nro_online.dialog.ConfirmDialog;
 import com.nro.nro_online.dialog.MenuDialog;
+import com.nro.nro_online.models.boss.BossFactory;
 import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.npc.NpcForge.GhiDanh;
 import com.nro.nro_online.models.npc.NpcForge.NoiBanh;
+import com.nro.nro_online.models.npc.NpcForge.QuyLaoKame;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Maintenance;
+import com.nro.nro_online.services.ClanService;
 import com.nro.nro_online.services.InventoryService;
 import com.nro.nro_online.services.ItemService;
 import com.nro.nro_online.services.NpcService;
 import com.nro.nro_online.services.PetService;
 import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.services.func.Input;
 import com.nro.nro_online.services.func.SummonDragon;
 import com.nro.nro_online.utils.Log;
-import nro.attr.AttributeManager;
-import nro.consts.*;
-import nro.dialog.ConfirmDialog;
-import nro.dialog.MenuDialog;
-import nro.jdbc.daos.PlayerDAO;
-import nro.models.boss.BossFactory;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.map.Zone;
-import nro.models.map.mabu.MabuWar;
-import nro.models.npc.NpcForge.*;
-import nro.models.player.Player;
-import nro.server.Maintenance;
-import nro.server.Manager;
-import nro.server.ServerManager;
-import nro.services.*;
-import nro.services.func.*;
-import nro.utils.Log;
-import nro.utils.TimeUtil;
-import nro.utils.Util;
+import com.nro.nro_online.attr.AttributeManager;
+import com.nro.nro_online.consts.*;
+import com.nro.nro_online.jdbc.daos.PlayerDAO;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.map.mabu.MabuWar;
+import com.nro.nro_online.models.npc.NpcForge.*;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.server.ServerManager;
+import com.nro.nro_online.services.*;
+import com.nro.nro_online.services.func.*;
+import com.nro.nro_online.utils.TimeUtil;
+import com.nro.nro_online.utils.Util;
 
-/**
- * @stole Arriety
- */
 public class NpcFactory {
 
     // playerid - object
@@ -708,7 +697,7 @@ public class NpcFactory {
                     case ConstNpc.CONFIRM_REMOVE_ALL_ITEM_LUCKY_ROUND:
                         if (select == 0) {
                             for (int i = 0; i < player.inventory.itemsBoxCrackBall.size(); i++) {
-                                player.inventory.itemsBoxCrackBall.set(i, ItemService.gI().createItemNull());
+                                player.inventory.itemsBoxCrackBall.set(i, ItemService.gI().createNullItem());
                             }
                             Service.getInstance().sendThongBao(player, "Đã xóa hết vật phẩm trong rương");
                         }

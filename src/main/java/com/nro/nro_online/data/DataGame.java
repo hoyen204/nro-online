@@ -6,9 +6,21 @@ import java.util.List;
 import java.util.Map;
 
 import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.PartManager;
 import com.nro.nro_online.models.item.HeadAvatar;
+import com.nro.nro_online.models.map.MapTemplate;
+import com.nro.nro_online.models.mob.MobTemplate;
+import com.nro.nro_online.models.npc.NpcTemplate;
+import com.nro.nro_online.models.skill.NClass;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.models.skill.SkillTemplate;
+import com.nro.nro_online.power.Caption;
+import com.nro.nro_online.power.CaptionManager;
+import com.nro.nro_online.resources.Resources;
+import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.server.io.Session;
+import com.nro.nro_online.services.Service;
 import com.nro.nro_online.utils.FileIO;
 import com.nro.nro_online.utils.Log;
 
@@ -45,9 +57,11 @@ public class DataGame {
             msg.writer().writeByte(0);
             List<Caption> captions = CaptionManager.getInstance().getCaptions();
             msg.writer().writeByte(captions.size());
-            captions.forEach(c -> msg.writer().writeLong(c.getPower()));
+            for(Caption caption : captions) {
+                msg.writer().writeLong(caption.getPower());
+            }
             session.sendMessage(msg);
-        } catch (Exception e) {
+        } catch (IOException e) {
             Log.error(DataGame.class, e);
         }
     }

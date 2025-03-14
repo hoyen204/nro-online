@@ -15,6 +15,7 @@ import com.nro.nro_online.attr.Attribute;
 import com.nro.nro_online.attr.AttributeManager;
 import com.nro.nro_online.consts.ConstItem;
 import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.data.DataGame;
 import com.nro.nro_online.event.Event;
 import com.nro.nro_online.jdbc.DBService;
@@ -31,9 +32,11 @@ import com.nro.nro_online.models.item.ItemLuckyRound;
 import com.nro.nro_online.models.item.ItemOptionTemplate;
 import com.nro.nro_online.models.item.ItemReward;
 import com.nro.nro_online.models.item.ItemTemplate;
+import com.nro.nro_online.models.map.EffectMap;
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.MapTemplate;
 import com.nro.nro_online.models.map.SantaCity;
+import com.nro.nro_online.models.map.WayPoint;
 import com.nro.nro_online.models.mob.MobReward;
 import com.nro.nro_online.models.mob.MobTemplate;
 import com.nro.nro_online.models.npc.Npc;
@@ -42,6 +45,8 @@ import com.nro.nro_online.models.npc.NpcTemplate;
 import com.nro.nro_online.models.player.Referee;
 import com.nro.nro_online.models.shop.Shop;
 import com.nro.nro_online.models.skill.NClass;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.models.skill.SkillTemplate;
 import com.nro.nro_online.models.task.SideTaskTemplate;
 import com.nro.nro_online.models.task.TaskMain;
 import com.nro.nro_online.services.MapService;
@@ -163,7 +168,7 @@ public class Manager {
     }
 
     private void initMap() {
-        int[][] tileTyleTop = readTileIndexTileType(ConstMap.TILE_TOP);
+        int[][] tileTyleTop = readTileIndexTileType();
         for (MapTemplate mapTemp : MAP_TEMPLATES) {
             int[][] tileMap = readTileMap(mapTemp.id);
             int[] tileTop = tileTyleTop[mapTemp.tileId - 1];
@@ -855,47 +860,77 @@ public class Manager {
         DOMAIN = properties.getProperty("server.domain", "localhost");
     }
 
-    private int[][] readTileIndexTileType(int tileTypeFocus) {
-        int[][] tileIndexTileType = null;
+    private int[][] readTileIndexTileType() {
         try (DataInputStream dis = new DataInputStream(new FileInputStream("resources/data/nro/map/tile_set_info"))) {
-            int numTileMap = dis.readByte();
-            tileIndexTileType = new int[numTileMap][];
+            int numTileMap = dis.readByte() & 0xFF;  // Convert to unsigned
+            if (numTileMap <= 0) {
+                throw new IllegalStateException("Invalid number of tile maps: " + numTileMap);
+            }
+
+            int[][] tileIndexTileType = new int[numTileMap][];
             for (int i = 0; i < numTileMap; i++) {
-                int numTileOfMap = dis.readByte();
+                int numTileOfMap = dis.readByte() & 0xFF;
                 for (int j = 0; j < numTileOfMap; j++) {
                     int tileType = dis.readInt();
-                    int numIndex = dis.readByte();
-                    if (tileType == tileTypeFocus) {
+                    int numIndex = dis.readByte() & 0xFF;
+
+                    if (tileType == ConstMap.TILE_TOP) {
+                        if (numIndex <= 0) continue;
                         tileIndexTileType[i] = new int[numIndex];
-                    }
-                    for (int k = 0; k < numIndex; k++) {
-                        int typeIndex = dis.readByte();
-                        if (tileType == tileTypeFocus) {
-                            tileIndexTileType[i][k] = typeIndex;
+                        for (int k = 0; k < numIndex; k++) {
+                            tileIndexTileType[i][k] = dis.readByte() & 0xFF;
                         }
                     }
                 }
             }
-        } catch (Exception e) {
-            Log.error(MapService.class, e);
+            return tileIndexTileType;
+        } catch (IOException e) {
+            Log.error(MapService.class, e, "Failed to read tile set info");
+            return new int[][]{};
         }
-        return tileIndexTileType;
     }
 
     private int[][] readTileMap(int mapId) {
-        int[][] tileMap = null;
-        try (DataInputStream dis = new DataInputStream(new FileInputStream("resources/map/" + mapId))) {
-            int w = dis.readByte();
-            int h = dis.readByte();
-            tileMap = new int[h][w];
-            for (int i = 0; i < h; i++) {
-                for (int j = 0; j < w; j++) {
-                    tileMap[i][j] = dis.readByte();
+        String filePath = "resources/map/" + mapId;
+        int[][] tileMap = new int[0][0];
+
+        try (DataInputStream dis = new DataInputStream(
+                new BufferedInputStream(
+                        new FileInputStream(filePath)))) {
+            // Read dimensions as unsigned bytes
+            int height = dis.readUnsignedByte();
+            int width = dis.readUnsignedByte();
+
+            // Validate dimensions
+            if (height == 0 || width == 0) {
+                Log.error("Empty map dimensions for ID " + mapId + ": " + width + "x" + height);
+                return tileMap;
+            }
+
+            tileMap = new int[height][width];
+
+            int totalBytes = height * width;
+            byte[] buffer = new byte[totalBytes];
+            int bytesRead = dis.read(buffer);
+
+            if (bytesRead != totalBytes) {
+                throw new IOException("Incomplete map data: expected " + totalBytes +
+                        " bytes, got " + bytesRead);
+            }
+
+            for (int i = 0; i < height; i++) {
+                int rowOffset = i * width;
+                for (int j = 0; j < width; j++) {
+                    tileMap[i][j] = buffer[rowOffset + j] & 0xFF;
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        } catch (FileNotFoundException e) {
+            Log.error("Map file not found: " + filePath);
+        } catch (IOException e) {
+           Log.error("Error reading map " + mapId + ": " + e.getMessage());
         }
+
         return tileMap;
     }
 

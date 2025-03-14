@@ -19,11 +19,14 @@ import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.power.CaptionManager;
 import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.EffectSkillService;
 import com.nro.nro_online.services.InventoryService;
 import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.services.PlayerService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.services.TaskService;
+import com.nro.nro_online.services.func.ChangeMapService;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -924,7 +927,7 @@ public class Zone {
             }
         }
         if (zoneJoin != null) {
-            ChangeMapService.gI().changeMap(player, zoneJoin, -1, -1, xGo, yGo, NON_SPACE_SHIP);
+            ChangeMapService.gI().changeMap(player, zoneJoin, -1, -1, xGo, yGo, ChangeMapService.NON_SPACE_SHIP);
         } else {
             int x = player.location.x;
             if (player.location.x >= map.mapWidth - 60) {

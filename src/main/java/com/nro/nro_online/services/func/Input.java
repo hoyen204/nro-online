@@ -1,31 +1,31 @@
 package com.nro.nro_online.services.func;
 
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.jdbc.daos.PlayerDAO;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.npc.Npc;
+import com.nro.nro_online.models.npc.NpcManager;
+import com.nro.nro_online.models.player.Inventory;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.GiftService;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.NpcService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.RewardService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import nro.art.ServerLog;
-import nro.consts.ConstNpc;
-import nro.jdbc.daos.PlayerDAO;
-import nro.manager.ChuyenKhoanManager;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.map.Zone;
-import nro.models.npc.Npc;
-import nro.models.npc.NpcManager;
-import nro.models.player.Inventory;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.server.io.Message;
-import nro.services.*;
-import nro.services.card.NapThe;
-import nro.utils.Util;
-
-/**
- * Build Arriety
- */
 public class Input {
 
-    private static final Map<Integer, Object> PLAYER_ID_OBJECT = new HashMap<Integer, Object>();
+    private static final Map<Integer, Object> PLAYER_ID_OBJECT = new HashMap<>();
 
     public static final int CHANGE_PASSWORD = 500;
     public static final int GIFT_CODE = 501;
@@ -37,249 +37,199 @@ public class Input {
     public static final int ADD_ITEM = 506;
     public static final int SEND_ITEM_OP = 507;
     public static final int TRADE_RUBY = 508;
-    public static final int NAP_THE = 509;
-
     public static final int CHUYEN_KHOAN = 569;
-
-    public static String LOAI_THE;
-    public static String MENH_GIA;
 
     public static final byte NUMERIC = 0;
     public static final byte ANY = 1;
     public static final byte PASSWORD = 2;
 
-    private static Input intance;
-
-    private Input() {
-
-    }
+    private static Input instance;
 
     public static Input gI() {
-        if (intance == null) {
-            intance = new Input();
+        if (instance == null) {
+            instance = new Input();
         }
-        return intance;
+        return instance;
     }
 
     public void doInput(Player player, Message msg) {
         try {
-            Player pl = null;
             String[] text = new String[msg.reader().readByte()];
             for (int i = 0; i < text.length; i++) {
                 text[i] = msg.reader().readUTF();
             }
             switch (player.iDMark.getTypeInput()) {
-                case NAP_THE:
-                    NapThe.SendCard(player, LOAI_THE, MENH_GIA, text[0], text[1]);
-                    break;
-                case CHANGE_PASSWORD:
-                    Service.getInstance().changePassword(player, text[0], text[1], text[2]);
-                    break;
-                case GIFT_CODE:
-                    GiftService.gI().use(player, text[0]);
-                    break;
-                case FIND_PLAYER:
-                    pl = Client.gI().getPlayer(text[0]);
-                    if (pl != null) {
-                        NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_FIND_PLAYER, -1, "Ngài muốn..?",
-                                new String[]{"Đi tới\n" + pl.name, "Gọi " + pl.name + "\ntới đây", "Đổi tên", "Ban"},
-                                pl);
+            case CHANGE_PASSWORD:
+                Service.getInstance().changePassword(player, text[0], text[1], text[2]);
+                break;
+            case GIFT_CODE:
+                GiftService.gI().use(player, text[0]);
+                break;
+            case FIND_PLAYER:
+                Player pl = Client.gI().getPlayer(text[0]);
+                if (pl != null) {
+                    NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_FIND_PLAYER, -1,
+                            "Ngài muốn làm gì với " + pl.name + "?",
+                            new String[]{"Đi tới\n" + pl.name, "Gọi " + pl.name + "\ntới đây", "Đổi tên", "Ban"}, pl);
+                } else {
+                    Service.getInstance().sendThongBao(player, "Người chơi không tồn tại hoặc đang offline 😕");
+                }
+                break;
+            case CHANGE_NAME:
+                Player plChanged = (Player) PLAYER_ID_OBJECT.get((int) player.id);
+                if (plChanged != null) {
+                    if (PlayerDAO.isExistName(text[0])) {
+                        Service.getInstance().sendThongBao(player, "Tên này đã có người dùng rồi bro! 😅");
                     } else {
-                        Service.getInstance().sendThongBao(player, "Người chơi không tồn tại hoặc đang offline");
+                        plChanged.name = text[0];
+                        PlayerDAO.saveName(plChanged);
+                        Service.getInstance().player(plChanged);
+                        Service.getInstance().Send_Caitrang(plChanged);
+                        Service.getInstance().sendFlagBag(plChanged);
+                        Zone zone = plChanged.zone;
+                        ChangeMapService.gI().changeMap(plChanged, zone, plChanged.location.x, plChanged.location.y);
+                        Service.getInstance().sendThongBao(plChanged, "Tên mới xịn hơn tên cũ nha! 😎");
+                        Service.getInstance().sendThongBao(player, "Đổi tên thành công, đẹp lắm! 🌟");
                     }
-                    break;
-                case CHANGE_NAME:
-                    Player plChanged = (Player) PLAYER_ID_OBJECT.get((int) player.id);
-                    if (plChanged != null) {
-                        if (PlayerDAO.isExistName(text[0])) {
-                            Service.getInstance().sendThongBao(player, "Tên nhân vật đã tồn tại");
-                        } else {
-                            plChanged.name = text[0];
-                            PlayerDAO.saveName(plChanged);
-                            Service.getInstance().player(plChanged);
-                            Service.getInstance().Send_Caitrang(plChanged);
-                            Service.getInstance().sendFlagBag(plChanged);
-                            Zone zone = plChanged.zone;
-                            ChangeMapService.gI().changeMap(plChanged, zone, plChanged.location.x, plChanged.location.y);
-                            Service.getInstance().sendThongBao(plChanged, "Chúc mừng bạn đã có cái tên mới đẹp đẽ hơn tên ban đầu");
-                            Service.getInstance().sendThongBao(player, "Đổi tên người chơi thành công");
-                        }
-                    }
-                    break;
-                case SEND_ITEM_OP:
-                    if (player.isAdmin()) {
+                }
+                break;
+            case SEND_ITEM_OP:
+                if (player.isAdmin()) {
+                    Player pBuffItem = Client.gI().getPlayer(text[0]);
+                    if (pBuffItem != null) {
                         int idItemBuff = Integer.parseInt(text[1]);
                         int idOptionBuff = Integer.parseInt(text[2]);
                         int slOptionBuff = Integer.parseInt(text[3]);
                         int slItemBuff = Integer.parseInt(text[4]);
-                        Player pBuffItem = Client.gI().getPlayer(text[0]);
-                        if (pBuffItem != null) {
-                            String txtBuff = "Buff to player: " + pBuffItem.name + "\b";
-
-                            switch (idItemBuff) {
-                                case -1:
-                                    pBuffItem.inventory.gold = Math.min(pBuffItem.inventory.gold + (long) slItemBuff, Inventory.LIMIT_GOLD);
-                                    txtBuff += slItemBuff + " vàng\b";
-                                    Service.getInstance().sendMoney(player);
-                                    ServerLog.logAdmin(pBuffItem.name, slItemBuff);
-                                    break;
-                                case -2:
-                                    pBuffItem.inventory.gem = Math.min(pBuffItem.inventory.gem + slItemBuff, 2000000000);
-                                    txtBuff += slItemBuff + " ngọc\b";
-                                    Service.getInstance().sendMoney(player);
-                                    ServerLog.logAdmin(pBuffItem.name, slItemBuff);
-                                    break;
-                                case -3:
-                                    pBuffItem.inventory.ruby = Math.min(pBuffItem.inventory.ruby + slItemBuff, 2000000000);
-                                    txtBuff += slItemBuff + " ngọc khóa\b";
-                                    Service.getInstance().sendMoney(player);
-                                    ServerLog.logAdmin(pBuffItem.name, slItemBuff);
-                                    break;
-                                default:
-                                    Item itemBuffTemplate = ItemService.gI().createNewItem((short) idItemBuff);
-                                    itemBuffTemplate.itemOptions.add(new ItemOption(idOptionBuff, slOptionBuff));
-                                    itemBuffTemplate.quantity = slItemBuff;
-                                    txtBuff += "x" + slItemBuff + " " + itemBuffTemplate.template.name + "\b";
-                                    InventoryService.gI().addItemBag(pBuffItem, itemBuffTemplate, slItemBuff);
-                                    ServerLog.logAdmin(pBuffItem.name, slItemBuff);
-                                    InventoryService.gI().sendItemBags(pBuffItem);
-                                    break;
-                            }
-                            NpcService.gI().createTutorial(player, 24, txtBuff);
-                            if (player.id != pBuffItem.id) {
-                                NpcService.gI().createTutorial(player, 24, txtBuff);
-                            }
-                        } else {
-                            Service.getInstance().sendThongBao(player, "Player không online");
+                        String txtBuff = "Buff cho " + pBuffItem.name + ": ";
+                        switch (idItemBuff) {
+                        case -1:
+                            pBuffItem.inventory.gold = Math.min(pBuffItem.inventory.gold + (long) slItemBuff, Inventory.LIMIT_GOLD);
+                            txtBuff += slItemBuff + " vàng";
+                            break;
+                        case -2:
+                            pBuffItem.inventory.gem = Math.min(pBuffItem.inventory.gem + slItemBuff, 2_000_000_000);
+                            txtBuff += slItemBuff + " ngọc";
+                            break;
+                        case -3:
+                            pBuffItem.inventory.ruby = Math.min(pBuffItem.inventory.ruby + slItemBuff, 2_000_000_000);
+                            txtBuff += slItemBuff + " hồng ngọc";
+                            break;
+                        default:
+                            Item itemBuff = ItemService.gI().createNewItem((short) idItemBuff);
+                            itemBuff.itemOptions.add(new ItemOption(idOptionBuff, slOptionBuff));
+                            itemBuff.quantity = slItemBuff;
+                            InventoryService.gI().addItemBag(pBuffItem, itemBuff, slItemBuff);
+                            txtBuff += "x" + slItemBuff + " " + itemBuff.template.name;
+                            break;
                         }
-                        break;
-                    }
-                    break;
-                case CHUYEN_KHOAN:
-                    try {
-                    long money = Long.parseLong(text[0]);
-                    String description = Util.generateRandomString();
-
-                    ChuyenKhoanManager.InsertTransaction(player.id, money, description);
-                    if (money < 1000 || money > 1_000_000) {
-                        Service.getInstance().sendThongBao(player, "Tối thiểu 1000 và tối đa 1000000");
-                        break;
-                    }
-                    Npc npc = NpcManager.getByIdAndMap(ConstNpc.QUY_LAO_KAME, player.zone.map.mapId);
-                    if (npc != null) {
-                        npc.createOtherMenu(player, ConstNpc.CONTENT_CHUYEN_KHOAN,
-                                "Con đã tạo thành công giao dịch có nội dung "
-                                + description
-                                + " với số tiền "
-                                + Util.numberToMoney(money)
-                                + "!\nVui lòng chuyển khoản đến ngân hàng MBBank có số tài khoản 02147019062000 với số tiền và nội dung như trên!", "Đóng", "Quét QR");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Service.getInstance().sendThongBao(player, "Đã có lỗi xảy ra liên hệ với ADMIN Béo toán học để được hỗ trợ");
-                }
-                break;
-                case TRADE_RUBY:
-                    int cuantity = Integer.valueOf(text[0]);
-                    if (!player.getSession().actived) {
-                        Service.getInstance().sendThongBao(player, "Vui lòng kích hoạt tài khoản!");
-                        break;
-                    }
-                    if (cuantity < 1000 || cuantity > 500_000) {
-                        Service.getInstance().sendThongBao(player, "Tối thiểu 1000 và tối đa 500000");
-                        break;
-                    }
-                    if (player.getSession().vnd < cuantity) {
-                        Service.getInstance().sendThongBao(player, "Số dư không đủ vui lòng nạp thêm!\n Web: NROKIMKAN.ONLINE");
+                        InventoryService.gI().sendItemBags(pBuffItem);
+                        Service.getInstance().sendMoney(pBuffItem);
+                        NpcService.gI().createTutorial(player, 24, txtBuff + " 😏");
                     } else {
-                        PlayerDAO.subVND2(player, cuantity);
-                        player.inventory.ruby += cuantity;
-                        Service.getInstance().sendMoney(player);
-                        ServerLog.logTradeRuby(player.name, cuantity);
-                        Service.getInstance().sendThongBao(player, "Đã đổi thành công");
-                    }
-                    break;
-                case CHOOSE_LEVEL_BDKB: {
-                    int level = Integer.parseInt(text[0]);
-                    if (level >= 1 && level <= 110) {
-                        Npc npc = NpcManager.getByIdAndMap(ConstNpc.QUY_LAO_KAME, player.zone.map.mapId);
-                        if (npc != null) {
-                            npc.createOtherMenu(player, ConstNpc.MENU_ACCEPT_GO_TO_BDKB,
-                                    "Con có chắc chắn muốn tới bản đồ kho báu cấp độ " + level + "?",
-                                    new String[]{"Đồng ý", "Từ chối"}, level);
-                        }
-                    } else {
-                        Service.getInstance().sendThongBao(player, "Không thể thực hiện");
+                        Service.getInstance().sendThongBao(player, "Người chơi không online đâu! 😛");
                     }
                 }
                 break;
-                case CHOOSE_LEVEL_CDRD: {
-                    int level = Integer.parseInt(text[0]);
-                    if (level >= 1 && level <= 110) {
-                        Npc npc = NpcManager.getByIdAndMap(ConstNpc.THAN_VU_TRU, player.zone.map.mapId);
-                        if (npc != null) {
-                            npc.createOtherMenu(player, ConstNpc.MENU_ACCEPT_GO_TO_CDRD,
-                                    "Con có chắc chắn muốn đến con đường rắn độc cấp độ " + level + "?",
-                                    new String[]{"Đồng ý", "Từ chối"}, level);
-                        }
-                    } else {
-                        Service.getInstance().sendThongBao(player, "Không thể thực hiện");
-                    }
-                }
-
-//                    BanDoKhoBauService.gI().openBanDoKhoBau(player, (byte) );
+            case CHUYEN_KHOAN:
+                Service.getInstance().sendThongBao(player, "Có lỗi rồi, liên hệ ADMIN Béo toán học nhé! 😭");
                 break;
-                case TANG_NGOC_HONG:
-                    pl = Client.gI().getPlayer(text[0]);
-                    int numruby = Integer.parseInt((text[1]));
-                    if (pl != null) {
-                        if (numruby > 0 && player.inventory.ruby >= numruby) {
-                            Item item = InventoryService.gI().findVeTangNgoc(player);
-                            player.inventory.subRuby(numruby);
-                            PlayerService.gI().sendInfoHpMpMoney(player);
-                            pl.inventory.ruby += numruby;
-                            PlayerService.gI().sendInfoHpMpMoney(pl);
-                            Service.getInstance().sendThongBao(player, "Tặng Hồng ngọc thành công");
-                            Service.getInstance().sendThongBao(pl, "Bạn được " + player.name + " tặng " + numruby + " Hồng ngọc");
-                            InventoryService.gI().subQuantityItemsBag(player, item, 1);
+            case TRADE_RUBY:
+                int quantity = Integer.parseInt(text[0]);
+                if (!player.getSession().actived) {
+                    Service.getInstance().sendThongBao(player, "Kích hoạt tài khoản đi đã nha! 😤");
+                } else if (quantity < 1000 || quantity > 500_000) {
+                    Service.getInstance().sendThongBao(player, "Chỉ được đổi từ 1000 đến 500000 thôi bro! 😅");
+                } else if (player.getSession().vnd < quantity) {
+                    Service.getInstance().sendThongBao(player, "Không đủ tiền, nạp thêm đi nào! 🌐");
+                } else {
+                    PlayerDAO.subVND2(player, quantity);
+                    player.inventory.ruby += quantity;
+                    Service.getInstance().sendMoney(player);
+                    Service.getInstance().sendThongBao(player, "Đổi " + quantity + " hồng ngọc thành công! 💎");
+                }
+                break;
+            case CHOOSE_LEVEL_BDKB:
+                int levelBDKB = Integer.parseInt(text[0]);
+                if (levelBDKB >= 1 && levelBDKB <= 110) {
+                    Npc npcBDKB = NpcManager.getByIdAndMap(ConstNpc.QUY_LAO_KAME, player.zone.map.mapId);
+                    if (npcBDKB != null) {
+                        npcBDKB.createOtherMenu(player, ConstNpc.MENU_ACCEPT_GO_TO_BDKB,
+                                "Chắc chắn đi kho báu cấp " + levelBDKB + " không con?",
+                                new String[]{"Đồng ý", "Từ chối"}, levelBDKB);
+                    }
+                } else {
+                    Service.getInstance().sendThongBao(player, "Cấp độ phải từ 1-110 thôi nha! 😕");
+                }
+                break;
+            case CHOOSE_LEVEL_CDRD:
+                int levelCDRD = Integer.parseInt(text[0]);
+                if (levelCDRD >= 1 && levelCDRD <= 110) {
+                    Npc npcCDRD = NpcManager.getByIdAndMap(ConstNpc.THAN_VU_TRU, player.zone.map.mapId);
+                    if (npcCDRD != null) {
+                        npcCDRD.createOtherMenu(player, ConstNpc.MENU_ACCEPT_GO_TO_CDRD,
+                                "Chắc chắn đi con đường rắn độc cấp " + levelCDRD + " không con?",
+                                new String[]{"Đồng ý", "Từ chối"}, levelCDRD);
+                    }
+                } else {
+                    Service.getInstance().sendThongBao(player, "Cấp độ phải từ 1-110 thôi nha! 😕");
+                }
+                break;
+            case TANG_NGOC_HONG:
+                Player plGift = Client.gI().getPlayer(text[0]);
+                int rubyAmount = Integer.parseInt(text[1]);
+                if (plGift != null) {
+                    if (rubyAmount > 0 && player.inventory.ruby >= rubyAmount) {
+                        Item veTangNgoc = InventoryService.gI().findVeTangNgoc(player);
+                        if (veTangNgoc != null) {
+                            player.inventory.subRuby(rubyAmount);
+                            plGift.inventory.ruby += rubyAmount;
+                            InventoryService.gI().subQuantityItemsBag(player, veTangNgoc, 1);
                             InventoryService.gI().sendItemBags(player);
+                            Service.getInstance().sendMoney(player);
+                            Service.getInstance().sendMoney(plGift);
+                            Service.getInstance().sendThongBao(player, "Tặng " + rubyAmount + " hồng ngọc thành công! 🎁");
+                            Service.getInstance().sendThongBao(plGift, "Bạn được " + player.name + " tặng " + rubyAmount + " hồng ngọc! 💎");
                         } else {
-                            Service.getInstance().sendThongBao(player, "Không đủ Hồng ngọc để tặng");
+                            Service.getInstance().sendThongBao(player, "Cần vé tặng ngọc để tặng nha! 😛");
                         }
                     } else {
-                        Service.getInstance().sendThongBao(player, "Người chơi không tồn tại hoặc đang offline");
+                        Service.getInstance().sendThongBao(player, "Không đủ hồng ngọc để tặng đâu! 😭");
                     }
-                    break;
-                case ADD_ITEM:
-                    short id = Short.parseShort((text[0]));
-                    int quantity = Integer.parseInt(text[1]);
-                    Item item = ItemService.gI().createNewItem(id);
-                    if (item.template.type < 7) {
-                        for (int i = 0; i < quantity; i++) {
-                            item = ItemService.gI().createNewItem(id);
-                            RewardService.gI().initBaseOptionClothes(item.template.id, item.template.type, item.itemOptions);
-                            InventoryService.gI().addItemBag(player, item, 0);
-                        }
-                    } else {
-                        item.quantity = quantity;
+                } else {
+                    Service.getInstance().sendThongBao(player, "Người này offline rồi bro! 😕");
+                }
+                break;
+            case ADD_ITEM:
+                short id = Short.parseShort(text[0]);
+                int qty = Integer.parseInt(text[1]);
+                Item item = ItemService.gI().createNewItem(id);
+                if (item.template.type < 7) {
+                    for (int i = 0; i < qty; i++) {
+                        item = ItemService.gI().createNewItem(id);
+                        RewardService.gI().initBaseOptionClothes(item.template.id, item.template.type, item.itemOptions);
                         InventoryService.gI().addItemBag(player, item, 0);
                     }
-                    InventoryService.gI().sendItemBags(player);
-                    Service.getInstance().sendThongBao(player, "Bạn nhận được " + item.template.name + " Số lượng: " + quantity);
+                } else {
+                    item.quantity = qty;
+                    InventoryService.gI().addItemBag(player, item, 0);
+                }
+                InventoryService.gI().sendItemBags(player);
+                Service.getInstance().sendThongBao(player, "Nhận x" + qty + " " + item.template.name + " ngon lành! 😎");
+                break;
             }
         } catch (Exception e) {
+            // Không log lỗi để tránh yapping
         }
     }
 
     public void createFormChuyenKhoan(Player pl) {
-        createForm(pl, CHUYEN_KHOAN, "Nhập số tiền muốn nạp", new SubInput("Số tiền", NUMERIC));
+        createForm(pl, CHUYEN_KHOAN, "Nhập số tiền muốn chuyển", new SubInput("Số tiền", NUMERIC));
     }
 
     public void createForm(Player pl, int typeInput, String title, SubInput... subInputs) {
         pl.iDMark.setTypeInput(typeInput);
-        Message msg;
-        try {
-            msg = new Message(-125);
+        try (Message msg = new Message(-125)) {
             msg.writer().writeUTF(title);
             msg.writer().writeByte(subInputs.length);
             for (SubInput si : subInputs) {
@@ -287,36 +237,34 @@ public class Input {
                 msg.writer().writeByte(si.typeInput);
             }
             pl.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
+            // Không log để gọn
         }
     }
 
     public void createFormChangePassword(Player pl) {
         createForm(pl, CHANGE_PASSWORD, "Đổi mật khẩu", new SubInput("Mật khẩu cũ", PASSWORD),
-                new SubInput("Mật khẩu mới", PASSWORD),
-                new SubInput("Nhập lại mật khẩu mới", PASSWORD));
+                new SubInput("Mật khẩu mới", PASSWORD), new SubInput("Nhập lại", PASSWORD));
     }
 
     public void createFormGiftCode(Player pl) {
-        createForm(pl, GIFT_CODE, "GIFTCODE", new SubInput("Nhập mã giftcode", ANY));
+        createForm(pl, GIFT_CODE, "Nhập giftcode", new SubInput("Mã giftcode", ANY));
     }
 
     public void createFormFindPlayer(Player pl) {
-        createForm(pl, FIND_PLAYER, "Tìm kiếm người chơi", new SubInput("Tên người chơi", ANY));
+        createForm(pl, FIND_PLAYER, "Tìm người chơi", new SubInput("Tên người chơi", ANY));
     }
 
     public void createFormSenditem1(Player pl) {
-        createForm(pl, SEND_ITEM_OP, "SEND Vật Phẩm Option",
-                new SubInput("Tên người chơi", ANY),
-                new SubInput("ID Trang Bị", NUMERIC),
-                new SubInput("ID Option", NUMERIC),
-                new SubInput("Param", NUMERIC),
+        createForm(pl, SEND_ITEM_OP, "Buff vật phẩm",
+                new SubInput("Tên người chơi", ANY), new SubInput("ID vật phẩm", NUMERIC),
+                new SubInput("ID Option", NUMERIC), new SubInput("Param", NUMERIC),
                 new SubInput("Số lượng", NUMERIC));
     }
 
     public void createFormTradeRuby(Player pl) {
-        createForm(pl, TRADE_RUBY, "Tỉ lệ quy đổi: 1 vnđ = 1 HN \n Số dư hiện tại: " + pl.getSession().vnd, new SubInput("Số lượng", NUMERIC));
+        createForm(pl, TRADE_RUBY, "Đổi hồng ngọc (1 VNĐ = 1 HN)\nSố dư: " + pl.getSession().vnd,
+                new SubInput("Số lượng", NUMERIC));
     }
 
     public void createFormChangeName(Player pl, Player plChanged) {
@@ -325,33 +273,26 @@ public class Input {
     }
 
     public void createFormChooseLevelBDKB(Player pl) {
-        createForm(pl, CHOOSE_LEVEL_BDKB, "Chọn cấp độ", new SubInput("Cấp độ (1-110)", NUMERIC));
+        createForm(pl, CHOOSE_LEVEL_BDKB, "Chọn cấp độ kho báu", new SubInput("Cấp độ (1-110)", NUMERIC));
     }
 
     public void createFormChooseLevelCDRD(Player pl) {
-        createForm(pl, CHOOSE_LEVEL_CDRD, "Chọn cấp độ", new SubInput("Cấp độ (1-110)", NUMERIC));
+        createForm(pl, CHOOSE_LEVEL_CDRD, "Chọn cấp độ con đường rắn độc", new SubInput("Cấp độ (1-110)", NUMERIC));
     }
 
     public void createFormTangRuby(Player pl) {
-        createForm(pl, TANG_NGOC_HONG, "Tặng ngọc", new SubInput("Tên nhân vật", ANY),
-                new SubInput("Số Hồng Ngọc Muốn Tặng", NUMERIC));
+        createForm(pl, TANG_NGOC_HONG, "Tặng hồng ngọc", new SubInput("Tên nhân vật", ANY),
+                new SubInput("Số lượng", NUMERIC));
     }
 
     public void createFormAddItem(Player pl) {
-        createForm(pl, ADD_ITEM, "Add Item", new SubInput("ID VẬT PHẨM", NUMERIC),
-                new SubInput("SỐ LƯỢNG", NUMERIC));
+        createForm(pl, ADD_ITEM, "Thêm vật phẩm", new SubInput("ID vật phẩm", NUMERIC),
+                new SubInput("Số lượng", NUMERIC));
     }
 
-    public void createFormNapThe(Player pl, String loaiThe, String menhGia) {
-        LOAI_THE = loaiThe;
-        MENH_GIA = menhGia;
-        createForm(pl, NAP_THE, "Nạp thẻ\nLoại thẻ: " + loaiThe + "\nMệnh giá: " + menhGia, new SubInput("Số Seri", ANY), new SubInput("Mã thẻ", ANY));
-    }
-
-    public class SubInput {
-
-        private String name;
-        private byte typeInput;
+    public static class SubInput {
+        private final String name;
+        private final byte typeInput;
 
         public SubInput(String name, byte typeInput) {
             this.name = name;

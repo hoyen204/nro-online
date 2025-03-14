@@ -300,35 +300,35 @@ public class ServerManager {
             }
         }, "Update giai sieu hang pending").start();
 
-        new Thread(() -> {
-            while (isRunning) {
-                try {
-                    long start = System.currentTimeMillis();
-                    ChuyenKhoanManager.HandleTransactionAuto();
-                    long timeUpdate = System.currentTimeMillis() - start;
-                    if (timeUpdate < delaySecond) {
-                        Thread.sleep(delaySecond - timeUpdate);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, "Check nap the").start();
+//        new Thread(() -> {
+//            while (isRunning) {
+//                try {
+//                    long start = System.currentTimeMillis();
+//                    ChuyenKhoanManager.HandleTransactionAuto();
+//                    long timeUpdate = System.currentTimeMillis() - start;
+//                    if (timeUpdate < delaySecond) {
+//                        Thread.sleep(delaySecond - timeUpdate);
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }, "Check nap the").start();
         //
-        new Thread(() -> {
-            while (isRunning) {
-                try {
-                    long start = System.currentTimeMillis();
-                    ChuyenKhoanManager.HandleTransactionAddMoneyAuto();
-                    long timeUpdate = System.currentTimeMillis() - start;
-                    if (timeUpdate < delay) {
-                        Thread.sleep(delay - timeUpdate);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, "Cong qua nap the").start();
+//        new Thread(() -> {
+//            while (isRunning) {
+//                try {
+//                    long start = System.currentTimeMillis();
+//                    ChuyenKhoanManager.HandleTransactionAddMoneyAuto();
+//                    long timeUpdate = System.currentTimeMillis() - start;
+//                    if (timeUpdate < delay) {
+//                        Thread.sleep(delay - timeUpdate);
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }, "Cong qua nap the").start();
     }
 
     public void close(long delay) {

@@ -1,39 +1,35 @@
 package com.nro.nro_online.login;
 
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
+import lombok.Getter;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Vector;
 
-import com.nro.nro_online.server.io.Message;
-import com.nro.nro_online.utils.Log;
-import lombok.Getter;
-
 public class LoginSession {
 
-    @Getter
-    private boolean connected;
+    @Getter private boolean connected;
     private LoginController controller;
-    @Getter
-    private LoginService service;
-    public boolean isStopSend = false;
+    @Getter private LoginService service;
     private DataOutputStream dos;
-    public DataInputStream dis;
-    public Socket sc;
-    public boolean connecting;
+    private DataInputStream dis;
+    private Socket sc;
+    private boolean connecting;
     private final Sender sender = new Sender();
-    public Thread initThread;
-    public Thread collectorThread;
+    private Thread collectorThread;
     public int sendByteCount;
     public int recvByteCount;
-    boolean getKeyComplete;
-    public byte[] key = null;
+    private boolean getKeyComplete;
+    private byte[] key;
     private byte curR, curW;
-    long timeConnected;
+    private long timeConnected;
     public String strRecvByteCount = "";
-    public boolean isCancel;
-    private Vector<Message> sendingMessage;
+    private boolean isCancel;
     private String host;
     private int port;
 
@@ -43,51 +39,47 @@ public class LoginSession {
     }
 
     public void connect(String host, int port) {
-        if (connected || connecting) return;
-        getKeyComplete = false;
-        sc = null;
+        if (connected || connecting) {
+            Log.log("Đã kết nối rồi, chill đi bro! 😛");
+            return;
+        }
         this.host = host;
         this.port = port;
-        initThread = new Thread(new NetworkInit());
-        initThread.start();
+        getKeyComplete = false;
+        new Thread(new NetworkInit()).start();
     }
 
     public void reconnect() {
-        Log.log("Kết nối lại!");
+        Log.log("Reconnect đây, chờ tí nha! 🔄");
         connect(host, port);
     }
 
-    class NetworkInit implements Runnable {
+    private class NetworkInit implements Runnable {
+        @Override
         public void run() {
             isCancel = false;
+            startTimeoutWatcher();
+            connecting = true;
+            try {
+                doConnect();
+                controller.onConnectOK();
+            } catch (IOException e) {
+                handleConnectionFailure();
+            }
+        }
+
+        private void startTimeoutWatcher() {
             new Thread(() -> {
-                try {
-                    Thread.sleep(20000);
-                } catch (InterruptedException e) {}
-                if (connecting) {
-                    try {
-                        if (sc != null) sc.close();
-                    } catch (IOException e) {}
+                Util.sleep(20000);
+                if (connecting && !isCancel) {
+                    closeSocket();
                     isCancel = true;
                     connecting = false;
                     connected = false;
                     controller.onConnectionFail();
+                    Log.warning("Timeout kết nối, chậm quá trời ơi! ⏳");
                 }
             }).start();
-            connecting = true;
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            try {
-                doConnect();
-                controller.onConnectOK();
-            } catch (Exception e) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException ie) {}
-                if (!isCancel && controller != null) {
-                    close();
-                    controller.onConnectionFail();
-                }
-            }
         }
 
         private void doConnect() throws IOException {
@@ -98,163 +90,194 @@ public class LoginSession {
             collectorThread = new Thread(new MessageCollector());
             collectorThread.start();
             timeConnected = System.currentTimeMillis();
-            doSendMessage(new Message(-27));
+            sendMessage(new Message(-27));
             connecting = false;
             connected = true;
+            Log.log("Kết nối server thành công, ngon lành! 🌟");
+        }
+
+        private void handleConnectionFailure() {
+            Util.sleep(500);
+            if (!isCancel) {
+                close();
+                controller.onConnectionFail();
+                Log.error("Kết nối fail, mạng lag hả bro? 🌩️");
+            }
+        }
+
+        private void closeSocket() {
+            try {
+                if (sc != null) sc.close();
+            } catch (IOException e) {
+                Log.error(LoginSession.class, e, "Đóng socket lỗi, khổ ghê! 😵");
+            }
         }
     }
 
     public void sendMessage(Message message) {
-        sender.AddMessage(message);
+        sender.addMessage(message);
     }
 
-    private synchronized void doSendMessage(Message m) throws IOException {
+    private void doSendMessage(Message m) throws IOException {
         byte[] data = m.getData();
-        if (getKeyComplete) {
-            dos.writeByte(writeKey(m.command));
-        } else {
-            dos.writeByte(m.command);
-        }
+        dos.writeByte(getKeyComplete ? writeKey(m.command) : m.command);
         if (data != null) {
             int size = data.length;
-            if (m.command == -31) {
-                dos.writeShort(size);
-            } else if (getKeyComplete) {
-                dos.writeByte(writeKey((byte) (size >> 8)));
-                dos.writeByte(writeKey((byte) (size & 0xFF)));
-            } else {
-                dos.writeShort(size);
-            }
-            if (getKeyComplete) {
-                for (int i = 0; i < data.length; i++) {
-                    data[i] = writeKey(data[i]);
-                }
-            }
+            writeSize(size, m.command == -31);
+            if (getKeyComplete) encryptData(data);
             dos.write(data);
-            sendByteCount += (5 + data.length);
+            sendByteCount += (data.length + 3);
         } else {
             dos.writeShort(0);
-            sendByteCount += 5;
+            sendByteCount += 3;
         }
         dos.flush();
     }
 
+    private void writeSize(int size, boolean isSpecialCmd) throws IOException {
+        if (isSpecialCmd) {
+            dos.writeShort(size);
+        } else if (getKeyComplete) {
+            dos.writeByte(writeKey((byte) (size >> 8)));
+            dos.writeByte(writeKey((byte) (size & 0xFF)));
+        } else {
+            dos.writeShort(size);
+        }
+    }
+
+    private void encryptData(byte[] data) {
+        for (int i = 0; i < data.length; i++) {
+            data[i] = writeKey(data[i]);
+        }
+    }
+
     private byte readKey(byte b) {
-        byte i = (byte) ((key[curR++] & 0xff) ^ (b & 0xff));
-        if (curR >= key.length) curR %= key.length;
-        return i;
+        byte result = (byte) ((key[curR++] & 0xFF) ^ (b & 0xFF));
+        curR %= key.length;
+        return result;
     }
 
     private byte writeKey(byte b) {
-        byte i = (byte) ((key[curW++] & 0xff) ^ (b & 0xff));
-        if (curW >= key.length) curW %= key.length;
-        return i;
+        byte result = (byte) ((key[curW++] & 0xFF) ^ (b & 0xFF));
+        curW %= key.length;
+        return result;
     }
 
     private class Sender implements Runnable {
-        public Sender() {
-            sendingMessage = new Vector();
+        private final Vector<Message> sendingMessage = new Vector<>();
+
+        public void addMessage(Message message) {
+            sendingMessage.add(message);
         }
 
-        public void AddMessage(Message message) {
-            sendingMessage.addElement(message);
-        }
-
+        @Override
         public void run() {
             while (connected) {
                 try {
                     if (getKeyComplete && !sendingMessage.isEmpty()) {
-                        Message m = (Message) sendingMessage.removeFirst();
-                        doSendMessage(m);
+                        doSendMessage(sendingMessage.remove(0));
                     }
                     Thread.sleep(10);
                 } catch (IOException | InterruptedException e) {
-                    Log.error(LoginSession.class, e);
+                    Log.error(LoginSession.class, e, "Gửi message lỗi, mạng có vấn đề hả? 📡");
                 }
             }
         }
     }
 
-    class MessageCollector implements Runnable {
+    private class MessageCollector implements Runnable {
+        @Override
         public void run() {
             try {
                 while (connected) {
                     Message message = readMessage();
                     if (message == null) break;
-                    try {
-                        if (message.command == -27) getKey(message);
-                        else controller.process(message);
-                    } catch (Exception e) {
-                        Log.error(LoginSession.class, e);
-                    }
+                    processMessage(message);
                 }
-            } catch (Exception e) {
-                Log.error(LoginSession.class, e);
+            } catch (IOException e) {
+                Log.error(LoginSession.class, e, "Đọc message lỗi, mạng đứt rồi! 📴");
             }
-            if (connected && controller != null) {
-                if (System.currentTimeMillis() - timeConnected > 500) {
-                    controller.onDisconnected();
-                } else {
-                    controller.onConnectionFail();
-                }
-                cleanNetwork();
+            handleDisconnect();
+        }
+
+        private void processMessage(Message message) {
+            try {
+                if (message.command == -27) getKey(message);
+                else controller.process(message);
+            } catch (Exception e) {
+                Log.error(LoginSession.class, e, "Xử lý message " + message.command + " lỗi, khổ ghê! 😭");
             }
         }
 
         private void getKey(Message message) throws IOException {
             byte keySize = message.reader().readByte();
             key = new byte[keySize];
-            for (int i = 0; i < keySize; i++) {
-                key[i] = message.reader().readByte();
-            }
-            for (int i = 0; i < key.length - 1; i++) {
-                key[i + 1] ^= key[i];
+            message.reader().read(key);
+            for (int i = 1; i < key.length; i++) {
+                key[i] ^= key[i - 1];
             }
             getKeyComplete = true;
+            Log.info("Lấy key mã hóa xong, an toàn rồi nha! 🔑");
         }
 
         private Message readMessage() throws IOException {
             byte cmd = getKeyComplete ? readKey(dis.readByte()) : dis.readByte();
-            int size;
-            if (cmd == -32) {
-                cmd = getKeyComplete ? readKey(dis.readByte()) : dis.readByte();
-                byte b1 = readKey(dis.readByte());
-                byte b2 = readKey(dis.readByte());
-                byte b3 = readKey(dis.readByte());
-                byte b4 = readKey(dis.readByte());
-                size = ((b1 & 0xff) << 24) | ((b2 & 0xff) << 16) | ((b3 & 0xff) << 8) | (b4 & 0xff);
-            } else if (getKeyComplete) {
-                size = (readKey(dis.readByte()) & 0xff) << 8 | (readKey(dis.readByte()) & 0xff);
-            } else {
-                size = dis.readUnsignedShort();
-            }
+            int size = cmd == -32 ? readExtendedSize() : readNormalSize();
             byte[] data = new byte[size];
-            int byteRead = 0;
-            while (byteRead < size) {
-                int len = dis.read(data, byteRead, size - byteRead);
+            int bytesRead = 0;
+            while (bytesRead < size) {
+                int len = dis.read(data, bytesRead, size - bytesRead);
                 if (len == -1) return null;
-                byteRead += len;
-                recvByteCount += (5 + byteRead);
-                int kb = (recvByteCount + sendByteCount);
-                strRecvByteCount = kb / 1024 + "." + kb % 1024 / 102 + "Kb";
+                bytesRead += len;
             }
-            if (getKeyComplete) {
-                for (int i = 0; i < data.length; i++) {
-                    data[i] = readKey(data[i]);
-                }
-            }
+            recvByteCount += (size + (cmd == -32 ? 5 : 3));
+            updateRecvStats();
+            if (getKeyComplete) decryptData(data);
             return new Message(cmd, data);
+        }
+
+        private int readExtendedSize() throws IOException {
+            dis.readByte(); // Skip extra cmd byte
+            return (readKey(dis.readByte()) & 0xFF) << 24 |
+                    (readKey(dis.readByte()) & 0xFF) << 16 |
+                    (readKey(dis.readByte()) & 0xFF) << 8 |
+                    (readKey(dis.readByte()) & 0xFF);
+        }
+
+        private int readNormalSize() throws IOException {
+            return getKeyComplete ?
+                    (readKey(dis.readByte()) & 0xFF) << 8 | (readKey(dis.readByte()) & 0xFF) :
+                    dis.readUnsignedShort();
+        }
+
+        private void decryptData(byte[] data) {
+            for (int i = 0; i < data.length; i++) {
+                data[i] = readKey(data[i]);
+            }
+        }
+
+        private void updateRecvStats() {
+            int kb = (recvByteCount + sendByteCount) / 1024;
+            int remainder = (recvByteCount + sendByteCount) % 1024 / 102;
+            strRecvByteCount = kb + "." + remainder + "Kb";
+        }
+
+        private void handleDisconnect() {
+            if (connected) {
+                long timeSinceConnected = System.currentTimeMillis() - timeConnected;
+                if (timeSinceConnected > 500) controller.onDisconnected();
+                else controller.onConnectionFail();
+                cleanNetwork();
+            }
         }
     }
 
     public void close() {
         cleanNetwork();
+        Log.log("Đóng session, tạm biệt nha! 👋");
     }
 
     private void cleanNetwork() {
-        key = null;
-        curR = 0;
-        curW = 0;
         connected = false;
         connecting = false;
         try {
@@ -264,10 +287,12 @@ public class LoginSession {
             sc = null;
             dos = null;
             dis = null;
+            key = null;
+            curR = curW = 0;
             collectorThread = null;
-            System.gc();
+            Log.log("Dọn mạng xong, sạch bong! 🧹");
         } catch (IOException e) {
-            Log.error(LoginSession.class, e);
+            Log.error(LoginSession.class, e, "Đóng mạng lỗi, khổ ghê! 😵");
         }
     }
 }

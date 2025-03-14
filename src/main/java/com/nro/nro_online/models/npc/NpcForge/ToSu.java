@@ -4,6 +4,14 @@
  */
 package com.nro.nro_online.models.npc.NpcForge;
 
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.models.npc.Npc;
+import com.nro.nro_online.models.player.NPoint;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.OpenPowerService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.CombineServiceNew;
+import com.nro.nro_online.utils.Util;
 import nro.consts.ConstNpc;
 import nro.models.npc.Npc;
 import nro.models.player.NPoint;

@@ -2,8 +2,8 @@ package com.nro.nro_online.login;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import com.nro.nro_online.server.Client;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.server.io.Session;
 import com.nro.nro_online.utils.Log;
@@ -41,14 +41,14 @@ public class LoginService {
         try (Message ms = new Message(Cmd.SERVER)) {
             List<Session> sessions = client.getSessions();
             synchronized (sessions) {
-                List<Session> list = sessions.stream().filter(t -> t.loginSuccess).collect(Collectors.toList());
+                List<Session> list = sessions.stream().filter(t -> t.loginSuccess).toList();
                 ms.writer().writeInt(serverID);
                 ms.writer().writeInt(list.size());
-                for (Session session : list) {
-                    ms.writer().writeInt(session.id);
-                    ms.writer().writeInt(session.userId);
-                    ms.writer().writeUTF(session.uu);
-                    ms.writer().writeUTF(session.pp);
+                for (Session ses : list) {
+                    ms.writer().writeInt(ses.id);
+                    ms.writer().writeInt(ses.userId);
+                    ms.writer().writeUTF(ses.uu);
+                    ms.writer().writeUTF(ses.pp);
                 }
                 sendMessage(ms);
             }

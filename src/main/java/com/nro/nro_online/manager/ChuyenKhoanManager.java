@@ -15,20 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.Gson;
-import nro.consts.Cmd;
-import nro.jdbc.DBService;
-import nro.jdbc.daos.PlayerDAO;
-import nro.models.*;
-import nro.models.Part;
-import nro.models.PartManager;
-import nro.models.Transaction;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.server.io.Message;
-import nro.services.Service;
-import nro.utils.Log;
-import nro.utils.TimeUtil;
-import nro.utils.Util;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.models.Part;
+import com.nro.nro_online.models.PartManager;
+import com.nro.nro_online.models.Transaction;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Util;
 
 public class ChuyenKhoanManager {
 
@@ -83,13 +77,12 @@ public class ChuyenKhoanManager {
                         + "Ngày giao dịch " + (Util.formatLocalDateTime(top.createdDate)) + "\n");
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static List<Transaction> GetTransactionAuto() {
+    public static List<Transaction> getTransactionAuto() {
         List<Transaction> result = new ArrayList<>();
         Connection con = null;
         CallableStatement ps = null;
@@ -502,7 +495,7 @@ public class ChuyenKhoanManager {
     }
 
     public static void HandleTransactionAuto() {
-        List<Transaction> transactions = GetTransactionAuto();
+        List<Transaction> transactions = getTransactionAuto();
 
         if (!transactions.isEmpty()) {
             String history = GetTransactionOnline("https://api.web2m.com/historyapimb/Tuanbeo@12345/02147019062000/F3CAC210-DAC1-BD7F-7A26-A2643A5B3DD7");

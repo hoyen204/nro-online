@@ -1,15 +1,12 @@
 package com.nro.nro_online.models.boss.dhvt;
 
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.player.Player;
-import nro.services.SkillService;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.SkillService;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 
-/**
- * @build by arriety
- */
 public class ThienXinHang extends BossDHVT {
 
     private long lastTimePhanThan;

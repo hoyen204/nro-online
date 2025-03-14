@@ -1,10 +1,12 @@
 package com.nro.nro_online.utils;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
@@ -156,5 +158,21 @@ public class Util {
 
     public static int getOne(int n1, int n2) {
         return rand.nextInt() % 2 == 0 ? n1 : n2;
+    }
+
+    public static void sleep(int delay){
+        try{
+            Thread.sleep(delay);
+        }
+        catch(InterruptedException e){}
+    }
+
+    public static String formatCurrency(double amount) {
+        return new DecimalFormat("#,##0").format(amount).replace(",", ".") + " đ";
+    }
+
+    public static String formatLocalDateTime(LocalDateTime localDateTime) {
+        return localDateTime == null ? "Chưa có giờ!" :
+                localDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + " ⏰";
     }
 }

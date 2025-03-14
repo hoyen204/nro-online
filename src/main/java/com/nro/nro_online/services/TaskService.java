@@ -6,11 +6,18 @@ import java.util.List;
 
 import com.nro.nro_online.consts.ConstAchive;
 import com.nro.nro_online.consts.ConstMob;
+import com.nro.nro_online.consts.ConstNpc;
 import com.nro.nro_online.consts.ConstTask;
 import com.nro.nro_online.models.boss.Boss;
 import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.mob.Mob;
+import com.nro.nro_online.models.npc.Npc;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.task.SubTaskMain;
+import com.nro.nro_online.models.task.TaskMain;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.server.io.Message;
 import nro.art.ServerLog;
 import nro.consts.*;
 import nro.models.boss.Boss;
@@ -162,54 +169,54 @@ public class TaskService {
 
     public boolean checkDoneTaskTalkNpc(Player player, Npc npc) {
         switch (npc.tempId) {
-            case ConstNpc.QUY_LAO_KAME:
-            case ConstNpc.TRUONG_LAO_GURU:
-            case ConstNpc.VUA_VEGETA:
-                return (doneTask(player, ConstTask.TASK_9_1)
-                        || doneTask(player, ConstTask.TASK_10_2)
-                        || doneTask(player, ConstTask.TASK_11_3)
-                        || doneTask(player, ConstTask.TASK_12_2)
-                        || doneTask(player, ConstTask.TASK_13_1)
-                        || doneTask(player, ConstTask.TASK_14_3)
-                        || doneTask(player, ConstTask.TASK_15_3)
-                        || doneTask(player, ConstTask.TASK_16_3));
-            case ConstNpc.ONG_GOHAN:
-            case ConstNpc.ONG_MOORI:
-            case ConstNpc.ONG_PARAGUS:
-                return (doneTask(player, ConstTask.TASK_0_2)
-                        || doneTask(player, ConstTask.TASK_0_5)
-                        || doneTask(player, ConstTask.TASK_1_1)
-                        || doneTask(player, ConstTask.TASK_2_1)
-                        || doneTask(player, ConstTask.TASK_3_2)
-                        || doneTask(player, ConstTask.TASK_4_1)
-                        || doneTask(player, ConstTask.TASK_5_3)
-                        || doneTask(player, ConstTask.TASK_8_2)
-                        || doneTask(player, ConstTask.TASK_12_1));
-            case ConstNpc.DR_DRIEF:
-            case ConstNpc.CARGO:
-            case ConstNpc.CUI:
-                return (doneTask(player, ConstTask.TASK_6_1)
-                        || doneTask(player, ConstTask.TASK_7_2)
-                        || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_17_1)
-                        || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_18_5)
-                        || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_19_3)
-                        || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_20_6)
-                        || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_21_4));
-            case ConstNpc.BUNMA:
-            case ConstNpc.DENDE:
-            case ConstNpc.APPULE:
-                return doneTask(player, ConstTask.TASK_8_1);
-            case ConstNpc.BUNMA_TL:
-                return (doneTask(player, ConstTask.TASK_22_0)
-                        || doneTask(player, ConstTask.TASK_22_4)
-                        || doneTask(player, ConstTask.TASK_23_4)
-                        || doneTask(player, ConstTask.TASK_24_5)
-                        || doneTask(player, ConstTask.TASK_25_5));
-            case ConstNpc.THAN_MEO_KARIN:
-                return (doneTask(player, ConstTask.TASK_25_0));
-            case ConstNpc.OSIN:
-                return (doneTask(player, ConstTask.TASK_26_0)
-                        || doneTask(player, ConstTask.TASK_26_7));
+        case ConstNpc.QUY_LAO_KAME:
+        case ConstNpc.TRUONG_LAO_GURU:
+        case ConstNpc.VUA_VEGETA:
+            return (doneTask(player, ConstTask.TASK_9_1)
+                    || doneTask(player, ConstTask.TASK_10_2)
+                    || doneTask(player, ConstTask.TASK_11_3)
+                    || doneTask(player, ConstTask.TASK_12_2)
+                    || doneTask(player, ConstTask.TASK_13_1)
+                    || doneTask(player, ConstTask.TASK_14_3)
+                    || doneTask(player, ConstTask.TASK_15_3)
+                    || doneTask(player, ConstTask.TASK_16_3));
+        case ConstNpc.ONG_GOHAN:
+        case ConstNpc.ONG_MOORI:
+        case ConstNpc.ONG_PARAGUS:
+            return (doneTask(player, ConstTask.TASK_0_2)
+                    || doneTask(player, ConstTask.TASK_0_5)
+                    || doneTask(player, ConstTask.TASK_1_1)
+                    || doneTask(player, ConstTask.TASK_2_1)
+                    || doneTask(player, ConstTask.TASK_3_2)
+                    || doneTask(player, ConstTask.TASK_4_1)
+                    || doneTask(player, ConstTask.TASK_5_3)
+                    || doneTask(player, ConstTask.TASK_8_2)
+                    || doneTask(player, ConstTask.TASK_12_1));
+        case ConstNpc.DR_DRIEF:
+        case ConstNpc.CARGO:
+        case ConstNpc.CUI:
+            return (doneTask(player, ConstTask.TASK_6_1)
+                    || doneTask(player, ConstTask.TASK_7_2)
+                    || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_17_1)
+                    || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_18_5)
+                    || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_19_3)
+                    || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_20_6)
+                    || player.zone.map.mapId == 19 && doneTask(player, ConstTask.TASK_21_4));
+        case ConstNpc.BUNMA:
+        case ConstNpc.DENDE:
+        case ConstNpc.APPULE:
+            return doneTask(player, ConstTask.TASK_8_1);
+        case ConstNpc.BUNMA_TL:
+            return (doneTask(player, ConstTask.TASK_22_0)
+                    || doneTask(player, ConstTask.TASK_22_4)
+                    || doneTask(player, ConstTask.TASK_23_4)
+                    || doneTask(player, ConstTask.TASK_24_5)
+                    || doneTask(player, ConstTask.TASK_25_5));
+        case ConstNpc.THAN_MEO_KARIN:
+            return (doneTask(player, ConstTask.TASK_25_0));
+        case ConstNpc.OSIN:
+            return (doneTask(player, ConstTask.TASK_26_0)
+                    || doneTask(player, ConstTask.TASK_26_7));
         }
         return false;
     }
@@ -263,54 +270,54 @@ public class TaskService {
     public void checkDoneTaskGoToMap(Player player, Zone zoneJoin) {
         if (!player.isBoss && !player.isPet && !player.isMiniPet) {
             switch (zoneJoin.map.mapId) {
-                case 39:
-                case 40:
-                case 41:
-                    if (player.location.x >= 635) {
-                        doneTask(player, ConstTask.TASK_0_0);
-                    }
-                    break;
-                case 21:
-                case 22:
-                case 23:
-                    doneTask(player, ConstTask.TASK_0_1);
-                    doneTask(player, ConstTask.TASK_12_0);
-                    break;
-                case 24:
-                case 25:
-                case 26:
-                    doneTask(player, ConstTask.TASK_6_0);
-                    break;
-                case 3:
-                case 11:
-                case 17:
-                    doneTask(player, ConstTask.TASK_7_0);
-                    break;
-                case 0:
-                case 7:
-                case 14:
-                    doneTask(player, ConstTask.TASK_8_0);
-                    break;
-                case 5:
-                case 13:
-                case 20:
-                    doneTask(player, ConstTask.TASK_9_0);
-                    break;
-                case 19:
-                    doneTask(player, ConstTask.TASK_17_0);
-                    break;
-                case 93:
-                    doneTask(player, ConstTask.TASK_22_1);
-                    break;
-                case 97:
-                    doneTask(player, ConstTask.TASK_23_0);
-                    break;
-                case 100:
-                    doneTask(player, ConstTask.TASK_24_0);
-                    break;
-                case 103:
-                    doneTask(player, ConstTask.TASK_25_2);
-                    break;
+            case 39:
+            case 40:
+            case 41:
+                if (player.location.x >= 635) {
+                    doneTask(player, ConstTask.TASK_0_0);
+                }
+                break;
+            case 21:
+            case 22:
+            case 23:
+                doneTask(player, ConstTask.TASK_0_1);
+                doneTask(player, ConstTask.TASK_12_0);
+                break;
+            case 24:
+            case 25:
+            case 26:
+                doneTask(player, ConstTask.TASK_6_0);
+                break;
+            case 3:
+            case 11:
+            case 17:
+                doneTask(player, ConstTask.TASK_7_0);
+                break;
+            case 0:
+            case 7:
+            case 14:
+                doneTask(player, ConstTask.TASK_8_0);
+                break;
+            case 5:
+            case 13:
+            case 20:
+                doneTask(player, ConstTask.TASK_9_0);
+                break;
+            case 19:
+                doneTask(player, ConstTask.TASK_17_0);
+                break;
+            case 93:
+                doneTask(player, ConstTask.TASK_22_1);
+                break;
+            case 97:
+                doneTask(player, ConstTask.TASK_23_0);
+                break;
+            case 100:
+                doneTask(player, ConstTask.TASK_24_0);
+                break;
+            case 103:
+                doneTask(player, ConstTask.TASK_25_2);
+                break;
             }
         }
     }
@@ -319,16 +326,16 @@ public class TaskService {
     public void checkDoneTaskPickItem(Player player, ItemMap item) {
         if (!player.isBoss && !player.isPet && item != null && item.itemTemplate != null) {
             switch (item.itemTemplate.id) {
-                case 73: //đùi gà
-                    doneTask(player, ConstTask.TASK_2_0);
-                    break;
-                case 78: //em bé
-                    doneTask(player, ConstTask.TASK_3_1);
-                    Service.getInstance().sendFlagBag(player);
-                    break;
-                case 380: //capsule ki bi
-                    doneTask(player, ConstTask.TASK_25_1);
-                    break;
+            case 73: //đùi gà
+                doneTask(player, ConstTask.TASK_2_0);
+                break;
+            case 78: //em bé
+                doneTask(player, ConstTask.TASK_3_1);
+                Service.getInstance().sendFlagBag(player);
+                break;
+            case 380: //capsule ki bi
+                doneTask(player, ConstTask.TASK_25_1);
+                break;
             }
         }
     }
@@ -337,15 +344,15 @@ public class TaskService {
     public void checkDoneTaskMakeFriend(Player player, Player friend) {
         if (!player.isBoss && !player.isPet) {
             switch (friend.gender) {
-                case ConstPlayer.TRAI_DAT:
-                    doneTask(player, ConstTask.TASK_11_0);
-                    break;
-                case ConstPlayer.NAMEC:
-                    doneTask(player, ConstTask.TASK_11_1);
-                    break;
-                case ConstPlayer.XAYDA:
-                    doneTask(player, ConstTask.TASK_11_2);
-                    break;
+            case ConstPlayer.TRAI_DAT:
+                doneTask(player, ConstTask.TASK_11_0);
+                break;
+            case ConstPlayer.NAMEC:
+                doneTask(player, ConstTask.TASK_11_1);
+                break;
+            case ConstPlayer.XAYDA:
+                doneTask(player, ConstTask.TASK_11_2);
+                break;
             }
         }
     }
@@ -354,15 +361,15 @@ public class TaskService {
     public void checkDoneTaskConfirmMenuNpc(Player player, Npc npc, byte select) {
         if (!player.isBoss && !player.isPet) {
             switch (npc.tempId) {
-                case ConstNpc.DAU_THAN:
-                    switch (player.iDMark.getIndexMenu()) {
-                        case ConstNpc.MAGIC_TREE_NON_UPGRADE_LEFT_PEA:
-                        case ConstNpc.MAGIC_TREE_NON_UPGRADE_FULL_PEA:
-                            if (select == 0) {
-                                doneTask(player, ConstTask.TASK_0_4);
-                            }
+            case ConstNpc.DAU_THAN:
+                switch (player.iDMark.getIndexMenu()) {
+                case ConstNpc.MAGIC_TREE_NON_UPGRADE_LEFT_PEA:
+                case ConstNpc.MAGIC_TREE_NON_UPGRADE_FULL_PEA:
+                    if (select == 0) {
+                        doneTask(player, ConstTask.TASK_0_4);
                     }
-                    break;
+                }
+                break;
             }
         }
     }
@@ -371,102 +378,102 @@ public class TaskService {
     public void checkDoneTaskKillBoss(Player player, Boss boss) {
         if (player != null && !player.isBoss && !player.isPet) {
             switch ((int) boss.id) {
-                case BossFactory.KUKU:
-                    doneTask(player, ConstTask.TASK_19_0);
-                    break;
-                case BossFactory.MAP_DAU_DINH:
-                    doneTask(player, ConstTask.TASK_19_1);
-                    break;
-                case BossFactory.RAMBO:
-                    doneTask(player, ConstTask.TASK_19_2);
-                    break;
-                case BossFactory.SO4:
-                case BossFactory.SO4NM:
-                    doneTask(player, ConstTask.TASK_20_1);
-                    break;
-                case BossFactory.SO3:
-                case BossFactory.SO3NM:
-                    doneTask(player, ConstTask.TASK_20_2);
-                    break;
-                case BossFactory.SO2:
-                case BossFactory.SO2NM:
-                    doneTask(player, ConstTask.TASK_20_3);
-                    break;
-                case BossFactory.SO1:
-                case BossFactory.SO1NM:
-                    doneTask(player, ConstTask.TASK_20_4);
-                    break;
-                case BossFactory.TIEU_DOI_TRUONG:
-                case BossFactory.TIEU_DOI_TRUONGNM:
-                    doneTask(player, ConstTask.TASK_20_5);
-                    break;
-                case BossFactory.FIDE_DAI_CA_1:
-                    doneTask(player, ConstTask.TASK_21_1);
-                    break;
-                case BossFactory.FIDE_DAI_CA_2:
-                    doneTask(player, ConstTask.TASK_21_2);
-                    break;
-                case BossFactory.FIDE_DAI_CA_3:
-                    doneTask(player, ConstTask.TASK_21_3);
-                    break;
-                case BossFactory.ANDROID_19:
-                    //System.out.println("vao day");
-                    doneTask(player, ConstTask.TASK_22_2);
-                    break;
-                case BossFactory.ANDROID_20:
-                    doneTask(player, ConstTask.TASK_22_3);
-                    break;
+            case BossFactory.KUKU:
+                doneTask(player, ConstTask.TASK_19_0);
+                break;
+            case BossFactory.MAP_DAU_DINH:
+                doneTask(player, ConstTask.TASK_19_1);
+                break;
+            case BossFactory.RAMBO:
+                doneTask(player, ConstTask.TASK_19_2);
+                break;
+            case BossFactory.SO4:
+            case BossFactory.SO4NM:
+                doneTask(player, ConstTask.TASK_20_1);
+                break;
+            case BossFactory.SO3:
+            case BossFactory.SO3NM:
+                doneTask(player, ConstTask.TASK_20_2);
+                break;
+            case BossFactory.SO2:
+            case BossFactory.SO2NM:
+                doneTask(player, ConstTask.TASK_20_3);
+                break;
+            case BossFactory.SO1:
+            case BossFactory.SO1NM:
+                doneTask(player, ConstTask.TASK_20_4);
+                break;
+            case BossFactory.TIEU_DOI_TRUONG:
+            case BossFactory.TIEU_DOI_TRUONGNM:
+                doneTask(player, ConstTask.TASK_20_5);
+                break;
+            case BossFactory.FIDE_DAI_CA_1:
+                doneTask(player, ConstTask.TASK_21_1);
+                break;
+            case BossFactory.FIDE_DAI_CA_2:
+                doneTask(player, ConstTask.TASK_21_2);
+                break;
+            case BossFactory.FIDE_DAI_CA_3:
+                doneTask(player, ConstTask.TASK_21_3);
+                break;
+            case BossFactory.ANDROID_19:
+                //System.out.println("vao day");
+                doneTask(player, ConstTask.TASK_22_2);
+                break;
+            case BossFactory.ANDROID_20:
+                doneTask(player, ConstTask.TASK_22_3);
+                break;
 
-                case BossFactory.POC:
-                    doneTask(player, ConstTask.TASK_23_1);
-                    break;
-                case BossFactory.PIC:
-                    doneTask(player, ConstTask.TASK_23_2);
-                    break;
-                case BossFactory.KINGKONG:
-                    doneTask(player, ConstTask.TASK_23_3);
-                    break;
-                case BossFactory.XEN_BO_HUNG_1:
-                    doneTask(player, ConstTask.TASK_24_1);
-                    break;
-                case BossFactory.XEN_BO_HUNG_2:
-                    doneTask(player, ConstTask.TASK_24_2);
-                    break;
-                case BossFactory.XEN_BO_HUNG_HOAN_THIEN:
-                    doneTask(player, ConstTask.TASK_24_3);
-                    break;
-                case BossFactory.XEN_CON:
-                case -104:
-                case -105:
-                case -106:
-                case -107:
-                case -108:
-                case -109:
-                case -110:
-                    doneTask(player, ConstTask.TASK_25_3);
-                    break;
-                case BossFactory.SIEU_BO_HUNG:
-                    doneTask(player, ConstTask.TASK_25_4);
-                    break;
-                case BossFactory.DRABULA_TANG1:
-                    doneTask(player, ConstTask.TASK_26_1);
-                    break;
-                case BossFactory.BUIBUI_TANG2:
-                    doneTask(player, ConstTask.TASK_26_2);
-                    break;
-                case BossFactory.BUIBUI_TANG3:
-                    doneTask(player, ConstTask.TASK_26_3);
-                    break;
-                case BossFactory.YACON_TANG4:
-                    doneTask(player, ConstTask.TASK_26_4);
-                    break;
-                case BossFactory.DRABULA_TANG5:
-                case BossFactory.DRABULA_TANG6:
-                    doneTask(player, ConstTask.TASK_26_5);
-                    break;
-                case BossFactory.MABU_MAP:
-                    doneTask(player, ConstTask.TASK_26_6);
-                    break;
+            case BossFactory.POC:
+                doneTask(player, ConstTask.TASK_23_1);
+                break;
+            case BossFactory.PIC:
+                doneTask(player, ConstTask.TASK_23_2);
+                break;
+            case BossFactory.KINGKONG:
+                doneTask(player, ConstTask.TASK_23_3);
+                break;
+            case BossFactory.XEN_BO_HUNG_1:
+                doneTask(player, ConstTask.TASK_24_1);
+                break;
+            case BossFactory.XEN_BO_HUNG_2:
+                doneTask(player, ConstTask.TASK_24_2);
+                break;
+            case BossFactory.XEN_BO_HUNG_HOAN_THIEN:
+                doneTask(player, ConstTask.TASK_24_3);
+                break;
+            case BossFactory.XEN_CON:
+            case -104:
+            case -105:
+            case -106:
+            case -107:
+            case -108:
+            case -109:
+            case -110:
+                doneTask(player, ConstTask.TASK_25_3);
+                break;
+            case BossFactory.SIEU_BO_HUNG:
+                doneTask(player, ConstTask.TASK_25_4);
+                break;
+            case BossFactory.DRABULA_TANG1:
+                doneTask(player, ConstTask.TASK_26_1);
+                break;
+            case BossFactory.BUIBUI_TANG2:
+                doneTask(player, ConstTask.TASK_26_2);
+                break;
+            case BossFactory.BUIBUI_TANG3:
+                doneTask(player, ConstTask.TASK_26_3);
+                break;
+            case BossFactory.YACON_TANG4:
+                doneTask(player, ConstTask.TASK_26_4);
+                break;
+            case BossFactory.DRABULA_TANG5:
+            case BossFactory.DRABULA_TANG6:
+                doneTask(player, ConstTask.TASK_26_5);
+                break;
+            case BossFactory.MABU_MAP:
+                doneTask(player, ConstTask.TASK_26_6);
+                break;
 
             }
         }
@@ -476,112 +483,112 @@ public class TaskService {
     public void checkDoneTaskKillMob(Player player, Mob mob) {
         if (!player.isBoss && !player.isPet) {
             switch (mob.tempId) {
-                case ConstMob.MOC_NHAN:
-                    doneTask(player, ConstTask.TASK_1_0);
-                    player.playerTask.achievements.get(ConstAchive.TAP_LUYEN_BAI_BAN).count++;
-                    break;
-                case ConstMob.KHUNG_LONG_ME:
-                case ConstMob.LON_LOI_ME:
-                case ConstMob.QUY_DAT_ME:
-                    doneTask(player, ConstTask.TASK_4_0);
-                    break;
-                case ConstMob.THAN_LAN_BAY:
-                case ConstMob.PHI_LONG:
-                case ConstMob.QUY_BAY:
-                    doneTask(player, ConstTask.TASK_7_1);
-                    break;
-                case ConstMob.OC_MUON_HON:
-                case ConstMob.OC_SEN:
-                case ConstMob.HEO_XAYDA_ME:
-                    doneTask(player, ConstTask.TASK_10_1);
-                    break;
-                case ConstMob.HEO_RUNG:
-                case ConstMob.HEO_DA_XANH:
-                case ConstMob.HEO_XAYDA:
-                    if (player.clan != null) {
-                        List<Player> list = new ArrayList<>();
-                        List<Player> playersMap = player.zone.getPlayers();
-                        synchronized (playersMap) {
-                            for (Player pl : playersMap) {
-                                if (pl != null && pl.clan != null && pl.clan.equals(player.clan)) {
-                                    list.add(pl);
-                                }
-                            }
-                        }
-                        if (list.size() >= NMEMBER_DO_TASK_TOGETHER) {
-                            for (Player pl : list) {
-                                switch (mob.tempId) {
-                                    case ConstMob.HEO_RUNG:
-                                        doneTask(pl, ConstTask.TASK_14_0);
-                                        break;
-                                    case ConstMob.HEO_DA_XANH:
-                                        doneTask(pl, ConstTask.TASK_14_1);
-                                        break;
-                                    case ConstMob.HEO_XAYDA:
-                                        doneTask(pl, ConstTask.TASK_14_2);
-                                        break;
-                                }
+            case ConstMob.MOC_NHAN:
+                doneTask(player, ConstTask.TASK_1_0);
+                player.playerTask.achievements.get(ConstAchive.TAP_LUYEN_BAI_BAN).count++;
+                break;
+            case ConstMob.KHUNG_LONG_ME:
+            case ConstMob.LON_LOI_ME:
+            case ConstMob.QUY_DAT_ME:
+                doneTask(player, ConstTask.TASK_4_0);
+                break;
+            case ConstMob.THAN_LAN_BAY:
+            case ConstMob.PHI_LONG:
+            case ConstMob.QUY_BAY:
+                doneTask(player, ConstTask.TASK_7_1);
+                break;
+            case ConstMob.OC_MUON_HON:
+            case ConstMob.OC_SEN:
+            case ConstMob.HEO_XAYDA_ME:
+                doneTask(player, ConstTask.TASK_10_1);
+                break;
+            case ConstMob.HEO_RUNG:
+            case ConstMob.HEO_DA_XANH:
+            case ConstMob.HEO_XAYDA:
+                if (player.clan != null) {
+                    List<Player> list = new ArrayList<>();
+                    List<Player> playersMap = player.zone.getPlayers();
+                    synchronized (playersMap) {
+                        for (Player pl : playersMap) {
+                            if (pl != null && pl.clan != null && pl.clan.equals(player.clan)) {
+                                list.add(pl);
                             }
                         }
                     }
-                    break;
-                case ConstMob.BULON:
-                case ConstMob.UKULELE:
-                case ConstMob.QUY_MAP:
-                    if (player.clan != null) {
-                        List<Player> list = new ArrayList<>();
-                        List<Player> playersMap = player.zone.getPlayers();
-                        synchronized (playersMap) {
-                            for (Player pl : playersMap) {
-                                if (pl != null && pl.clan != null && pl.clan.equals(player.clan)) {
-                                    list.add(pl);
-                                }
-                            }
-                        }
-                        if (list.size() >= NMEMBER_DO_TASK_TOGETHER) {
-                            for (Player pl : list) {
-                                switch (mob.tempId) {
-                                    case ConstMob.BULON:
-                                        doneTask(pl, ConstTask.TASK_15_0);
-                                        break;
-                                    case ConstMob.UKULELE:
-                                        doneTask(pl, ConstTask.TASK_15_1);
-                                        break;
-                                    case ConstMob.QUY_MAP:
-                                        doneTask(pl, ConstTask.TASK_15_2);
-                                        break;
-                                }
+                    if (list.size() >= NMEMBER_DO_TASK_TOGETHER) {
+                        for (Player pl : list) {
+                            switch (mob.tempId) {
+                            case ConstMob.HEO_RUNG:
+                                doneTask(pl, ConstTask.TASK_14_0);
+                                break;
+                            case ConstMob.HEO_DA_XANH:
+                                doneTask(pl, ConstTask.TASK_14_1);
+                                break;
+                            case ConstMob.HEO_XAYDA:
+                                doneTask(pl, ConstTask.TASK_14_2);
+                                break;
                             }
                         }
                     }
-                    break;
-                case ConstMob.TAMBOURINE:
-                    doneTask(player, ConstTask.TASK_16_0);
-                    break;
-                case ConstMob.DRUM:
-                    doneTask(player, ConstTask.TASK_16_1);
-                    break;
-                case ConstMob.AKKUMAN:
-                    doneTask(player, ConstTask.TASK_16_2);
-                    break;
-                case ConstMob.NAPPA:
-                    doneTask(player, ConstTask.TASK_18_0);
-                    break;
-                case ConstMob.SOLDIER:
-                    doneTask(player, ConstTask.TASK_18_1);
-                    break;
-                case ConstMob.APPULE:
-                    doneTask(player, ConstTask.TASK_18_2);
-                    break;
-                case ConstMob.RASPBERRY:
-                    doneTask(player, ConstTask.TASK_18_3);
-                    break;
-                case ConstMob.THAN_LAN_XANH:
-                    doneTask(player, ConstTask.TASK_18_4);
-                    break;
-                case ConstMob.XEN_CON_CAP_8:
-                    doneTask(player, ConstTask.TASK_24_4);
-                    break;
+                }
+                break;
+            case ConstMob.BULON:
+            case ConstMob.UKULELE:
+            case ConstMob.QUY_MAP:
+                if (player.clan != null) {
+                    List<Player> list = new ArrayList<>();
+                    List<Player> playersMap = player.zone.getPlayers();
+                    synchronized (playersMap) {
+                        for (Player pl : playersMap) {
+                            if (pl != null && pl.clan != null && pl.clan.equals(player.clan)) {
+                                list.add(pl);
+                            }
+                        }
+                    }
+                    if (list.size() >= NMEMBER_DO_TASK_TOGETHER) {
+                        for (Player pl : list) {
+                            switch (mob.tempId) {
+                            case ConstMob.BULON:
+                                doneTask(pl, ConstTask.TASK_15_0);
+                                break;
+                            case ConstMob.UKULELE:
+                                doneTask(pl, ConstTask.TASK_15_1);
+                                break;
+                            case ConstMob.QUY_MAP:
+                                doneTask(pl, ConstTask.TASK_15_2);
+                                break;
+                            }
+                        }
+                    }
+                }
+                break;
+            case ConstMob.TAMBOURINE:
+                doneTask(player, ConstTask.TASK_16_0);
+                break;
+            case ConstMob.DRUM:
+                doneTask(player, ConstTask.TASK_16_1);
+                break;
+            case ConstMob.AKKUMAN:
+                doneTask(player, ConstTask.TASK_16_2);
+                break;
+            case ConstMob.NAPPA:
+                doneTask(player, ConstTask.TASK_18_0);
+                break;
+            case ConstMob.SOLDIER:
+                doneTask(player, ConstTask.TASK_18_1);
+                break;
+            case ConstMob.APPULE:
+                doneTask(player, ConstTask.TASK_18_2);
+                break;
+            case ConstMob.RASPBERRY:
+                doneTask(player, ConstTask.TASK_18_3);
+                break;
+            case ConstMob.THAN_LAN_XANH:
+                doneTask(player, ConstTask.TASK_18_4);
+                break;
+            case ConstMob.XEN_CON_CAP_8:
+                doneTask(player, ConstTask.TASK_24_4);
+                break;
             }
             if (MobService.gI().isMonterFly(mob.tempId)) {
                 player.playerTask.achievements.get(ConstAchive.THO_SAN_THIEN_XA).count++;
@@ -594,415 +601,415 @@ public class TaskService {
         if (TaskService.gI().isCurrentTask(player, idTaskCustom)) {
             this.addDoneSubTask(player, 1);
             switch (idTaskCustom) {
-                case ConstTask.TASK_0_0:
-                    NpcService.gI().createTutorial(player, -1, transformName(player, "Làm tốt lắm..\n"
-                            + "Bây giờ bạn hãy vào nhà ông %2 bên phải để nhận nhiệm vụ mới nhé"));
-                    break;
-                case ConstTask.TASK_0_1:
-                    NpcService.gI().createTutorial(player, -1, transformName(player, "Ông %2 đang đứng đợi kìa\n"
-                            + "Hãy nhấn 2 lần vào để nói chuyện"));
-                    break;
-                case ConstTask.TASK_0_2:
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Con vừa đi đâu về đó?\n"
-                            + "Con hãy đến rương đồ để lấy rađa..\n"
-                            + "..sau đó thu hoạch hết đậu trên cây đậu thần đằng kia!");
-                    break;
-                case ConstTask.TASK_0_3:
-                    break;
-                case ConstTask.TASK_0_4:
-                    break;
-                case ConstTask.TASK_0_5:
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Tốt lắm, rađa sẽ giúp con thấy được lượng máu và thể lực ở bên góc trái\n"
-                            + "Bây giờ con hãy đi luyện tập\n"
-                            + "Con hãy ra %1, ở đó có những con mộc nhân cho con luyện tập dó\n"
-                            + "Hãy đốn ngã 5 con mộc nhân cho ông");
-                    break;
+            case ConstTask.TASK_0_0:
+                NpcService.gI().createTutorial(player, -1, transformName(player, "Làm tốt lắm..\n"
+                        + "Bây giờ bạn hãy vào nhà ông %2 bên phải để nhận nhiệm vụ mới nhé"));
+                break;
+            case ConstTask.TASK_0_1:
+                NpcService.gI().createTutorial(player, -1, transformName(player, "Ông %2 đang đứng đợi kìa\n"
+                        + "Hãy nhấn 2 lần vào để nói chuyện"));
+                break;
+            case ConstTask.TASK_0_2:
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Con vừa đi đâu về đó?\n"
+                                + "Con hãy đến rương đồ để lấy rađa..\n"
+                                + "..sau đó thu hoạch hết đậu trên cây đậu thần đằng kia!");
+                break;
+            case ConstTask.TASK_0_3:
+                break;
+            case ConstTask.TASK_0_4:
+                break;
+            case ConstTask.TASK_0_5:
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Tốt lắm, rađa sẽ giúp con thấy được lượng máu và thể lực ở bên góc trái\n"
+                                + "Bây giờ con hãy đi luyện tập\n"
+                                + "Con hãy ra %1, ở đó có những con mộc nhân cho con luyện tập dó\n"
+                                + "Hãy đốn ngã 5 con mộc nhân cho ông");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_1_0:
+                if (isCurrentTask(player, idTaskCustom)) {
+                    Service.getInstance().sendThongBao(player, "Bạn đánh được "
+                            + player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).count + "/"
+                            + player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).maxCount + " mộc nhân");
+                }
+                break;
+            case ConstTask.TASK_1_1:
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Thể lực của con cũng khá tốt\n"
+                                + "Con à, dạo gần đây dân làng của chúng ta gặp phải vài chuyện\n"
+                                + "Bên cạnh làng ta đột nhiên xuất hiện lũ quái vật\n"
+                                + "Nó tàn sát dân làng và phá hoại nông sản làng ta\n"
+                                + "Con hãy tìm đánh chúng và đem về đây 10 cái đùi gà, 2 ông cháu mình sẽ để dành ăn dần\n"
+                                + "Đây là tấm bản đồ của vùng này, con hãy xem để tìm đến %3\n"
+                                + "Con có thể sử dụng đậu thần khi hết HP hoặc KI, bằng cách nhấn vào nút có hình trái tim "
+                                + "bên góc phải dưới màn hình\n"
+                                + "Nhanh lên, ông đói lắm rồi");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_2_0:
+                break;
+            case ConstTask.TASK_2_1:
+                InventoryService.gI().subQuantityItemsBag(player, InventoryService.gI().findItemBagByTemp(player, 73), 10);
+                InventoryService.gI().sendItemBags(player);
+                Service.getInstance().dropItemMapForMe(player, player.zone.getItemMapByTempId(74));
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Tốt lắm, đùi gà đây rồi, haha. Ông sẽ nướng tại đống lửa gần kia con có thể ăn bất cứ lúc nào nếu muốn\n"
+                                + "À cháu này, vừa nãy ông có nghe thấy 1 tiếng động lớn, hình như có 1 vật thể rơi tại %5, con hãy đến kiểm tra xem\n"
+                                + "Con cũng có thể dùng tiềm năng bản thân để nâng HP, KI hoặc sức đánh");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_3_0:
+                break;
+            case ConstTask.TASK_3_1:
+                break;
+            case ConstTask.TASK_3_2:
+                InventoryService.gI().subQuantityItemsBag(player, InventoryService.gI().findItemBagByTemp(player, 78), 1);
+                InventoryService.gI().sendItemBags(player);
+                Service.getInstance().sendFlagBag(player);
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Có em bé trong phi thuyền rơi xuống à, ông cứ tưởng là sao băng chứ\n"
+                                + "Ông sẽ đặt tên cho em nó là Goku, từ giờ nó sẽ là thành viên trong gia đình ta\n"
+                                + "Nãy ông mới nhận được tin có bầy mãnh thú xuất hiện tại Trạm phi thuyền\n"
+                                + "Bọn chúng vừa đổ bộ xuống trái đất để trả thù việc con sát hại con chúng\n"
+                                + "Con hãy đi tiêu diệt chúng để giúp dân làng tại đó luôn nhé");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_4_0:
+                if (isCurrentTask(player, idTaskCustom)) {
+                    Service.getInstance().sendThongBao(player, "Bạn đánh được "
+                            + player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).count + "/"
+                            + player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).maxCount
+                            + transformName(player, " %4 mẹ"));
+                }
+                break;
+            case ConstTask.TASK_4_1:
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Ông rất tự hào về con\n"
+                                + "Ông cho con cuốn bí kíp này để nâng cao võ học\n"
+                                + "Hãy dùng sức mạnh của mình trừ gian diệt ác bảo vệ dân lành con nhé\n"
+                                + "Bây giờ con hãy đi tập luyện đi, khi nào mạnh hơn thì quay về đây ông giao cho nhiệm vụ mới\n"
+                                + "Đi đi..");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_5_0:
+                break;
+            case ConstTask.TASK_5_1:
+                break;
+            case ConstTask.TASK_5_2:
+                break;
+            case ConstTask.TASK_5_3:
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Con bây giờ là người khỏe nhất vùng này rồi. Con có thể tới trạm tàu vũ trụ "
+                                + "gặp %7, cậu ấy có thể đưa con tới bất cứ nơi nào\n"
+                                + "Con hãy tới chào hỏi cậu đi");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_6_0:
+                break;
+            case ConstTask.TASK_6_1:
+                npcSay(player, ConstTask.NPC_TTVT,
+                        "Ôi, tôi chào cậu " + player.name + ", tôi nghe danh cậu đã lâu trong vùng này mà "
+                                + "tới bây giờ mới có thể gặp\n"
+                                + "Cậu giúp tôi điều này với, đứa nhỏ nhà tôi nó lên đường đi tìm cái thứ "
+                                + "gọi là ngọc rồng gì đó,..\n"
+                                + ".. hồi nãy có người báo tôi rằng trên đường bé gặp chuyện không may, bé nó bị bọn %9 bắt\n"
+                                + "Cậu hãy đi cứu nó giúp tôi với, bé nó tên là %8.. rất cám ơn cậu và hứa "
+                                + "sẽ tặng cậu 1 thứ xứng đáng");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_7_0:
+                break;
+            case ConstTask.TASK_7_1:
+                break;
+            case ConstTask.TASK_7_2:
+                npcSay(player, ConstTask.NPC_TTVT,
+                        "Ôi, tôi thật sự cám ơn cậu, " + player.name + ", con bé đã bình an trở về\n"
+                                + "Để báo đáp ơn này, tôi sẽ miễn phí cho cậu đi phi thuyền của tôi, cậu có thể tới bất kỳ nơi nào cậu muốn\n"
+                                + "Cứ lúc nào cần hãy đến đây nhé..\n"
+                                + "..à mà bé nhà tôi nó cũng đang đứng ở trước %1 đó, nó có bán vài vật phẩm ở đó\n"
+                                + "Cậu hãy tới trò chuyện với bé nó nhé..");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_8_0:
+                break;
+            case ConstTask.TASK_8_1:
+                Item capsule = ItemService.gI().createNewItem((short) 193, 30);
+                InventoryService.gI().addItemBag(player, capsule, 0);
+                npcSay(player, ConstTask.NPC_SHOP_LANG,
+                        "Hiện tại em vẫn khỏe anh ạ, hơi bị trầy xước tí thôi nhưng không sao\n"
+                                + "Em thực sự cảm ơn anh đã cứu em, nếu không có anh thì giờ này cũng không biết em sẽ thế nào nữa\n"
+                                + "À em có cái món này, tuy nó không quá giá trị nhưng em mong anh nhận cho em vui");
+                break;
+            case ConstTask.TASK_8_2:
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Cháu trai của ông, con làm ông tự hào lắm. Con đã biết dùng sức mạnh của mình để giúp kẻ yếu\n"
+                                + "Bây giờ con đã trưởng thành thực sự rồi, ông sẽ bàn giao con lại cho %10 - người "
+                                + "bạn lâu ngày không gặp của ông\n"
+                                + "Con hãy tìm đường tới %11 và gửi lời chào của ông tới lão ấy nhé\n"
+                                + "Đi đi con...");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_9_0:
+                break;
+            case ConstTask.TASK_9_1:
+                npcSay(player, ConstTask.NPC_QUY_LAO,
+                        "Chào cậu bé, cháu có phải cháu nội ông %2 phải không?\n"
+                                + "Ta cũng đã gặp cháu 1 lần hồi cháu còn bé xíu à\n"
+                                + "Bây giờ cháu muốn ta nhận cháu làm đệ tử à? Ta cũng không biết thực lực của cháu hiện tại như nào nữa\n"
+                                + "Cháu bé hãy đi đánh mấy con %12 ở quanh đây thể hiện tài năng và ta sẽ coi như đó là học phí nhé");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_10_0:
+                break;
+            case ConstTask.TASK_10_1:
+                break;
+            case ConstTask.TASK_10_2:
+                Item skill2 = ItemService.gI().createNewItem((short) (player.gender == 0 ? 94 : player.gender == 1 ? 101 : 108), 1);
+                InventoryService.gI().addItemBag(player, skill2, 0);
+                npcSay(player, ConstTask.NPC_QUY_LAO,
+                        "Tốt lắm, bây giờ con đã chính thức trở thành đệ tử của ta\n"
+                                + "Ta sẽ dạy con 1 tuyệt chiêu đặc biệt của ta\n"
+                                + "Bây giờ con hãy đi kết bạn với những người xung quanh đây đi, thêm 1 người bạn bớt 1 kẻ thù mà con\n"
+                                + "Mà lưu ý là tránh kết bạn với những người có bang hội nhé, họ không là kẻ thù cũng không nên là bạn");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_11_0:
+                break;
+            case ConstTask.TASK_11_1:
+                break;
+            case ConstTask.TASK_11_2:
+                break;
+            case ConstTask.TASK_11_3:
+                npcSay(player, ConstTask.NPC_QUY_LAO,
+                        "Giờ đây xã giao của con đã tiến bộ hơn rất nhiều rồi\n"
+                                + "Bây giờ con hãy về nhà xin ông %2 rằng con sẽ vào bang hội nhé\n"
+                                + "Ta sợ lão ấy không đồng ý lại quay sang trách móc cái thân già này..\n"
+                                + "Đi đi con, nói khéo lão ấy nhé.");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_12_0:
+                break;
+            case ConstTask.TASK_12_1:
+                npcSay(player, ConstTask.NPC_NHA,
+                        "Con muốn tham gia vào bang hội á? Haizz, cái lão già này lại dạy hư cháu ông rồi\n"
+                                + "Con muốn thì cũng được thôi, nhưng con phải biết lựa chọn được bang hội nào tốt đấy nhé..\n"
+                                + "..xã hội này có nhiều thành phần lắm, cũng chỉ vì an nguy của con nên ông chỉ biết dặn dò vậy\n"
+                                + "Chúc con may mắn trên con đường con chọn, mà luôn nhớ rằng con phải là 1 công dân tốt đấy nhé..");
+                break;
+            case ConstTask.TASK_12_2:
+                npcSay(player, ConstTask.NPC_QUY_LAO,
+                        "Cuối cùng lão ấy cũng đồng ý rồi à? Tốt lắm\n"
+                                + "Bây giờ con hãy cùng những người bạn con vừa kết bạn tạo thành 1 bang hội đi nhé\n"
+                                + "Khi nào đủ 5 thành viên bang hãy tới đây ta sẽ giao nhiệm vụ cho tất cả các con");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_13_0:
+                break;
+            case ConstTask.TASK_13_1:
+                npcSay(player, ConstTask.NPC_QUY_LAO,
+                        "Tốt lắm, con đã có những người đồng đội kề vai sát cánh rồi\n"
+                                + "Bây giờ con và 3 người họ hãy thể hiện tinh thần đoàn kết đi nào\n"
+                                + "Cách phối hợp nhau làm nhiệm vụ, cách cư xử với nhau đó là hiện thân của tâm tính mỗi người\n"
+                                + "Các con hãy đối nhân xử thế với nhau, hãy cùng hợp sức tiêu diệt lũ quái vật nhé");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_14_0:
+                break;
+            case ConstTask.TASK_14_1:
+                break;
+            case ConstTask.TASK_14_2: //heo rừng
+                break;
+            case ConstTask.TASK_14_3:
+                npcSay(player, ConstTask.NPC_QUY_LAO,
+                        "Giỏi lắm các con!\n"
+                                + "...Hiện tại có vài chủng quái vật mới đổ bộ lên hành tinh chúng ta\n"
+                                + "Con hãy cùng 3 người trong bang lên đường tiêu diệt chúng nhé\n"
+                                + "Dân chúng đặt niềm tin vào các con hết đấy..\n"
+                                + "Đi đi...");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_15_0:
+                break;
+            case ConstTask.TASK_15_1: //bulon
+                break;
+            case ConstTask.TASK_15_2:
+                break;
+            case ConstTask.TASK_15_3:
+                npcSay(player, ConstTask.NPC_QUY_LAO,
+                        "Giỏi lắm các con\n"
+                                + "Còn 1 vài con quái vật đầu sỏ nữa\n"
+                                + "Con hãy tiêu diệt nốt chúng đi nhé..");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_16_0:
+                break;
+            case ConstTask.TASK_16_1: //taubourine
+                break;
+            case ConstTask.TASK_16_2:
+                break;
+            case ConstTask.TASK_16_3:
+                npcSay(player, ConstTask.NPC_QUY_LAO,
+                        "Con thực sự làm ta ngạc nhiên đấy, không uổng công ta truyền dạy võ công\n"
+                                + "Bên ngoài còn rất nhiều kẻ thù nguy hiểm, nên con phải không ngừng luyện tập nhé\n"
+                                + "Lại có chuyện xảy ra rồi, Cui - một người họ hàng xa của họ hàng ta - đang gặp chuyện\n"
+                                + "Con hãy tới thành phố Vegeta hỏi thăm tình hình cậu ta nhé! Đi đi con..");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_17_0:
+                break;
+            case ConstTask.TASK_17_1:
+                npcSay(player, ConstNpc.CUI,
+                        "Chào cậu, cậu là đệ tử của %10 phải không\n"
+                                + "Bọn người ngoài hành tinh cầm đầu bởi tên Fide đã và đang đổ bộ vào quê hương của tôi..\n"
+                                + "..chúng tàn sát hết dân lành và hủy hoại quê hương chúng tôi\n"
+                                + "Cậu hãy giúp tôi 1 tay tiêu diệt bọn chúng nhé"); //need retext
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_18_0:
+                break;
+            case ConstTask.TASK_18_1:
+                break;
+            case ConstTask.TASK_18_2:
+                break;
+            case ConstTask.TASK_18_3:
+                break;
+            case ConstTask.TASK_18_4:
+                break;
+            case ConstTask.TASK_18_5:
+                npcSay(player, ConstNpc.CUI,
+                        "Cảm ơn cậu đã hỗ trợ tôi tiêu diệt bọn lính tay sai Fide\n"
+                                + "3 tên cầm đầu chúng đang tức giận lắm, tôi thì không đủ mạnh để chống lại bọn chúng\n"
+                                + "...");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_19_0:
+                break;
+            case ConstTask.TASK_19_1:
+                break;
+            case ConstTask.TASK_19_2:
+                break;
+            case ConstTask.TASK_19_3:
+                npcSay(player, ConstNpc.CUI,
+                        "Cảm ơn cậu đã tiêu diệt giúp tôi lũ đệ tử của Fide\n"
+                                + "Dưới trướng Fide còn có 1 đội gồm 5 thành viên được chúng gọi là Tiều Đội Sát Thủ\n"
+                                + "Chúng rất mạnh và rất trung thành với tên Fide\n"
+                                + "Bọn chúng vừa được cử tới đi trả thù cho 3 tên đệ tử cậu vừa tiêu diệt\n"
+                                + "Hãy chống lại bọn chúng giúp tôi nhé....");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_20_0:
+                break;
+            case ConstTask.TASK_20_1:
+                break;
+            case ConstTask.TASK_20_2:
+                break;
+            case ConstTask.TASK_20_3:
+                break;
+            case ConstTask.TASK_20_4:
+                break;
+            case ConstTask.TASK_20_5:
+                break;
+            case ConstTask.TASK_20_6:
+                npcSay(player, ConstNpc.CUI,
+                        "Tốt lắm cậu..\n"
+                                + "Không ổn rồi, tên Fide đại ca đã đích thân tới..\n"
+                                + "Cậu hãy tới núi khỉ vàng tiêu diệt hắn giúp tôi nhé\n"
+                                + "Dân làng sẽ biết ơn cậu rất nhiều đấy...");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_21_0:
+                break;
+            case ConstTask.TASK_21_1:
+                break;
+            case ConstTask.TASK_21_2:
+                break;
+            case ConstTask.TASK_21_3:
+                break;
+            case ConstTask.TASK_21_4:
+                npcSay(player, ConstNpc.CUI,
+                        "Cảm ơn cậu đã giúp chúng tôi tiêu diệt bọn Fide\n"
+                                + "Cậu xứng đáng là người hùng của chúng tôi đó...");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_22_0:
+                npcSay(player, ConstNpc.BUNMA_TL,
+                        "Cứu bọn tôi với, bọn Dr.Korê");
+                break;
+            case ConstTask.TASK_22_1:
+                break;
+            case ConstTask.TASK_22_2:
+                break;
+            case ConstTask.TASK_22_3:
+                break;
+            case ConstTask.TASK_22_4:
+                npcSay(player, ConstNpc.BUNMA_TL,
+                        "Cứu bọn tôi với, bọn Kingkong");
                 //--------------------------------------------------------------
-                case ConstTask.TASK_1_0:
-                    if (isCurrentTask(player, idTaskCustom)) {
-                        Service.getInstance().sendThongBao(player, "Bạn đánh được "
-                                + player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).count + "/"
-                                + player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).maxCount + " mộc nhân");
-                    }
-                    break;
-                case ConstTask.TASK_1_1:
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Thể lực của con cũng khá tốt\n"
-                            + "Con à, dạo gần đây dân làng của chúng ta gặp phải vài chuyện\n"
-                            + "Bên cạnh làng ta đột nhiên xuất hiện lũ quái vật\n"
-                            + "Nó tàn sát dân làng và phá hoại nông sản làng ta\n"
-                            + "Con hãy tìm đánh chúng và đem về đây 10 cái đùi gà, 2 ông cháu mình sẽ để dành ăn dần\n"
-                            + "Đây là tấm bản đồ của vùng này, con hãy xem để tìm đến %3\n"
-                            + "Con có thể sử dụng đậu thần khi hết HP hoặc KI, bằng cách nhấn vào nút có hình trái tim "
-                            + "bên góc phải dưới màn hình\n"
-                            + "Nhanh lên, ông đói lắm rồi");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_2_0:
-                    break;
-                case ConstTask.TASK_2_1:
-                    InventoryService.gI().subQuantityItemsBag(player, InventoryService.gI().findItemBagByTemp(player, 73), 10);
-                    InventoryService.gI().sendItemBags(player);
-                    Service.getInstance().dropItemMapForMe(player, player.zone.getItemMapByTempId(74));
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Tốt lắm, đùi gà đây rồi, haha. Ông sẽ nướng tại đống lửa gần kia con có thể ăn bất cứ lúc nào nếu muốn\n"
-                            + "À cháu này, vừa nãy ông có nghe thấy 1 tiếng động lớn, hình như có 1 vật thể rơi tại %5, con hãy đến kiểm tra xem\n"
-                            + "Con cũng có thể dùng tiềm năng bản thân để nâng HP, KI hoặc sức đánh");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_3_0:
-                    break;
-                case ConstTask.TASK_3_1:
-                    break;
-                case ConstTask.TASK_3_2:
-                    InventoryService.gI().subQuantityItemsBag(player, InventoryService.gI().findItemBagByTemp(player, 78), 1);
-                    InventoryService.gI().sendItemBags(player);
-                    Service.getInstance().sendFlagBag(player);
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Có em bé trong phi thuyền rơi xuống à, ông cứ tưởng là sao băng chứ\n"
-                            + "Ông sẽ đặt tên cho em nó là Goku, từ giờ nó sẽ là thành viên trong gia đình ta\n"
-                            + "Nãy ông mới nhận được tin có bầy mãnh thú xuất hiện tại Trạm phi thuyền\n"
-                            + "Bọn chúng vừa đổ bộ xuống trái đất để trả thù việc con sát hại con chúng\n"
-                            + "Con hãy đi tiêu diệt chúng để giúp dân làng tại đó luôn nhé");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_4_0:
-                    if (isCurrentTask(player, idTaskCustom)) {
-                        Service.getInstance().sendThongBao(player, "Bạn đánh được "
-                                + player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).count + "/"
-                                + player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).maxCount
-                                + transformName(player, " %4 mẹ"));
-                    }
-                    break;
-                case ConstTask.TASK_4_1:
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Ông rất tự hào về con\n"
-                            + "Ông cho con cuốn bí kíp này để nâng cao võ học\n"
-                            + "Hãy dùng sức mạnh của mình trừ gian diệt ác bảo vệ dân lành con nhé\n"
-                            + "Bây giờ con hãy đi tập luyện đi, khi nào mạnh hơn thì quay về đây ông giao cho nhiệm vụ mới\n"
-                            + "Đi đi..");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_5_0:
-                    break;
-                case ConstTask.TASK_5_1:
-                    break;
-                case ConstTask.TASK_5_2:
-                    break;
-                case ConstTask.TASK_5_3:
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Con bây giờ là người khỏe nhất vùng này rồi. Con có thể tới trạm tàu vũ trụ "
-                            + "gặp %7, cậu ấy có thể đưa con tới bất cứ nơi nào\n"
-                            + "Con hãy tới chào hỏi cậu đi");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_6_0:
-                    break;
-                case ConstTask.TASK_6_1:
-                    npcSay(player, ConstTask.NPC_TTVT,
-                            "Ôi, tôi chào cậu " + player.name + ", tôi nghe danh cậu đã lâu trong vùng này mà "
-                            + "tới bây giờ mới có thể gặp\n"
-                            + "Cậu giúp tôi điều này với, đứa nhỏ nhà tôi nó lên đường đi tìm cái thứ "
-                            + "gọi là ngọc rồng gì đó,..\n"
-                            + ".. hồi nãy có người báo tôi rằng trên đường bé gặp chuyện không may, bé nó bị bọn %9 bắt\n"
-                            + "Cậu hãy đi cứu nó giúp tôi với, bé nó tên là %8.. rất cám ơn cậu và hứa "
-                            + "sẽ tặng cậu 1 thứ xứng đáng");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_7_0:
-                    break;
-                case ConstTask.TASK_7_1:
-                    break;
-                case ConstTask.TASK_7_2:
-                    npcSay(player, ConstTask.NPC_TTVT,
-                            "Ôi, tôi thật sự cám ơn cậu, " + player.name + ", con bé đã bình an trở về\n"
-                            + "Để báo đáp ơn này, tôi sẽ miễn phí cho cậu đi phi thuyền của tôi, cậu có thể tới bất kỳ nơi nào cậu muốn\n"
-                            + "Cứ lúc nào cần hãy đến đây nhé..\n"
-                            + "..à mà bé nhà tôi nó cũng đang đứng ở trước %1 đó, nó có bán vài vật phẩm ở đó\n"
-                            + "Cậu hãy tới trò chuyện với bé nó nhé..");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_8_0:
-                    break;
-                case ConstTask.TASK_8_1:
-                    Item capsule = ItemService.gI().createNewItem((short) 193, 30);
-                    InventoryService.gI().addItemBag(player, capsule, 0);
-                    npcSay(player, ConstTask.NPC_SHOP_LANG,
-                            "Hiện tại em vẫn khỏe anh ạ, hơi bị trầy xước tí thôi nhưng không sao\n"
-                            + "Em thực sự cảm ơn anh đã cứu em, nếu không có anh thì giờ này cũng không biết em sẽ thế nào nữa\n"
-                            + "À em có cái món này, tuy nó không quá giá trị nhưng em mong anh nhận cho em vui");
-                    break;
-                case ConstTask.TASK_8_2:
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Cháu trai của ông, con làm ông tự hào lắm. Con đã biết dùng sức mạnh của mình để giúp kẻ yếu\n"
-                            + "Bây giờ con đã trưởng thành thực sự rồi, ông sẽ bàn giao con lại cho %10 - người "
-                            + "bạn lâu ngày không gặp của ông\n"
-                            + "Con hãy tìm đường tới %11 và gửi lời chào của ông tới lão ấy nhé\n"
-                            + "Đi đi con...");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_9_0:
-                    break;
-                case ConstTask.TASK_9_1:
-                    npcSay(player, ConstTask.NPC_QUY_LAO,
-                            "Chào cậu bé, cháu có phải cháu nội ông %2 phải không?\n"
-                            + "Ta cũng đã gặp cháu 1 lần hồi cháu còn bé xíu à\n"
-                            + "Bây giờ cháu muốn ta nhận cháu làm đệ tử à? Ta cũng không biết thực lực của cháu hiện tại như nào nữa\n"
-                            + "Cháu bé hãy đi đánh mấy con %12 ở quanh đây thể hiện tài năng và ta sẽ coi như đó là học phí nhé");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_10_0:
-                    break;
-                case ConstTask.TASK_10_1:
-                    break;
-                case ConstTask.TASK_10_2:
-                    Item skill2 = ItemService.gI().createNewItem((short) (player.gender == 0 ? 94 : player.gender == 1 ? 101 : 108), 1);
-                    InventoryService.gI().addItemBag(player, skill2, 0);
-                    npcSay(player, ConstTask.NPC_QUY_LAO,
-                            "Tốt lắm, bây giờ con đã chính thức trở thành đệ tử của ta\n"
-                            + "Ta sẽ dạy con 1 tuyệt chiêu đặc biệt của ta\n"
-                            + "Bây giờ con hãy đi kết bạn với những người xung quanh đây đi, thêm 1 người bạn bớt 1 kẻ thù mà con\n"
-                            + "Mà lưu ý là tránh kết bạn với những người có bang hội nhé, họ không là kẻ thù cũng không nên là bạn");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_11_0:
-                    break;
-                case ConstTask.TASK_11_1:
-                    break;
-                case ConstTask.TASK_11_2:
-                    break;
-                case ConstTask.TASK_11_3:
-                    npcSay(player, ConstTask.NPC_QUY_LAO,
-                            "Giờ đây xã giao của con đã tiến bộ hơn rất nhiều rồi\n"
-                            + "Bây giờ con hãy về nhà xin ông %2 rằng con sẽ vào bang hội nhé\n"
-                            + "Ta sợ lão ấy không đồng ý lại quay sang trách móc cái thân già này..\n"
-                            + "Đi đi con, nói khéo lão ấy nhé.");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_12_0:
-                    break;
-                case ConstTask.TASK_12_1:
-                    npcSay(player, ConstTask.NPC_NHA,
-                            "Con muốn tham gia vào bang hội á? Haizz, cái lão già này lại dạy hư cháu ông rồi\n"
-                            + "Con muốn thì cũng được thôi, nhưng con phải biết lựa chọn được bang hội nào tốt đấy nhé..\n"
-                            + "..xã hội này có nhiều thành phần lắm, cũng chỉ vì an nguy của con nên ông chỉ biết dặn dò vậy\n"
-                            + "Chúc con may mắn trên con đường con chọn, mà luôn nhớ rằng con phải là 1 công dân tốt đấy nhé..");
-                    break;
-                case ConstTask.TASK_12_2:
-                    npcSay(player, ConstTask.NPC_QUY_LAO,
-                            "Cuối cùng lão ấy cũng đồng ý rồi à? Tốt lắm\n"
-                            + "Bây giờ con hãy cùng những người bạn con vừa kết bạn tạo thành 1 bang hội đi nhé\n"
-                            + "Khi nào đủ 5 thành viên bang hãy tới đây ta sẽ giao nhiệm vụ cho tất cả các con");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_13_0:
-                    break;
-                case ConstTask.TASK_13_1:
-                    npcSay(player, ConstTask.NPC_QUY_LAO,
-                            "Tốt lắm, con đã có những người đồng đội kề vai sát cánh rồi\n"
-                            + "Bây giờ con và 3 người họ hãy thể hiện tinh thần đoàn kết đi nào\n"
-                            + "Cách phối hợp nhau làm nhiệm vụ, cách cư xử với nhau đó là hiện thân của tâm tính mỗi người\n"
-                            + "Các con hãy đối nhân xử thế với nhau, hãy cùng hợp sức tiêu diệt lũ quái vật nhé");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_14_0:
-                    break;
-                case ConstTask.TASK_14_1:
-                    break;
-                case ConstTask.TASK_14_2: //heo rừng
-                    break;
-                case ConstTask.TASK_14_3:
-                    npcSay(player, ConstTask.NPC_QUY_LAO,
-                            "Giỏi lắm các con!\n"
-                            + "...Hiện tại có vài chủng quái vật mới đổ bộ lên hành tinh chúng ta\n"
-                            + "Con hãy cùng 3 người trong bang lên đường tiêu diệt chúng nhé\n"
-                            + "Dân chúng đặt niềm tin vào các con hết đấy..\n"
-                            + "Đi đi...");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_15_0:
-                    break;
-                case ConstTask.TASK_15_1: //bulon
-                    break;
-                case ConstTask.TASK_15_2:
-                    break;
-                case ConstTask.TASK_15_3:
-                    npcSay(player, ConstTask.NPC_QUY_LAO,
-                            "Giỏi lắm các con\n"
-                            + "Còn 1 vài con quái vật đầu sỏ nữa\n"
-                            + "Con hãy tiêu diệt nốt chúng đi nhé..");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_16_0:
-                    break;
-                case ConstTask.TASK_16_1: //taubourine
-                    break;
-                case ConstTask.TASK_16_2:
-                    break;
-                case ConstTask.TASK_16_3:
-                    npcSay(player, ConstTask.NPC_QUY_LAO,
-                            "Con thực sự làm ta ngạc nhiên đấy, không uổng công ta truyền dạy võ công\n"
-                            + "Bên ngoài còn rất nhiều kẻ thù nguy hiểm, nên con phải không ngừng luyện tập nhé\n"
-                            + "Lại có chuyện xảy ra rồi, Cui - một người họ hàng xa của họ hàng ta - đang gặp chuyện\n"
-                            + "Con hãy tới thành phố Vegeta hỏi thăm tình hình cậu ta nhé! Đi đi con..");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_17_0:
-                    break;
-                case ConstTask.TASK_17_1:
-                    npcSay(player, ConstNpc.CUI,
-                            "Chào cậu, cậu là đệ tử của %10 phải không\n"
-                            + "Bọn người ngoài hành tinh cầm đầu bởi tên Fide đã và đang đổ bộ vào quê hương của tôi..\n"
-                            + "..chúng tàn sát hết dân lành và hủy hoại quê hương chúng tôi\n"
-                            + "Cậu hãy giúp tôi 1 tay tiêu diệt bọn chúng nhé"); //need retext
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_18_0:
-                    break;
-                case ConstTask.TASK_18_1:
-                    break;
-                case ConstTask.TASK_18_2:
-                    break;
-                case ConstTask.TASK_18_3:
-                    break;
-                case ConstTask.TASK_18_4:
-                    break;
-                case ConstTask.TASK_18_5:
-                    npcSay(player, ConstNpc.CUI,
-                            "Cảm ơn cậu đã hỗ trợ tôi tiêu diệt bọn lính tay sai Fide\n"
-                            + "3 tên cầm đầu chúng đang tức giận lắm, tôi thì không đủ mạnh để chống lại bọn chúng\n"
-                            + "...");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_19_0:
-                    break;
-                case ConstTask.TASK_19_1:
-                    break;
-                case ConstTask.TASK_19_2:
-                    break;
-                case ConstTask.TASK_19_3:
-                    npcSay(player, ConstNpc.CUI,
-                            "Cảm ơn cậu đã tiêu diệt giúp tôi lũ đệ tử của Fide\n"
-                            + "Dưới trướng Fide còn có 1 đội gồm 5 thành viên được chúng gọi là Tiều Đội Sát Thủ\n"
-                            + "Chúng rất mạnh và rất trung thành với tên Fide\n"
-                            + "Bọn chúng vừa được cử tới đi trả thù cho 3 tên đệ tử cậu vừa tiêu diệt\n"
-                            + "Hãy chống lại bọn chúng giúp tôi nhé....");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_20_0:
-                    break;
-                case ConstTask.TASK_20_1:
-                    break;
-                case ConstTask.TASK_20_2:
-                    break;
-                case ConstTask.TASK_20_3:
-                    break;
-                case ConstTask.TASK_20_4:
-                    break;
-                case ConstTask.TASK_20_5:
-                    break;
-                case ConstTask.TASK_20_6:
-                    npcSay(player, ConstNpc.CUI,
-                            "Tốt lắm cậu..\n"
-                            + "Không ổn rồi, tên Fide đại ca đã đích thân tới..\n"
-                            + "Cậu hãy tới núi khỉ vàng tiêu diệt hắn giúp tôi nhé\n"
-                            + "Dân làng sẽ biết ơn cậu rất nhiều đấy...");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_21_0:
-                    break;
-                case ConstTask.TASK_21_1:
-                    break;
-                case ConstTask.TASK_21_2:
-                    break;
-                case ConstTask.TASK_21_3:
-                    break;
-                case ConstTask.TASK_21_4:
-                    npcSay(player, ConstNpc.CUI,
-                            "Cảm ơn cậu đã giúp chúng tôi tiêu diệt bọn Fide\n"
-                            + "Cậu xứng đáng là người hùng của chúng tôi đó...");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_22_0:
-                    npcSay(player, ConstNpc.BUNMA_TL,
-                            "Cứu bọn tôi với, bọn Dr.Korê");
-                    break;
-                case ConstTask.TASK_22_1:
-                    break;
-                case ConstTask.TASK_22_2:
-                    break;
-                case ConstTask.TASK_22_3:
-                    break;
-                case ConstTask.TASK_22_4:
-                    npcSay(player, ConstNpc.BUNMA_TL,
-                            "Cứu bọn tôi với, bọn Kingkong");
-                //--------------------------------------------------------------
-                case ConstTask.TASK_23_0:
-                    break;
-                case ConstTask.TASK_23_1:
-                    break;
-                case ConstTask.TASK_23_2:
-                    break;
-                case ConstTask.TASK_23_3:
-                    break;
-                case ConstTask.TASK_23_4:
-                    npcSay(player, ConstNpc.BUNMA_TL,
-                            "Cứu bọn tôi với, xên bọ hung");
-                    break;
-                //--------------------------------------------------------------
-                case ConstTask.TASK_24_0:
-                    break;
-                case ConstTask.TASK_24_1:
-                    break;
-                case ConstTask.TASK_24_2:
-                    break;
-                case ConstTask.TASK_24_3:
-                    break;
-                case ConstTask.TASK_24_4:
-                    break;
-                case ConstTask.TASK_24_5:
-                    npcSay(player, ConstNpc.BUNMA_TL,
-                            "Thanks");
-                    break;
-                case ConstTask.TASK_25_0:// nag sd goc
-                    npcSay(player, ConstNpc.THAN_MEO_KARIN,
-                            "Ta nghĩ con đã quá vất vả để đến được đây ta sẽ next nhiệm vụ cho con"
-                            + "\nnhớ nạp tiền ủng hộ server nhé con không thằng admin thiếu tiền server nhủm đấy=))))");
-                    break;
-                case ConstTask.TASK_25_1:// capsule
-                    break;
-                case ConstTask.TASK_25_2://den vo dai
-                    break;
-                case ConstTask.TASK_25_3:// xen con
-                    break;
-                case ConstTask.TASK_25_4:// tieu diet xen po heo
-                    break;
-                case ConstTask.TASK_25_5:
-                    npcSay(player, ConstNpc.BUNMA_TL,
-                            "Tên admin này lười lắm chả viết gì cả...");
-                    break;
-                case ConstTask.TASK_26_0://di theo osin
-                    npcSay(player, ConstNpc.OSIN,
-                            "Những tên ở đây rất manh động, tôi sẽ đi theo dõi tình hình\nBạn hãy đứng đợi tôi vào lúc 12h nhé...");
-                    break;
-                case ConstTask.TASK_26_1://Hạ vua địa ngục Drabura
-                    break;
-                case ConstTask.TASK_26_2://Hạ Pui Pui
-                    break;
-                case ConstTask.TASK_26_3://Hạ Pui Pui lần 2
-                    break;
-                case ConstTask.TASK_26_4://Hạ Yacôn
-                    break;
-                case ConstTask.TASK_26_5://Hạ Drabura lần 2
-                    break;
-                case ConstTask.TASK_26_6://Hạ Mabư
-                    break;
-                case ConstTask.TASK_26_7://Báo cáo Ôsin
-                    npcSay(player, ConstNpc.OSIN,
-                            "Tên admin này lười lắm chả viết cái gì....");
-                    break;
+            case ConstTask.TASK_23_0:
+                break;
+            case ConstTask.TASK_23_1:
+                break;
+            case ConstTask.TASK_23_2:
+                break;
+            case ConstTask.TASK_23_3:
+                break;
+            case ConstTask.TASK_23_4:
+                npcSay(player, ConstNpc.BUNMA_TL,
+                        "Cứu bọn tôi với, xên bọ hung");
+                break;
+            //--------------------------------------------------------------
+            case ConstTask.TASK_24_0:
+                break;
+            case ConstTask.TASK_24_1:
+                break;
+            case ConstTask.TASK_24_2:
+                break;
+            case ConstTask.TASK_24_3:
+                break;
+            case ConstTask.TASK_24_4:
+                break;
+            case ConstTask.TASK_24_5:
+                npcSay(player, ConstNpc.BUNMA_TL,
+                        "Thanks");
+                break;
+            case ConstTask.TASK_25_0:// nag sd goc
+                npcSay(player, ConstNpc.THAN_MEO_KARIN,
+                        "Ta nghĩ con đã quá vất vả để đến được đây ta sẽ next nhiệm vụ cho con"
+                                + "\nnhớ nạp tiền ủng hộ server nhé con không thằng admin thiếu tiền server nhủm đấy=))))");
+                break;
+            case ConstTask.TASK_25_1:// capsule
+                break;
+            case ConstTask.TASK_25_2://den vo dai
+                break;
+            case ConstTask.TASK_25_3:// xen con
+                break;
+            case ConstTask.TASK_25_4:// tieu diet xen po heo
+                break;
+            case ConstTask.TASK_25_5:
+                npcSay(player, ConstNpc.BUNMA_TL,
+                        "Tên admin này lười lắm chả viết gì cả...");
+                break;
+            case ConstTask.TASK_26_0://di theo osin
+                npcSay(player, ConstNpc.OSIN,
+                        "Những tên ở đây rất manh động, tôi sẽ đi theo dõi tình hình\nBạn hãy đứng đợi tôi vào lúc 12h nhé...");
+                break;
+            case ConstTask.TASK_26_1://Hạ vua địa ngục Drabura
+                break;
+            case ConstTask.TASK_26_2://Hạ Pui Pui
+                break;
+            case ConstTask.TASK_26_3://Hạ Pui Pui lần 2
+                break;
+            case ConstTask.TASK_26_4://Hạ Yacôn
+                break;
+            case ConstTask.TASK_26_5://Hạ Drabura lần 2
+                break;
+            case ConstTask.TASK_26_6://Hạ Mabư
+                break;
+            case ConstTask.TASK_26_7://Báo cáo Ôsin
+                npcSay(player, ConstNpc.OSIN,
+                        "Tên admin này lười lắm chả viết cái gì....");
+                break;
             }
             InventoryService.gI().sendItemBags(player);
             return true;
@@ -1020,30 +1027,30 @@ public class TaskService {
     //Thưởng nhiệm vụ
     private void rewardDoneTask(Player player) {
         switch (player.playerTask.taskMain.id) {
-            case 0:
-                Service.getInstance().addSMTN(player, (byte) 0, 500, false);
-                Service.getInstance().addSMTN(player, (byte) 1, 500, false);
-                break;
-            case 1:
-                Service.getInstance().addSMTN(player, (byte) 0, 1000, false);
-                Service.getInstance().addSMTN(player, (byte) 1, 1000, false);
-                break;
-            case 2:
-                Service.getInstance().addSMTN(player, (byte) 0, 1200, false);
-                Service.getInstance().addSMTN(player, (byte) 1, 1200, false);
-                break;
-            case 3:
-                Service.getInstance().addSMTN(player, (byte) 0, 3000, false);
-                Service.getInstance().addSMTN(player, (byte) 1, 3000, false);
-                break;
-            case 4:
-                Service.getInstance().addSMTN(player, (byte) 0, 7000, false);
-                Service.getInstance().addSMTN(player, (byte) 1, 7000, false);
-                break;
-            case 5:
-                Service.getInstance().addSMTN(player, (byte) 0, 20000, false);
-                Service.getInstance().addSMTN(player, (byte) 1, 20000, false);
-                break;
+        case 0:
+            Service.getInstance().addSMTN(player, (byte) 0, 500, false);
+            Service.getInstance().addSMTN(player, (byte) 1, 500, false);
+            break;
+        case 1:
+            Service.getInstance().addSMTN(player, (byte) 0, 1000, false);
+            Service.getInstance().addSMTN(player, (byte) 1, 1000, false);
+            break;
+        case 2:
+            Service.getInstance().addSMTN(player, (byte) 0, 1200, false);
+            Service.getInstance().addSMTN(player, (byte) 1, 1200, false);
+            break;
+        case 3:
+            Service.getInstance().addSMTN(player, (byte) 0, 3000, false);
+            Service.getInstance().addSMTN(player, (byte) 1, 3000, false);
+            break;
+        case 4:
+            Service.getInstance().addSMTN(player, (byte) 0, 7000, false);
+            Service.getInstance().addSMTN(player, (byte) 1, 7000, false);
+            break;
+        case 5:
+            Service.getInstance().addSMTN(player, (byte) 0, 20000, false);
+            Service.getInstance().addSMTN(player, (byte) 1, 20000, false);
+            break;
         }
     }
 
@@ -1069,31 +1076,31 @@ public class TaskService {
         } else if (id == ConstTask.MAP_200) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? 1 : (player.gender == ConstPlayer.NAMEC
-                            ? 8 : 15);
+                    ? 8 : 15);
         } else if (id == ConstTask.MAP_VACH_NUI) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? 39 : (player.gender == ConstPlayer.NAMEC
-                            ? 40 : 41);
+                    ? 40 : 41);
         } else if (id == ConstTask.MAP_200) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? 2 : (player.gender == ConstPlayer.NAMEC
-                            ? 9 : 16);
+                    ? 9 : 16);
         } else if (id == ConstTask.MAP_TTVT) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? 24 : (player.gender == ConstPlayer.NAMEC
-                            ? 25 : 26);
+                    ? 25 : 26);
         } else if (id == ConstTask.MAP_QUAI_BAY_600) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? 3 : (player.gender == ConstPlayer.NAMEC
-                            ? 11 : 17);
+                    ? 11 : 17);
         } else if (id == ConstTask.MAP_LANG) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? 0 : (player.gender == ConstPlayer.NAMEC
-                            ? 7 : 14);
+                    ? 7 : 14);
         } else if (id == ConstTask.MAP_QUY_LAO) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? 5 : (player.gender == ConstPlayer.NAMEC
-                            ? 13 : 20);
+                    ? 13 : 20);
         }
         return id;
     }
@@ -1102,19 +1109,19 @@ public class TaskService {
         if (id == ConstTask.NPC_NHA) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? ConstNpc.ONG_GOHAN : (player.gender == ConstPlayer.NAMEC
-                            ? ConstNpc.ONG_MOORI : ConstNpc.ONG_PARAGUS);
+                    ? ConstNpc.ONG_MOORI : ConstNpc.ONG_PARAGUS);
         } else if (id == ConstTask.NPC_TTVT) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? ConstNpc.DR_DRIEF : (player.gender == ConstPlayer.NAMEC
-                            ? ConstNpc.CARGO : ConstNpc.CUI);
+                    ? ConstNpc.CARGO : ConstNpc.CUI);
         } else if (id == ConstTask.NPC_SHOP_LANG) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? ConstNpc.BUNMA : (player.gender == ConstPlayer.NAMEC
-                            ? ConstNpc.DENDE : ConstNpc.APPULE);
+                    ? ConstNpc.DENDE : ConstNpc.APPULE);
         } else if (id == ConstTask.NPC_QUY_LAO) {
             return player.gender == ConstPlayer.TRAI_DAT
                     ? ConstNpc.QUY_LAO_KAME : (player.gender == ConstPlayer.NAMEC
-                            ? ConstNpc.TRUONG_LAO_GURU : ConstNpc.VUA_VEGETA);
+                    ? ConstNpc.TRUONG_LAO_GURU : ConstNpc.VUA_VEGETA);
         }
         return id;
     }
@@ -1123,760 +1130,760 @@ public class TaskService {
     private String transformName(Player player, String text) {
         text = text.replaceAll(ConstTask.TEN_NPC_QUY_LAO, player.gender == ConstPlayer.TRAI_DAT
                 ? "Quy Lão Kame" : (player.gender == ConstPlayer.NAMEC
-                        ? "Trưởng lão Guru" : "Vua Vegeta"));
+                ? "Trưởng lão Guru" : "Vua Vegeta"));
         text = text.replaceAll(ConstTask.TEN_MAP_QUY_LAO, player.gender == ConstPlayer.TRAI_DAT
                 ? "Đảo Kamê" : (player.gender == ConstPlayer.NAMEC
-                        ? "Đảo Guru" : "Vách núi đen"));
+                ? "Đảo Guru" : "Vách núi đen"));
         text = text.replaceAll(ConstTask.TEN_QUAI_3000, player.gender == ConstPlayer.TRAI_DAT
                 ? "ốc mượn hồn" : (player.gender == ConstPlayer.NAMEC
-                        ? "ốc sên" : "heo Xayda mẹ"));
+                ? "ốc sên" : "heo Xayda mẹ"));
         //----------------------------------------------------------------------
         text = text.replaceAll(ConstTask.TEN_LANG, player.gender == ConstPlayer.TRAI_DAT
                 ? "Làng Aru" : (player.gender == ConstPlayer.NAMEC
-                        ? "Làng Mori" : "Làng Kakarot"));
+                ? "Làng Mori" : "Làng Kakarot"));
         text = text.replaceAll(ConstTask.TEN_NPC_NHA, player.gender == ConstPlayer.TRAI_DAT
                 ? "Ông Gôhan" : (player.gender == ConstPlayer.NAMEC
-                        ? "Ông Moori" : "Ông Paragus"));
+                ? "Ông Moori" : "Ông Paragus"));
         text = text.replaceAll(ConstTask.TEN_QUAI_200, player.gender == ConstPlayer.TRAI_DAT
                 ? "khủng long" : (player.gender == ConstPlayer.NAMEC
-                        ? "lợn lòi" : "quỷ đất"));
+                ? "lợn lòi" : "quỷ đất"));
         text = text.replaceAll(ConstTask.TEN_MAP_200, player.gender == ConstPlayer.TRAI_DAT
                 ? "Đồi hoa cúc" : (player.gender == ConstPlayer.NAMEC
-                        ? "Đồi nấm tím" : "Đồi hoang"));
+                ? "Đồi nấm tím" : "Đồi hoang"));
         text = text.replaceAll(ConstTask.TEN_VACH_NUI, player.gender == ConstPlayer.TRAI_DAT
                 ? "Vách núi Aru" : (player.gender == ConstPlayer.NAMEC
-                        ? "Vách núi Moori" : "Vách núi Kakarot"));
+                ? "Vách núi Moori" : "Vách núi Kakarot"));
         text = text.replaceAll(ConstTask.TEN_MAP_500, player.gender == ConstPlayer.TRAI_DAT
                 ? "Thung lũng tre" : (player.gender == ConstPlayer.NAMEC
-                        ? "Thị trấn Moori" : "Làng Plane"));
+                ? "Thị trấn Moori" : "Làng Plane"));
         text = text.replaceAll(ConstTask.TEN_NPC_TTVT, player.gender == ConstPlayer.TRAI_DAT
                 ? "Dr. Brief" : (player.gender == ConstPlayer.NAMEC
-                        ? "Cargo" : "Cui"));
+                ? "Cargo" : "Cui"));
         text = text.replaceAll(ConstTask.TEN_QUAI_BAY_600, player.gender == ConstPlayer.TRAI_DAT
                 ? "thằn lằn bay" : (player.gender == ConstPlayer.NAMEC
-                        ? "phi long" : "quỷ bay"));
+                ? "phi long" : "quỷ bay"));
         text = text.replaceAll(ConstTask.TEN_NPC_SHOP_LANG, player.gender == ConstPlayer.TRAI_DAT
                 ? "Bunma" : (player.gender == ConstPlayer.NAMEC
-                        ? "Dende" : "Appule"));
+                ? "Dende" : "Appule"));
         return text;
     }
 
     public boolean isCurrentTask(Player player, int idTaskCustom) {
         switch (idTaskCustom) {
-            case ConstTask.TASK_0_0:
-                return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_0_1:
-                return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_0_2:
-                return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_0_3:
-                return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_0_4:
-                return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_0_5:
-                return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_0_6:
-                return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_1_0:
-                return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_1_1:
-                return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_1_2:
-                return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_1_3:
-                return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_1_4:
-                return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_1_5:
-                return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_1_6:
-                return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_2_0:
-                return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_2_1:
-                return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_2_2:
-                return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_2_3:
-                return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_2_4:
-                return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_2_5:
-                return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_2_6:
-                return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_3_0:
-                return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_3_1:
-                return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_3_2:
-                return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_3_3:
-                return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_3_4:
-                return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_3_5:
-                return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_3_6:
-                return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_4_0:
-                return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_4_1:
-                return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_4_2:
-                return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_4_3:
-                return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_4_4:
-                return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_4_5:
-                return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_4_6:
-                return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_5_0:
-                return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_5_1:
-                return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_5_2:
-                return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_5_3:
-                return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_5_4:
-                return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_5_5:
-                return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_5_6:
-                return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_6_0:
-                return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_6_1:
-                return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_6_2:
-                return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_6_3:
-                return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_6_4:
-                return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_6_5:
-                return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_6_6:
-                return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_7_0:
-                return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_7_1:
-                return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_7_2:
-                return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_7_3:
-                return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_7_4:
-                return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_7_5:
-                return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_7_6:
-                return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_8_0:
-                return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_8_1:
-                return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_8_2:
-                return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_8_3:
-                return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_8_4:
-                return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_8_5:
-                return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_8_6:
-                return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_9_0:
-                return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_9_1:
-                return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_9_2:
-                return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_9_3:
-                return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_9_4:
-                return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_9_5:
-                return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_9_6:
-                return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_10_0:
-                return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_10_1:
-                return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_10_2:
-                return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_10_3:
-                return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_10_4:
-                return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_10_5:
-                return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_10_6:
-                return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_11_0:
-                return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_11_1:
-                return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_11_2:
-                return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_11_3:
-                return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_11_4:
-                return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_11_5:
-                return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_11_6:
-                return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_12_0:
-                return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_12_1:
-                return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_12_2:
-                return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_12_3:
-                return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_12_4:
-                return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_12_5:
-                return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_12_6:
-                return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_13_0:
-                return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_13_1:
-                return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_13_2:
-                return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_13_3:
-                return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_13_4:
-                return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_13_5:
-                return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_13_6:
-                return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_14_0:
-                return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_14_1:
-                return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_14_2:
-                return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_14_3:
-                return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_14_4:
-                return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_14_5:
-                return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_14_6:
-                return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_15_0:
-                return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_15_1:
-                return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_15_2:
-                return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_15_3:
-                return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_15_4:
-                return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_15_5:
-                return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_15_6:
-                return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_16_0:
-                return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_16_1:
-                return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_16_2:
-                return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_16_3:
-                return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_16_4:
-                return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_16_5:
-                return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_16_6:
-                return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_17_0:
-                return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_17_1:
-                return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_17_2:
-                return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_17_3:
-                return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_17_4:
-                return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_17_5:
-                return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_17_6:
-                return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_18_0:
-                return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_18_1:
-                return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_18_2:
-                return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_18_3:
-                return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_18_4:
-                return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_18_5:
-                return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_18_6:
-                return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_19_0:
-                return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_19_1:
-                return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_19_2:
-                return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_19_3:
-                return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_19_4:
-                return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_19_5:
-                return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_19_6:
-                return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_20_0:
-                return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_20_1:
-                return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_20_2:
-                return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_20_3:
-                return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_20_4:
-                return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_20_5:
-                return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_20_6:
-                return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_21_0:
-                return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_21_1:
-                return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_21_2:
-                return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_21_3:
-                return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_21_4:
-                return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_21_5:
-                return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_21_6:
-                return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_22_0:
-                return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_22_1:
-                return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_22_2:
-                return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_22_3:
-                return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_22_4:
-                return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_22_5:
-                return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_22_6:
-                return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_23_0:
-                return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_23_1:
-                return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_23_2:
-                return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_23_3:
-                return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_23_4:
-                return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_23_5:
-                return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_23_6:
-                return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_24_0:
-                return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_24_1:
-                return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_24_2:
-                return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_24_3:
-                return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_24_4:
-                return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_24_5:
-                return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_24_6:
-                return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_25_0:
-                return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_25_1:
-                return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_25_2:
-                return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_25_3:
-                return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_25_4:
-                return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_25_5:
-                return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_25_6:
-                return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_26_0:
-                return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_26_1:
-                return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_26_2:
-                return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_26_3:
-                return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_26_4:
-                return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_26_5:
-                return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_26_6:
-                return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_27_0:
-                return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_27_1:
-                return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_27_2:
-                return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_27_3:
-                return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_27_4:
-                return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_27_5:
-                return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_27_6:
-                return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_28_0:
-                return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_28_1:
-                return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_28_2:
-                return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_28_3:
-                return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_28_4:
-                return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_28_5:
-                return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_28_6:
-                return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_29_0:
-                return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_29_1:
-                return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_29_2:
-                return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_29_3:
-                return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_29_4:
-                return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_29_5:
-                return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_29_6:
-                return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_30_0:
-                return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_30_1:
-                return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_30_2:
-                return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_30_3:
-                return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_30_4:
-                return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_30_5:
-                return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_30_6:
-                return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_31_0:
-                return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_31_1:
-                return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_31_2:
-                return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_31_3:
-                return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_31_4:
-                return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_31_5:
-                return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_31_6:
-                return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_32_0:
-                return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_32_1:
-                return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_32_2:
-                return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_32_3:
-                return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_32_4:
-                return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_32_5:
-                return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_32_6:
-                return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_33_0:
-                return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_33_1:
-                return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_33_2:
-                return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_33_3:
-                return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_33_4:
-                return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_33_5:
-                return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_33_6:
-                return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_34_0:
-                return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_34_1:
-                return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_34_2:
-                return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_34_3:
-                return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_34_4:
-                return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_34_5:
-                return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_34_6:
-                return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_35_0:
-                return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_35_1:
-                return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_35_2:
-                return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_35_3:
-                return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_35_4:
-                return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_35_5:
-                return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_35_6:
-                return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_36_0:
-                return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_36_1:
-                return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_36_2:
-                return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_36_3:
-                return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_36_4:
-                return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_36_5:
-                return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_36_6:
-                return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_37_0:
-                return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_37_1:
-                return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_37_2:
-                return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_37_3:
-                return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_37_4:
-                return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_37_5:
-                return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_37_6:
-                return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_38_0:
-                return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_38_1:
-                return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_38_2:
-                return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_38_3:
-                return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_38_4:
-                return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_38_5:
-                return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_38_6:
-                return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_39_0:
-                return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_39_1:
-                return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_39_2:
-                return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_39_3:
-                return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_39_4:
-                return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_39_5:
-                return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_39_6:
-                return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_40_0:
-                return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_40_1:
-                return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_40_2:
-                return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_40_3:
-                return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_40_4:
-                return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_40_5:
-                return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_40_6:
-                return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_41_0:
-                return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_41_1:
-                return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_41_2:
-                return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_41_3:
-                return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_41_4:
-                return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_41_5:
-                return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_41_6:
-                return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_42_0:
-                return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_42_1:
-                return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_42_2:
-                return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_42_3:
-                return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_42_4:
-                return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_42_5:
-                return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_42_6:
-                return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_43_0:
-                return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_43_1:
-                return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_43_2:
-                return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_43_3:
-                return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_43_4:
-                return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_43_5:
-                return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_43_6:
-                return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_44_0:
-                return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_44_1:
-                return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_44_2:
-                return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_44_3:
-                return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_44_4:
-                return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_44_5:
-                return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_44_6:
-                return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_45_0:
-                return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_45_1:
-                return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_45_2:
-                return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_45_3:
-                return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_45_4:
-                return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_45_5:
-                return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_45_6:
-                return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_46_0:
-                return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_46_1:
-                return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_46_2:
-                return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_46_3:
-                return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_46_4:
-                return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_46_5:
-                return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_46_6:
-                return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_47_0:
-                return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_47_1:
-                return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_47_2:
-                return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_47_3:
-                return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_47_4:
-                return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_47_5:
-                return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_47_6:
-                return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_48_0:
-                return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_48_1:
-                return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_48_2:
-                return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_48_3:
-                return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_48_4:
-                return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_48_5:
-                return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_48_6:
-                return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_49_0:
-                return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_49_1:
-                return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_49_2:
-                return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_49_3:
-                return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_49_4:
-                return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_49_5:
-                return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_49_6:
-                return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 6;
-            case ConstTask.TASK_50_0:
-                return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 0;
-            case ConstTask.TASK_50_1:
-                return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 1;
-            case ConstTask.TASK_50_2:
-                return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 2;
-            case ConstTask.TASK_50_3:
-                return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 3;
-            case ConstTask.TASK_50_4:
-                return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 4;
-            case ConstTask.TASK_50_5:
-                return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 5;
-            case ConstTask.TASK_50_6:
-                return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_0_0:
+            return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_0_1:
+            return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_0_2:
+            return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_0_3:
+            return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_0_4:
+            return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_0_5:
+            return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_0_6:
+            return player.playerTask.taskMain.id == 0 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_1_0:
+            return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_1_1:
+            return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_1_2:
+            return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_1_3:
+            return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_1_4:
+            return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_1_5:
+            return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_1_6:
+            return player.playerTask.taskMain.id == 1 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_2_0:
+            return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_2_1:
+            return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_2_2:
+            return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_2_3:
+            return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_2_4:
+            return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_2_5:
+            return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_2_6:
+            return player.playerTask.taskMain.id == 2 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_3_0:
+            return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_3_1:
+            return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_3_2:
+            return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_3_3:
+            return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_3_4:
+            return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_3_5:
+            return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_3_6:
+            return player.playerTask.taskMain.id == 3 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_4_0:
+            return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_4_1:
+            return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_4_2:
+            return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_4_3:
+            return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_4_4:
+            return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_4_5:
+            return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_4_6:
+            return player.playerTask.taskMain.id == 4 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_5_0:
+            return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_5_1:
+            return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_5_2:
+            return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_5_3:
+            return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_5_4:
+            return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_5_5:
+            return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_5_6:
+            return player.playerTask.taskMain.id == 5 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_6_0:
+            return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_6_1:
+            return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_6_2:
+            return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_6_3:
+            return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_6_4:
+            return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_6_5:
+            return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_6_6:
+            return player.playerTask.taskMain.id == 6 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_7_0:
+            return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_7_1:
+            return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_7_2:
+            return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_7_3:
+            return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_7_4:
+            return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_7_5:
+            return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_7_6:
+            return player.playerTask.taskMain.id == 7 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_8_0:
+            return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_8_1:
+            return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_8_2:
+            return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_8_3:
+            return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_8_4:
+            return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_8_5:
+            return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_8_6:
+            return player.playerTask.taskMain.id == 8 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_9_0:
+            return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_9_1:
+            return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_9_2:
+            return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_9_3:
+            return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_9_4:
+            return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_9_5:
+            return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_9_6:
+            return player.playerTask.taskMain.id == 9 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_10_0:
+            return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_10_1:
+            return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_10_2:
+            return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_10_3:
+            return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_10_4:
+            return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_10_5:
+            return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_10_6:
+            return player.playerTask.taskMain.id == 10 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_11_0:
+            return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_11_1:
+            return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_11_2:
+            return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_11_3:
+            return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_11_4:
+            return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_11_5:
+            return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_11_6:
+            return player.playerTask.taskMain.id == 11 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_12_0:
+            return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_12_1:
+            return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_12_2:
+            return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_12_3:
+            return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_12_4:
+            return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_12_5:
+            return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_12_6:
+            return player.playerTask.taskMain.id == 12 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_13_0:
+            return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_13_1:
+            return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_13_2:
+            return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_13_3:
+            return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_13_4:
+            return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_13_5:
+            return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_13_6:
+            return player.playerTask.taskMain.id == 13 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_14_0:
+            return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_14_1:
+            return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_14_2:
+            return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_14_3:
+            return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_14_4:
+            return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_14_5:
+            return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_14_6:
+            return player.playerTask.taskMain.id == 14 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_15_0:
+            return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_15_1:
+            return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_15_2:
+            return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_15_3:
+            return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_15_4:
+            return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_15_5:
+            return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_15_6:
+            return player.playerTask.taskMain.id == 15 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_16_0:
+            return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_16_1:
+            return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_16_2:
+            return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_16_3:
+            return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_16_4:
+            return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_16_5:
+            return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_16_6:
+            return player.playerTask.taskMain.id == 16 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_17_0:
+            return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_17_1:
+            return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_17_2:
+            return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_17_3:
+            return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_17_4:
+            return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_17_5:
+            return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_17_6:
+            return player.playerTask.taskMain.id == 17 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_18_0:
+            return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_18_1:
+            return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_18_2:
+            return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_18_3:
+            return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_18_4:
+            return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_18_5:
+            return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_18_6:
+            return player.playerTask.taskMain.id == 18 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_19_0:
+            return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_19_1:
+            return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_19_2:
+            return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_19_3:
+            return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_19_4:
+            return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_19_5:
+            return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_19_6:
+            return player.playerTask.taskMain.id == 19 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_20_0:
+            return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_20_1:
+            return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_20_2:
+            return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_20_3:
+            return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_20_4:
+            return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_20_5:
+            return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_20_6:
+            return player.playerTask.taskMain.id == 20 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_21_0:
+            return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_21_1:
+            return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_21_2:
+            return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_21_3:
+            return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_21_4:
+            return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_21_5:
+            return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_21_6:
+            return player.playerTask.taskMain.id == 21 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_22_0:
+            return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_22_1:
+            return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_22_2:
+            return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_22_3:
+            return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_22_4:
+            return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_22_5:
+            return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_22_6:
+            return player.playerTask.taskMain.id == 22 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_23_0:
+            return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_23_1:
+            return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_23_2:
+            return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_23_3:
+            return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_23_4:
+            return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_23_5:
+            return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_23_6:
+            return player.playerTask.taskMain.id == 23 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_24_0:
+            return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_24_1:
+            return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_24_2:
+            return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_24_3:
+            return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_24_4:
+            return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_24_5:
+            return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_24_6:
+            return player.playerTask.taskMain.id == 24 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_25_0:
+            return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_25_1:
+            return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_25_2:
+            return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_25_3:
+            return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_25_4:
+            return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_25_5:
+            return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_25_6:
+            return player.playerTask.taskMain.id == 25 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_26_0:
+            return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_26_1:
+            return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_26_2:
+            return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_26_3:
+            return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_26_4:
+            return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_26_5:
+            return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_26_6:
+            return player.playerTask.taskMain.id == 26 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_27_0:
+            return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_27_1:
+            return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_27_2:
+            return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_27_3:
+            return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_27_4:
+            return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_27_5:
+            return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_27_6:
+            return player.playerTask.taskMain.id == 27 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_28_0:
+            return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_28_1:
+            return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_28_2:
+            return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_28_3:
+            return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_28_4:
+            return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_28_5:
+            return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_28_6:
+            return player.playerTask.taskMain.id == 28 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_29_0:
+            return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_29_1:
+            return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_29_2:
+            return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_29_3:
+            return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_29_4:
+            return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_29_5:
+            return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_29_6:
+            return player.playerTask.taskMain.id == 29 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_30_0:
+            return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_30_1:
+            return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_30_2:
+            return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_30_3:
+            return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_30_4:
+            return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_30_5:
+            return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_30_6:
+            return player.playerTask.taskMain.id == 30 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_31_0:
+            return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_31_1:
+            return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_31_2:
+            return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_31_3:
+            return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_31_4:
+            return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_31_5:
+            return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_31_6:
+            return player.playerTask.taskMain.id == 31 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_32_0:
+            return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_32_1:
+            return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_32_2:
+            return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_32_3:
+            return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_32_4:
+            return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_32_5:
+            return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_32_6:
+            return player.playerTask.taskMain.id == 32 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_33_0:
+            return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_33_1:
+            return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_33_2:
+            return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_33_3:
+            return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_33_4:
+            return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_33_5:
+            return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_33_6:
+            return player.playerTask.taskMain.id == 33 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_34_0:
+            return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_34_1:
+            return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_34_2:
+            return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_34_3:
+            return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_34_4:
+            return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_34_5:
+            return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_34_6:
+            return player.playerTask.taskMain.id == 34 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_35_0:
+            return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_35_1:
+            return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_35_2:
+            return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_35_3:
+            return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_35_4:
+            return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_35_5:
+            return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_35_6:
+            return player.playerTask.taskMain.id == 35 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_36_0:
+            return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_36_1:
+            return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_36_2:
+            return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_36_3:
+            return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_36_4:
+            return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_36_5:
+            return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_36_6:
+            return player.playerTask.taskMain.id == 36 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_37_0:
+            return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_37_1:
+            return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_37_2:
+            return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_37_3:
+            return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_37_4:
+            return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_37_5:
+            return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_37_6:
+            return player.playerTask.taskMain.id == 37 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_38_0:
+            return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_38_1:
+            return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_38_2:
+            return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_38_3:
+            return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_38_4:
+            return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_38_5:
+            return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_38_6:
+            return player.playerTask.taskMain.id == 38 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_39_0:
+            return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_39_1:
+            return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_39_2:
+            return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_39_3:
+            return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_39_4:
+            return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_39_5:
+            return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_39_6:
+            return player.playerTask.taskMain.id == 39 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_40_0:
+            return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_40_1:
+            return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_40_2:
+            return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_40_3:
+            return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_40_4:
+            return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_40_5:
+            return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_40_6:
+            return player.playerTask.taskMain.id == 40 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_41_0:
+            return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_41_1:
+            return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_41_2:
+            return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_41_3:
+            return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_41_4:
+            return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_41_5:
+            return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_41_6:
+            return player.playerTask.taskMain.id == 41 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_42_0:
+            return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_42_1:
+            return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_42_2:
+            return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_42_3:
+            return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_42_4:
+            return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_42_5:
+            return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_42_6:
+            return player.playerTask.taskMain.id == 42 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_43_0:
+            return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_43_1:
+            return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_43_2:
+            return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_43_3:
+            return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_43_4:
+            return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_43_5:
+            return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_43_6:
+            return player.playerTask.taskMain.id == 43 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_44_0:
+            return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_44_1:
+            return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_44_2:
+            return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_44_3:
+            return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_44_4:
+            return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_44_5:
+            return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_44_6:
+            return player.playerTask.taskMain.id == 44 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_45_0:
+            return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_45_1:
+            return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_45_2:
+            return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_45_3:
+            return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_45_4:
+            return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_45_5:
+            return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_45_6:
+            return player.playerTask.taskMain.id == 45 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_46_0:
+            return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_46_1:
+            return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_46_2:
+            return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_46_3:
+            return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_46_4:
+            return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_46_5:
+            return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_46_6:
+            return player.playerTask.taskMain.id == 46 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_47_0:
+            return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_47_1:
+            return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_47_2:
+            return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_47_3:
+            return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_47_4:
+            return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_47_5:
+            return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_47_6:
+            return player.playerTask.taskMain.id == 47 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_48_0:
+            return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_48_1:
+            return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_48_2:
+            return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_48_3:
+            return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_48_4:
+            return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_48_5:
+            return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_48_6:
+            return player.playerTask.taskMain.id == 48 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_49_0:
+            return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_49_1:
+            return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_49_2:
+            return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_49_3:
+            return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_49_4:
+            return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_49_5:
+            return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_49_6:
+            return player.playerTask.taskMain.id == 49 && player.playerTask.taskMain.index == 6;
+        case ConstTask.TASK_50_0:
+            return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 0;
+        case ConstTask.TASK_50_1:
+            return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 1;
+        case ConstTask.TASK_50_2:
+            return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 2;
+        case ConstTask.TASK_50_3:
+            return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 3;
+        case ConstTask.TASK_50_4:
+            return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 4;
+        case ConstTask.TASK_50_5:
+            return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 5;
+        case ConstTask.TASK_50_6:
+            return player.playerTask.taskMain.id == 50 && player.playerTask.taskMain.index == 6;
         }
         return false;
     }
