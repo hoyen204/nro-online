@@ -1,38 +1,44 @@
 package com.nro.nro_online.power;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.nro.nro_online.jdbc.DBService;
 import com.nro.nro_online.models.player.Player;
 import lombok.Getter;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class CaptionManager {
+    private static final CaptionManager INSTANCE = new CaptionManager();
+    @Getter private final Map<Integer, Caption> captionsById = new ConcurrentHashMap<>();
+    @Getter private final NavigableMap<Long, Caption> captionsByPower = new TreeMap<>(); // Để tìm level theo power
 
-    private static final CaptionManager instance = new CaptionManager();
-
-    public static CaptionManager getInstance() {
-        return instance;
+    private CaptionManager() {
+        load();
     }
 
-    @Getter
-    private final List<Caption> captions = new ArrayList<>();
+    public static CaptionManager getInstance() {
+        return INSTANCE;
+    }
 
-    public void load() {
+    private void load() {
         try (Connection con = DBService.gI().getConnectionForGame();
                 PreparedStatement ps = con.prepareStatement("SELECT id, earth, saiya, namek, power FROM `caption`");
                 ResultSet rs = ps.executeQuery()) {
+            captionsById.clear();
+            captionsByPower.clear();
             while (rs.next()) {
-                captions.add(Caption.builder()
+                Caption caption = Caption.builder()
                         .id(rs.getShort("id"))
                         .earth(rs.getString("earth"))
                         .saiya(rs.getString("saiya"))
                         .namek(rs.getString("namek"))
                         .power(rs.getLong("power"))
-                        .build());
+                        .build();
+                captionsById.put(caption.getId(), caption);
+                captionsByPower.put(caption.getPower(), caption);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -40,22 +46,31 @@ public class CaptionManager {
     }
 
     public void add(Caption caption) {
-        captions.add(caption);
+        captionsById.put(caption.getId(), caption);
+        captionsByPower.put(caption.getPower(), caption);
     }
 
     public void remove(Caption caption) {
-        captions.remove(caption);
+        captionsById.remove(caption.getId());
+        captionsByPower.remove(caption.getPower());
     }
 
     public Caption find(int id) {
-        return captions.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
+        return captionsById.get(id);
     }
 
     public int getLevel(Player player) {
+        if (player == null) return 0;
         long power = player.nPoint.power;
-        for (int i = captions.size() - 1; i >= 0; i--) {
-            if (power >= captions.get(i).getPower()) return i;
-        }
-        return 0;
+
+        Map.Entry<Long, Caption> entry = captionsByPower.floorEntry(power);
+        if (entry == null) return 0;
+
+        // Tìm index dựa trên id của caption
+        return captionsById.values().stream()
+                .filter(c -> c.getId() <= entry.getValue().getId())
+                .mapToInt(Caption::getId)
+                .max()
+                .orElse(0);
     }
 }

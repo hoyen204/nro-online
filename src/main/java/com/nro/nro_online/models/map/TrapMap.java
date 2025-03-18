@@ -1,17 +1,11 @@
 package com.nro.nro_online.models.map;
 
-import nro.models.player.Player;
-import nro.services.PlayerService;
-import nro.services.func.EffectMapService;
-import nro.utils.Util;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.func.EffectMapService;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
 public class TrapMap {
-
     public int x;
     public int y;
     public int w;
@@ -19,18 +13,20 @@ public class TrapMap {
     public int effectId;
     public int dame;
 
-    public void doPlayer(Player player) {
-        switch (this.effectId) {
-            case 49:
-                if (!player.isDie() && !player.isMiniPet && Util.canDoWithTime(player.lastTimeAnXienTrapBDKB, 1000)) {
-                    player.injured(null, dame + (Util.nextInt(-10, 10) * dame / 100), false, false);
-                    PlayerService.gI().sendInfoHp(player);
-                    EffectMapService.gI().sendEffectMapToAllInMap(player.zone,
-                            effectId, 2, 1, player.location.x - 32, 1040, 1);
-                    player.lastTimeAnXienTrapBDKB = System.currentTimeMillis();
-                }
-                break;
-        }
-    }
+    private static final int AN_XIEN_EFFECT_ID = 49; // Hiệu ứng ăn xiên, hardcode cho vui 😜
+    private static final int COOLDOWN_AN_XIEN = 1000; // 1 giây cooldown, nhanh gọn lẹ!
 
+    public void doPlayer(Player player) {
+        if (this.effectId != AN_XIEN_EFFECT_ID) return; // Chỉ xử lý effect 49, kệ mấy cái khác 😅
+
+        if (player.isDie() || player.isMiniPet || !Util.canDoWithTime(player.lastTimeAnXienTrapBDKB, COOLDOWN_AN_XIEN)) {
+            return; // Chết, là pet, hoặc chưa hết cooldown thì nghỉ nha! 😛
+        }
+
+        int damageVariation = Util.nextInt(-10, 10) * dame / 100; // Biến động dame, random cho drama 😂
+        player.injured(null, dame + damageVariation, false, false);
+        PlayerService.gI().sendInfoHp(player); // Cập nhật HP ngay, không chờ ai hết! ⚡
+        EffectMapService.gI().sendEffectMapToAllInMap(player.zone, effectId, 2, 1, player.location.x - 32, 1040, 1);
+        player.lastTimeAnXienTrapBDKB = System.currentTimeMillis(); // Đánh dấu thời gian, xong việc rồi!
+    }
 }

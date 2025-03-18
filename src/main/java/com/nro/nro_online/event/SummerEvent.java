@@ -336,22 +336,23 @@ public class SummerEvent extends Event {
     }
 
     private void insectTrapping(Player player, Item item) {
+        int templateId = item.template.id;
         int mapId = player.zone.map.mapId;
         if (!Arrays.asList(ConstMap.DOI_NAM_TIM, ConstMap.THUNG_LUNG_NAMEC, ConstMap.RUNG_THONG_XAYDA,
                 ConstMap.RUNG_BAMBOO, ConstMap.RUNG_DUONG_XI).contains(mapId)) {
-            Service.getInstance().sendBigMessage(player, 0, buildInsectDialog(player, false));
+            Service.getInstance().sendBigMessage(player, 0, buildInsectDialog(player, false, templateId == ConstItem.HU_MAT_ONG));
             return;
         }
-        ConfirmDialog dialog = new ConfirmDialog(buildInsectDialog(player, true), () -> spawnInsectBoss(player, item));
+        ConfirmDialog dialog = new ConfirmDialog(buildInsectDialog(player, true, templateId == ConstItem.HU_MAT_ONG), () -> spawnInsectBoss(player, item));
         dialog.show(player);
     }
 
-    private String buildInsectDialog(Player player, boolean isValidMap) {
+    private String buildInsectDialog(Player player, boolean isValidMap, boolean isHuMatOng) {
         int n1 = InventoryService.gI().getQuantity(player, ConstItem.BO_KIEN_VUONG_HAI_SUNG);
         int n2 = InventoryService.gI().getQuantity(player, ConstItem.BO_HUNG_TE_GIAC);
         int n3 = InventoryService.gI().getQuantity(player, ConstItem.BO_KEP_KIM);
         return String.format("|1|Làm mồi nhử %s\n|%d|Bọ Kiến Vương: %d/10\n|%d|Bọ Hung Tê Giác: %d/10\n|%d|Bọ Kẹp Kìm: %d/10\n|%d|Chỉ dùng ở map sự kiện",
-                item.template.id == ConstItem.HU_MAT_ONG ? "Hũ mật ong" : "Vợt bắt bọ",
+                isHuMatOng ? "Hũ mật ong" : "Vợt bắt bọ",
                 n1 < 10 ? ConstTextColor.BLUE : ConstTextColor.RED, n1,
                 n2 < 10 ? ConstTextColor.BLUE : ConstTextColor.RED, n2,
                 n3 < 10 ? ConstTextColor.BLUE : ConstTextColor.RED, n3,
@@ -364,7 +365,7 @@ public class SummerEvent extends Event {
         InventoryService.gI().sendItemBags(player);
         BossData bossData = item.template.id == ConstItem.HU_MAT_ONG ? createBeetleData() : createNightLordData();
         EscortedBoss boss = createBoss(item.template.id, generateUniqueID(), bossData, player);
-        Service.getInstance().sendThongBao(player, "Boss " + boss.name + " xuất hiện, săn thôi nào! 😈");
+        Service.getInstance().sendThongBao(player, "Boss " + boss.name + " đã xuất hiện, săn thôi nào! 😈");
     }
 
     private EscortedBoss createBoss(int itemId, byte id, BossData data, Player player) {

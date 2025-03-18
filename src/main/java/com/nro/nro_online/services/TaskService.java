@@ -4,38 +4,29 @@ import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nro.nro_online.art.ServerLog;
+import com.nro.nro_online.consts.Cmd;
 import com.nro.nro_online.consts.ConstAchive;
 import com.nro.nro_online.consts.ConstMob;
 import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.consts.ConstTask;
 import com.nro.nro_online.models.boss.Boss;
 import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.map.ItemMap;
 import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.mob.Mob;
 import com.nro.nro_online.models.npc.Npc;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.task.Achievement;
+import com.nro.nro_online.models.task.SideTaskTemplate;
 import com.nro.nro_online.models.task.SubTaskMain;
 import com.nro.nro_online.models.task.TaskMain;
 import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.Message;
-import nro.art.ServerLog;
-import nro.consts.*;
-import nro.models.boss.Boss;
-import nro.models.boss.BossFactory;
-import nro.models.item.Item;
-import nro.models.map.ItemMap;
-import nro.models.map.Zone;
-import nro.models.mob.Mob;
-import nro.models.npc.Npc;
-import nro.models.player.Player;
-import nro.models.task.Achivement;
-import nro.models.task.SideTaskTemplate;
-import nro.models.task.SubTaskMain;
-import nro.models.task.TaskMain;
-import nro.server.Manager;
-import nro.server.io.Message;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @Build Arriety
@@ -123,7 +114,6 @@ public class TaskService {
                 msg.writer().writeShort(stm.maxCount);
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             Log.error(TaskService.class, e);
         }
@@ -145,7 +135,6 @@ public class TaskService {
             msg = new Message(43);
             msg.writer().writeShort(player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).count);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -156,7 +145,6 @@ public class TaskService {
         try {
             msg = new Message(41);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -2773,13 +2761,13 @@ public class TaskService {
     }
 
     public void sendAchivement(Player player) {
-        List<Achivement> achivements = player.playerTask.achievements;
+        List<Achievement> achivements = player.playerTask.achievements;
         Message m = new Message(Cmd.ACHIEVEMENT);
         DataOutputStream ds = m.writer();
         try {
             ds.writeByte(0);
             ds.writeByte(achivements.size());
-            for (Achivement a : achivements) {
+            for (Achievement a : achivements) {
                 String detail = String.format(a.getDetail(), a.getCount(), a.getMaxCount());
                 ds.writeUTF(a.getName());
                 ds.writeUTF(detail);
@@ -2789,14 +2777,13 @@ public class TaskService {
             }
             ds.flush();
             player.sendMessage(m);
-            m.cleanup();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void rewardAchivement(Player player, byte id) {
-        Achivement achivement = player.playerTask.achievements.get(id);
+        Achievement achivement = player.playerTask.achievements.get(id);
         if (achivement.isFinish()) {
             player.inventory.ruby += achivement.getMoney();
             ServerLog.logAchievement(player.name, achivement.getMoney());
@@ -2808,8 +2795,8 @@ public class TaskService {
     }
 
     public void checkDoneAchivements(Player player) {
-        List<Achivement> list = player.playerTask.achievements;
-        for (Achivement achivement : list) {
+        List<Achievement> list = player.playerTask.achievements;
+        for (Achievement achivement : list) {
             if (achivement.getId() == ConstAchive.GIA_NHAP_THAN_CAP || achivement.getId() == ConstAchive.SUC_MANH_GIOI_VUONG_THAN) {
                 if (achivement.isDone(1000000)) {
                     achivement.setFinish(true);

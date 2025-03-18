@@ -71,7 +71,7 @@ public class Inventory {
         this.gem -= num;
     }
 
-    public void subGold(int num) {
+    public void subGold(long num) {
         this.gold -= num;
     }
 

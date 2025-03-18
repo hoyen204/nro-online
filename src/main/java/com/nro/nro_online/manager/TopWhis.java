@@ -16,17 +16,16 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import nro.consts.ConstPlayer;
-import nro.jdbc.DBService;
-import nro.models.boss.Boss;
-import nro.models.boss.BossFactory;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.player.Player;
-import nro.models.top.whis.TopWhisModel;
-import nro.services.ItemService;
-import nro.services.PlayerService;
-import nro.services.Service;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.whis.TopWhisModel;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
 
 public class TopWhis {
 
@@ -187,10 +186,10 @@ public class TopWhis {
                         }
                         item.createTime = Long.parseLong(String.valueOf(dataObject.get("create_time")));
                         if (ItemService.gI().isOutOfDateTime(item)) {
-                            item = ItemService.gI().createItemNull();
+                            item = ItemService.gI().createNullItem();
                         }
                     } else {
-                        item = ItemService.gI().createItemNull();
+                        item = ItemService.gI().createNullItem();
                     }
                     top.player.inventory.itemsBody.add(item);
                 }
@@ -271,10 +270,10 @@ public class TopWhis {
                         }
                         item.createTime = Long.parseLong(String.valueOf(dataObject.get("create_time")));
                         if (ItemService.gI().isOutOfDateTime(item)) {
-                            item = ItemService.gI().createItemNull();
+                            item = ItemService.gI().createNullItem();
                         }
                     } else {
-                        item = ItemService.gI().createItemNull();
+                        item = ItemService.gI().createNullItem();
                     }
                     top.player.inventory.itemsBody.add(item);
                 }
@@ -289,7 +288,7 @@ public class TopWhis {
         return result;
     }
 
-    public static void AddHistory(Player pl) {
+    public static void addHistory(Player pl) {
         Connection con = null;
         CallableStatement ps = null;
         try {
@@ -319,7 +318,7 @@ public class TopWhis {
         }
     }
 
-    public static void SwitchToWhisBoss(Player player, int whisId, int level) {
+    public static void switchToWhisBoss(Player player, int whisId, int level) {
         Service.getInstance().sendEffectHideNPCPlayer(player, (byte) 56, (byte) 0);
         Boss whis = BossFactory.createWhisBoss(whisId + player.id, level, player.id);
         whis.zone = player.zone;

@@ -1,28 +1,32 @@
 package com.nro.nro_online.models.npc.specialnpc;
 
-import nro.consts.ConstAchive;
-import nro.consts.ConstNpc;
-import nro.models.npc.NpcManager;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.InventoryService;
-import nro.services.PlayerService;
-import nro.services.Service;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstAchive;
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.NpcService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
 public class MagicTree {
-
+    // Constants
     public static final byte MAX_LEVEL = 10;
+    public static final byte MIN_LEVEL = 1;
+    
+    // Menu constants
+    private static final byte MENU_HARVEST = 0;
+    private static final byte MENU_UPGRADE = 1;
+    private static final byte MENU_FAST_PEA = 2;
+    private static final byte MENU_CANCEL_UPGRADE = 3;
 
+    // Item templates and parameters
     public static final short[] PEA_TEMP = {13, 60, 61, 62, 63, 64, 65, 352, 523, 595};
     public static final int[] PEA_PARAM = {100, 500, 2, 4, 8, 16, 32, 64, 128, 256};
 
+    // Position data
     private static final int[][][] POS_PEAS = {
         {{19, 22}, {-1, 16}, {3, 10}, {19, 8}, {9, 0}},
         {{-1, 27}, {22, 35}, {15, 24}, {0, 17}, {-1, 7}, {26, 5}, {5, 0}},
@@ -33,39 +37,37 @@ public class MagicTree {
         {{32, 86}, {5, 77}, {25, 77}, {8, 89}, {29, 68}, {4, 63}, {18, 61}, {33, 53}, {8, 48}, {26, 39}, {11, 36}, {33, 23}, {18, 25}, {4, 20}, {26, 12}, {12, 7}, {19, 0}},
         {{32, 86}, {5, 77}, {25, 77}, {8, 89}, {29, 68}, {4, 63}, {18, 61}, {33, 53}, {8, 48}, {26, 39}, {11, 36}, {33, 23}, {18, 25}, {4, 20}, {26, 12}, {12, 7}, {19, 0}, {19, 0}, {19, 0}},
         {{32, 86}, {5, 77}, {25, 77}, {8, 89}, {29, 68}, {4, 63}, {18, 61}, {33, 53}, {8, 48}, {26, 39}, {11, 36}, {33, 23}, {18, 25}, {4, 20}, {26, 12}, {12, 7}, {19, 0}, {19, 0}, {19, 0}, {19, 0}, {19, 0}},
-        {{32, 86}, {5, 77}, {25, 77}, {8, 89}, {29, 68}, {4, 63}, {18, 61}, {33, 53}, {8, 48}, {26, 39}, {11, 36}, {33, 23}, {18, 25}, {4, 20}, {26, 12}, {12, 7}, {19, 0}, {19, 0}, {19, 0}, {19, 0}, {19, 0}, {19, 0}, {19, 0}}};
+        {{32, 86}, {5, 77}, {25, 77}, {8, 89}, {29, 68}, {4, 63}, {18, 61}, {33, 53}, {8, 48}, {26, 39}, {11, 36}, {33, 23}, {18, 25}, {4, 20}, {26, 12}, {12, 7}, {19, 0}, {19, 0}, {19, 0}, {19, 0}, {19, 0}, {19, 0}, {19, 0}}
+    };
 
-    //days - hours - mins - gold
+    // Upgrade data [days, hours, mins, gold]
     private static final short[][] PEA_UPGRADE = {
         {0, 0, 10, 5}, {0, 1, 40, 10}, {0, 16, 40, 100}, {6, 22, 0, 1},
         {13, 21, 0, 10}, {27, 18, 0, 20}, {55, 13, 0, 50}, {69, 10, 0, 100},
         {104, 4, 0, 300}, {0, 0, 0, 0}
     };
 
-    //icon magic tree [gender][level]
+    // Magic tree icons [gender][level]
     private static final short[][] ID_MAGIC_TREE = {
         {84, 85, 86, 87, 88, 89, 90, 90, 90, 90},
         {371, 372, 373, 374, 375, 376, 377, 377, 377, 377},
-        {378, 379, 380, 381, 382, 383, 384, 384, 384, 384}};
+        {378, 379, 380, 381, 382, 383, 384, 384, 384, 384}
+    };
     private static final short[][] POS_MAGIC_TREE = {{348, 336}, {372, 336}, {348, 336}};
 
+    // Instance variables
+    private final Player player;
     private boolean loadedMagicTreeToPlayer;
-    private Player player;
-    private boolean actived;
-
-    public byte level;
-    public int currPeas;
-    public boolean isUpgrade;
-    public long lastTimeHarvest;
-    public long lastTimeUpgrade;
+    private boolean isUpgrade;
+    private byte level;
+    private int currPeas;
+    private long lastTimeHarvest;
+    private long lastTimeUpgrade;
 
     public MagicTree(Player player, byte level, byte currPeas, long lastTimeHarvest, boolean isUpgrade, long lastTimeUpgrade) {
         this.player = player;
         this.level = level;
-        this.currPeas = currPeas;
-        if (this.currPeas > this.getMaxPea()) {
-            this.currPeas = this.getMaxPea();
-        }
+        this.currPeas = Math.min(currPeas, getMaxPea());
         this.isUpgrade = isUpgrade;
         this.lastTimeHarvest = lastTimeHarvest;
         this.lastTimeUpgrade = lastTimeUpgrade;
@@ -73,38 +75,43 @@ public class MagicTree {
 
     public void update() {
         if (!isUpgrade) {
-            if (this.currPeas < this.getMaxPea()) {
-                int timeThrow = (int) ((System.currentTimeMillis() - lastTimeHarvest) / 1000);
-                int numPeaRelease = timeThrow / getSecondPerPea();
-                if (numPeaRelease > 0) {
-                    this.currPeas += numPeaRelease;
-                    if (this.currPeas >= this.getMaxPea()) {
-                        this.currPeas = this.getMaxPea();
-                        this.lastTimeHarvest = System.currentTimeMillis();
-                    } else {
-                        this.lastTimeHarvest += (numPeaRelease * getSecondPerPea()) * 1000;
-                    }
-                }
-            }
+            updatePeas();
         } else {
-            if (Util.canDoWithTime(lastTimeUpgrade, getTimeUpgrade())) {
-                if (this.level < MAX_LEVEL) {
-                    this.level++;
-                    player.playerTask.achivements.get(ConstAchive.NONG_DAN_CHAM_CHI).count++;
+            updateUpgrade();
+        }
+    }
+
+    private void updatePeas() {
+        if (this.currPeas < getMaxPea()) {
+            int timeElapsed = (int) ((System.currentTimeMillis() - lastTimeHarvest) / 1000);
+            int numPeaRelease = timeElapsed / getSecondPerPea();
+            if (numPeaRelease > 0) {
+                this.currPeas = Math.min(this.currPeas + numPeaRelease, getMaxPea());
+                if (this.currPeas >= getMaxPea()) {
+                    this.lastTimeHarvest = System.currentTimeMillis();
+                } else {
+                    this.lastTimeHarvest += (numPeaRelease * getSecondPerPea()) * 1000L;
                 }
-                this.isUpgrade = false;
             }
         }
     }
 
+    private void updateUpgrade() {
+        if (Util.canDoWithTime(lastTimeUpgrade, getTimeUpgrade())) {
+            if (this.level < MAX_LEVEL) {
+                this.level++;
+                if (player.playerTask != null && player.playerTask.achievements != null) {
+                    player.playerTask.achievements.get(ConstAchive.NONG_DAN_CHAM_CHI).count++;
+                }
+            }
+            this.isUpgrade = false;
+        }
+    }
+
     public void loadMagicTree() {
-        Message msg;
-        try {
-            msg = new Message(-34);
+        try (Message msg = new Message(-34)) {
             msg.writer().writeByte(0);
-
             msg.writer().writeShort(ID_MAGIC_TREE[player.gender][level - 1]);
-
             msg.writer().writeUTF("Đậu thần cấp " + level);
             msg.writer().writeShort(POS_MAGIC_TREE[player.gender][0]);
             msg.writer().writeShort(POS_MAGIC_TREE[player.gender][1]);
@@ -112,15 +119,14 @@ public class MagicTree {
             msg.writer().writeShort(this.currPeas);
             msg.writer().writeShort(getMaxPea());
             msg.writer().writeUTF("Đang kết hạt\nCây lớn sinh nhiều hạt hơn");
-            msg.writer().writeInt(this.isUpgrade ? getSecondUpgrade() : getSecondPea()); //seconds
-            msg.writer().writeByte(POS_PEAS[this.level - 1].length); //pos pea
-            for (int i = 0; i < POS_PEAS[this.level - 1].length; i++) {
-                msg.writer().writeByte(POS_PEAS[this.level - 1][i][0]);
-                msg.writer().writeByte(POS_PEAS[this.level - 1][i][1]);
+            msg.writer().writeInt(this.isUpgrade ? getSecondUpgrade() : getSecondPea());
+            msg.writer().writeByte(POS_PEAS[this.level - 1].length);
+            for (int[] pos : POS_PEAS[this.level - 1]) {
+                msg.writer().writeByte(pos[0]);
+                msg.writer().writeByte(pos[1]);
             }
             msg.writer().writeBoolean(this.isUpgrade);
             player.sendMessage(msg);
-            msg.cleanup();
             if (!loadedMagicTreeToPlayer) {
                 loadedMagicTreeToPlayer = true;
             }
@@ -130,16 +136,14 @@ public class MagicTree {
     }
 
     public void openMenuTree() {
-        Message msg;
-        try {
-            msg = new Message(-34);
+        try (Message msg = new Message(-34)) {
             msg.writer().writeByte(1);
             if (!isUpgrade) {
                 msg.writer().writeUTF("Thu\nhoạch");
                 if (this.level < MAX_LEVEL) {
                     msg.writer().writeUTF(getTextMenuUpgrade());
                 }
-                if (this.currPeas < this.getMaxPea()) {
+                if (this.currPeas < getMaxPea()) {
                     msg.writer().writeUTF("Kết hạt\nnhanh\n0 ngọc");
                     this.player.iDMark.setIndexMenu(ConstNpc.MAGIC_TREE_NON_UPGRADE_LEFT_PEA);
                 } else {
@@ -151,7 +155,6 @@ public class MagicTree {
                 this.player.iDMark.setIndexMenu(ConstNpc.MAGIC_TREE_UPGRADE);
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             Log.error(MagicTree.class, e);
         }
@@ -167,14 +170,11 @@ public class MagicTree {
             this.lastTimeHarvest = System.currentTimeMillis();
             InventoryService.gI().sendItemBags(player);
             InventoryService.gI().sendItemBox(player);
-            Message msg;
-            try {
-                msg = new Message(-34);
+            try (Message msg = new Message(-34)) {
                 msg.writer().writeByte(2);
                 msg.writer().writeShort(this.currPeas);
                 msg.writer().writeInt(getSecondPea());
                 player.sendMessage(msg);
-                msg.cleanup();
             } catch (Exception e) {
                 Log.error(MagicTree.class, e);
             }
@@ -182,13 +182,17 @@ public class MagicTree {
     }
 
     public void showConfirmUpgradeMagicTree() {
-        NpcManager.getByIdAndMap(ConstNpc.DAU_THAN, this.player.zone.map.mapId).
-                createOtherMenu(player, ConstNpc.MAGIC_TREE_CONFIRM_UPGRADE, "Bạn có chắc chắn nâng cấp cây đậu?", "OK", "Từ chối");
+        NpcService.gI().createOtherMenu(player, ConstNpc.DAU_THAN, 
+            ConstNpc.MAGIC_TREE_CONFIRM_UPGRADE, 
+            "Bạn có chắc chắn nâng cấp cây đậu?", 
+            "OK", "Từ chối");
     }
 
     public void showConfirmUnuppgradeMagicTree() {
-        NpcManager.getByIdAndMap(ConstNpc.DAU_THAN, this.player.zone.map.mapId).
-                createOtherMenu(player, ConstNpc.MAGIC_TREE_CONFIRM_UNUPGRADE, "Bạn có chắc chắn hủy nâng cấp cây đậu?", "OK", "Từ chối");
+        NpcService.gI().createOtherMenu(player, ConstNpc.DAU_THAN,
+            ConstNpc.MAGIC_TREE_CONFIRM_UNUPGRADE,
+            "Bạn có chắc chắn hủy nâng cấp cây đậu?",
+            "OK", "Từ chối");
     }
 
     public void upgradeMagicTree() {
@@ -216,13 +220,11 @@ public class MagicTree {
     }
 
     public void fastRespawnPea() {
-        //giá kết hạt nhanh
-        this.currPeas = this.getMaxPea();
+        this.currPeas = getMaxPea();
         this.loadMagicTree();
     }
 
     public void fastUpgradeMagicTree() {
-        //giá nâng cấp nhanh
         if (this.level < MAX_LEVEL) {
             this.level++;
         }
@@ -239,10 +241,10 @@ public class MagicTree {
     }
 
     private int getSecondPea() {
-        short secondPerPea = (short) getSecondPerPea();
-        long timePeaRelease = lastTimeHarvest + secondPerPea * 1000;
+        short secondPerPea = getSecondPerPea();
+        long timePeaRelease = lastTimeHarvest + secondPerPea * 1000L;
         int secondLeft = (int) ((timePeaRelease - System.currentTimeMillis()) / 1000);
-        return secondLeft < 0 ? 0 : secondLeft;
+        return Math.max(0, secondLeft);
     }
 
     private int getSecondUpgrade() {
@@ -250,22 +252,23 @@ public class MagicTree {
     }
 
     private String getTextMenuUpgrade() {
-        String text = "Nâng cấp\n";
+        StringBuilder text = new StringBuilder("Nâng cấp\n");
         short d = PEA_UPGRADE[this.level - 1][0];
         short h = PEA_UPGRADE[this.level - 1][1];
         short m = PEA_UPGRADE[this.level - 1][2];
         short gold = PEA_UPGRADE[this.level - 1][3];
+        
         if (d != 0) {
-            text += d + "d";
+            text.append(d).append("d");
         }
         if (h != 0) {
-            text += h + "h";
+            text.append(h).append("h");
         }
         if (m != 0) {
-            text += m + "'";
+            text.append(m).append("'");
         }
-        text += "\n" + gold + (this.level <= 3 ? " k" : " Tr") + "\nvàng";
-        return text;
+        text.append("\n").append(gold).append(this.level <= 3 ? " k" : " Tr").append("\nvàng");
+        return text.toString();
     }
 
     private long getTimeUpgrade() {
@@ -276,7 +279,6 @@ public class MagicTree {
     }
 
     public void dispose() {
-        this.player = null;
+        // Cleanup resources if needed
     }
-
 }

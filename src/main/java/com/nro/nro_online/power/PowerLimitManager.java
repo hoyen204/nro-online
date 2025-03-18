@@ -1,57 +1,50 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.nro.nro_online.power;
+
+import com.nro.nro_online.jdbc.DBService;
+import lombok.Getter;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-
-import lombok.Getter;
-import nro.jdbc.DBService;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
+ * Manages power limits with efficient lookup by ID and power-based ordering.
  * @author Arriety
  */
 public class PowerLimitManager {
-
-    private static final PowerLimitManager instance = new PowerLimitManager();
+    private static final PowerLimitManager INSTANCE = new PowerLimitManager();
 
     public static PowerLimitManager getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
-    @Getter
-    private List<PowerLimit> powers;
+    @Getter private final Map<Integer, PowerLimit> powersById = new ConcurrentHashMap<>();
+    private final TreeMap<Long, PowerLimit> powersByPower = new TreeMap<>();
 
-    public PowerLimitManager() {
-        powers = new ArrayList<>();
+    private PowerLimitManager() {
+        load();
     }
 
     public void load() {
-        try {
-            String sql = "SELECT * FROM `power_limit`";
-            PreparedStatement ps = DBService.gI().getConnectionForGame().prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            try {
-                while (rs.next()) {
-                    int id = rs.getShort("id");
-                    long power = rs.getLong("power");
-                    int hp = rs.getInt("hp");
-                    int mp = rs.getInt("mp");
-                    int damage = rs.getInt("damage");
-                    int defense = rs.getInt("defense");
-                    int critical = rs.getInt("critical");
-                    PowerLimit powerLimit = PowerLimit.builder().id(id).power(power).hp(hp).mp(mp).damage(damage).defense(defense).critical(critical)
-                            .build();
-                    add(powerLimit);
-                }
-            } finally {
-                rs.close();
-                ps.close();
+        try (PreparedStatement ps = DBService.gI().getConnectionForGame()
+                .prepareStatement("SELECT id, power, hp, mp, damage, defense, critical FROM `power_limit`");
+                ResultSet rs = ps.executeQuery()) {
+            powersById.clear();
+            powersByPower.clear();
+            while (rs.next()) {
+                PowerLimit powerLimit = PowerLimit.builder()
+                        .id(rs.getShort("id"))
+                        .power(rs.getLong("power"))
+                        .hp(rs.getInt("hp"))
+                        .mp(rs.getInt("mp"))
+                        .damage(rs.getInt("damage"))
+                        .defense(rs.getInt("defense"))
+                        .critical(rs.getInt("critical"))
+                        .build();
+                powersById.put(powerLimit.getId(), powerLimit);
+                powersByPower.put(powerLimit.getPower(), powerLimit);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -59,17 +52,16 @@ public class PowerLimitManager {
     }
 
     public void add(PowerLimit powerLimit) {
-        powers.add(powerLimit);
+        powersById.put(powerLimit.getId(), powerLimit);
+        powersByPower.put(powerLimit.getPower(), powerLimit);
     }
 
     public void remove(PowerLimit powerLimit) {
-        powers.remove(powerLimit);
+        powersById.remove(powerLimit.getId());
+        powersByPower.remove(powerLimit.getPower());
     }
 
-    public PowerLimit get(int index) {
-        if (index < 0 || index >= powers.size()) {
-            return null;
-        }
-        return powers.get(index);
+    public PowerLimit get(int id) {
+        return powersById.get(id);
     }
 }

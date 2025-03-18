@@ -1,101 +1,56 @@
 package com.nro.nro_online.models.npc.specialnpc;
 
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.PetService;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.PetService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
-public class MabuEgg {
-
-//    private static final long DEFAULT_TIME_DONE = 7776000000L;
-    private static final long DEFAULT_TIME_DONE = 86400000L;
-
-    private Player player;
-    public long lastTimeCreate;
-    public long timeDone;
-
-    private final short id = 50;
+public class MabuEgg extends SpecialEgg {
+    private static final long DEFAULT_TIME_DONE = 86_400_000L; // 1 ngày, nhanh gọn 😜
+    private static final short EGG_ICON = 4664; // Icon trứng Mabu, đẹp trai lắm!
 
     public MabuEgg(Player player, long lastTimeCreate, long timeDone) {
-        this.player = player;
-        this.lastTimeCreate = lastTimeCreate;
-        this.timeDone = timeDone;
+        super(player, lastTimeCreate, timeDone);
     }
 
     public static void createMabuEgg(Player player) {
         player.mabuEgg = new MabuEgg(player, System.currentTimeMillis(), DEFAULT_TIME_DONE);
+        player.mabuEgg.sendEgg();
     }
 
-    public void sendMabuEgg() {
-        Message msg;
-        try {
-//            Message msg = new Message(-117);
-//            msg.writer().writeByte(100);
-//            player.sendMessage(msg);
-//            msg.cleanup();
+    @Override
+    protected long getDefaultTimeDone() {
+        return DEFAULT_TIME_DONE;
+    }
 
-            msg = new Message(-122);
-            msg.writer().writeShort(this.id);
-            msg.writer().writeByte(1);
-            msg.writer().writeShort(4664);
-            msg.writer().writeByte(0);
-            msg.writer().writeInt(this.getSecondDone());
-            this.player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(MabuEgg.class, e);
+    @Override
+    protected short getEggIcon() {
+        return EGG_ICON;
+    }
+
+    @Override
+    protected void openEggInternal(int gender) {
+        if (this.player.pet == null) {
+            Service.getInstance().sendThongBao(player, "Bro ơi, cần đệ tử để nở trứng nha! 😛");
+            return;
         }
-    }
-
-    public int getSecondDone() {
-        int seconds = (int) ((lastTimeCreate + timeDone - System.currentTimeMillis()) / 1000);
-        return seconds > 0 ? seconds : 0;
-    }
-
-    public void openEgg(int gender) {
-        if (this.player.pet != null) {
-            try {
-                destroyEgg();
-                Thread.sleep(4000);
-                if (this.player.pet == null) {
-                    PetService.gI().createMabuPet(this.player, gender);
-                } else {
-                    PetService.gI().changeMabuPet(this.player, gender);
-                }
-                ChangeMapService.gI().changeMapInYard(this.player, this.player.gender * 7, -1, Util.nextInt(300, 500));
-                player.mabuEgg = null;
-            } catch (Exception e) {
+        try {
+            destroyEgg();
+            Thread.sleep(4000); // Chờ chút cho drama 😂
+            if (this.player.pet == null) {
+                PetService.gI().createMabuPet(this.player, gender);
+            } else {
+                PetService.gI().changeMabuPet(this.player, gender);
             }
-        } else {
-            Service.getInstance().sendThongBao(player, "Yêu cầu phải có đệ tử");
-        }
-    }
-
-    public void destroyEgg() {
-        try {
-            Message msg = new Message(-117);
-            msg.writer().writeByte(101);
-            player.sendMessage(msg);
-            msg.cleanup();
+            ChangeMapService.gI().changeMapInYard(this.player, this.player.gender * 7, -1, Util.nextInt(300, 500));
         } catch (Exception e) {
+            // Lỗi thì kệ, chill đi 😅
         }
-        this.player.mabuEgg = null;
     }
 
-    public void subTimeDone(int d, int h, int m, int s) {
-        this.timeDone -= ((d * 24 * 60 * 60 * 1000) + (h * 60 * 60 * 1000) + (m * 60 * 1000) + (s * 1000));
-        this.sendMabuEgg();
-    }
-
-    public void dispose() {
-        this.player = null;
+    @Override
+    protected String getEggName() {
+        return "mabuEgg";
     }
 }

@@ -2,43 +2,18 @@ package com.nro.nro_online.models.boss;
 
 import org.apache.log4j.Logger;
 
-import nro.consts.ConstMap;
-import nro.consts.ConstPlayer;
-import nro.models.boss.NgucTu.Cumber;
-import nro.models.boss.NgucTu.SuperCumber;
-import nro.models.boss.Omega.OmegaPlus;
-import nro.models.boss.baconsoi.Basil;
-import nro.models.boss.baconsoi.Bergamo;
-import nro.models.boss.baconsoi.Lavender;
-import nro.models.boss.bill.*;
-import nro.models.boss.bosstuonglai.*;
-import nro.models.boss.broly.*;
-import nro.models.boss.cell.*;
-import nro.models.boss.chill.*;
-import nro.models.boss.cold.*;
-import nro.models.boss.event.noel.NoelBoss;
-import nro.models.boss.event.noel.NoelBossBall;
-import nro.models.boss.event.noel.NoelBossOne;
-import nro.models.boss.event.noel.NoelBossTwo;
-import nro.models.boss.fide.*;
-import nro.models.boss.hell.DraculaHutMau;
-import nro.models.boss.hell.SatanKing;
-import nro.models.boss.list_boss.NhanBan;
-import nro.models.boss.list_boss.WhisTop;
-import nro.models.boss.mabu_war.*;
-import nro.models.boss.nappa.*;
-import nro.models.boss.robotsatthu.*;
-import nro.models.boss.tieudoisatthu.*;
-import nro.models.map.Map;
-import nro.models.map.Zone;
-import nro.models.map.mabu.MabuWar;
-import nro.models.map.mabu.MabuWar14h;
-import nro.models.player.Player;
-import nro.services.MapService;
+import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.models.boss.event.noel.*;
+import com.nro.nro_online.models.boss.list_boss.*;
+import com.nro.nro_online.models.boss.mabu_war.*;
+import com.nro.nro_online.models.map.Map;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.map.mabu.MabuWar;
+import com.nro.nro_online.models.map.mabu.MabuWar14h;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.MapService;
 
-/**
- * @Stole Arriety
- */
 public class BossFactory {
 
     public static final byte BASIL = -45;
@@ -195,7 +170,7 @@ public class BossFactory {
     public static final int DRACULA_HUT_MAU = -140;
 
     private static final Logger logger = Logger.getLogger(BossFactory.class);
-    public static final int[] MAP_APPEARED_QILIN = {ConstMap.VACH_NUI_ARU_42, ConstMap.VACH_NUI_MOORI_43, ConstMap.VACH_NUI_KAKAROT,
+    public static final int[] MAP_APPEARED_QILIN = { ConstMap.VACH_NUI_ARU_42, ConstMap.VACH_NUI_MOORI_43, ConstMap.VACH_NUI_KAKAROT,
         ConstMap.LANG_ARU, ConstMap.LANG_MORI, ConstMap.LANG_KAKAROT, ConstMap.DOI_HOA_CUC, ConstMap.DOI_NAM_TIM, ConstMap.DOI_HOANG,
         ConstMap.TRAM_TAU_VU_TRU, ConstMap.TRAM_TAU_VU_TRU_25, ConstMap.TRAM_TAU_VU_TRU_26, ConstMap.LANG_PLANT, ConstMap.RUNG_NGUYEN_SINH,
         ConstMap.RUNG_CO, ConstMap.RUNG_THONG_XAYDA, ConstMap.RUNG_DA, ConstMap.THUNG_LUNG_DEN, ConstMap.BO_VUC_DEN, ConstMap.THANH_PHO_VEGETA,

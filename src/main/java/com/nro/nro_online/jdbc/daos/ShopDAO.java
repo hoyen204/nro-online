@@ -49,7 +49,7 @@ public class ShopDAO {
     }
 
     private static void loadItemShop(Connection con, TabShop tabShop) throws SQLException {
-        String sql = "SELECT id, temp_id, gold, gem, is_new, item_exchange, icon_spec, quantity_exchange " +
+        String sql = "SELECT id, temp_id, gold, gem, is_new, item_exchange, quantity_exchange " +
                 "FROM item_shop WHERE tab_id = ? ORDER BY create_time DESC";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, tabShop.id);

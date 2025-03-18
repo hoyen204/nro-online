@@ -1,37 +1,21 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.nro.nro_online.models.map.dungeon.zones;
 
+import com.nro.nro_online.consts.Cmd;
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.MapTemplate;
+import com.nro.nro_online.models.map.WayPoint;
 import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.map.dungeon.Dungeon;
 import com.nro.nro_online.models.mob.Mob;
 import com.nro.nro_online.models.mob.MobTemplate;
+import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
 import lombok.Getter;
-import nro.consts.Cmd;
-import nro.models.map.Map;
-import nro.models.map.MapTemplate;
-import nro.models.map.WayPoint;
-import nro.models.map.Zone;
-import nro.models.map.dungeon.Dungeon;
-import nro.models.mob.Mob;
-import nro.models.mob.MobTemplate;
-import nro.models.player.Player;
-import nro.server.Manager;
-import nro.server.io.Message;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
 
-/**
- *
- * @Build by Arriety
- */
 @Getter
 public abstract class ZDungeon extends Zone {
 

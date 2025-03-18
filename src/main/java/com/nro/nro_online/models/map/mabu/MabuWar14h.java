@@ -1,111 +1,91 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.nro.nro_online.models.map.mabu;
 
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.TimeUtil;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.models.boss.Boss;
-import nro.models.boss.BossFactory;
-import nro.models.player.Player;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
-import nro.utils.TimeUtil;
-
-/**
- *
- * @author: Duy
- * @debug: Arriety
- * @tester: PutNgu
- */
 public class MabuWar14h {
-
-    private static MabuWar14h i;
+    private static MabuWar14h instance;
     public final List<Boss> bosses = new ArrayList<>();
-    public static long TIME_OPEN;
+    private static LocalDateTime TIME_OPEN;
+    private static LocalDateTime TIME_CLOSE;
+    private static final byte HOUR_OPEN = 2;   // 2h sáng, giờ ma quỷ bắt đầu 😜
+    private static final byte MIN_OPEN = 0;
+    private static final byte SECOND_OPEN = 0;
+    private static final byte HOUR_CLOSE = 3;  // 3h sáng, hết giờ chơi!
+    private static final byte MIN_CLOSE = 0;
+    private static final byte SECOND_CLOSE = 0;
 
-    public static long TIME_CLOSE;
-    public static final byte HOUR_OPEN = 2;
-    public static final byte MIN_OPEN = 0;
-    public static final byte SECOND_OPEN = 0;
-    public static final byte HOUR_CLOSE = 3;
-    public static final byte MIN_CLOSE = 0;
-    public static final byte SECOND_CLOSE = 0;
-    private int day = -1;
-    public boolean initBoss;
-    public boolean clearBoss;
+    private int day = -1; // Ngày hiện tại, -1 là chưa set
+    private boolean initBoss = false; // Đã spawn boss chưa?
+    private boolean clearBoss = false; // Đã dọn boss chưa?
 
     public static MabuWar14h gI() {
-        if (i == null) {
-            i = new MabuWar14h();
+        if (instance == null) {
+            instance = new MabuWar14h();
         }
-        i.setTime();
-        return i;
+        instance.setTime(); // Set thời gian mỗi khi gọi, chắc ăn! 😎
+        return instance;
     }
 
-    public void setTime() {
-        if (i.day == -1 || i.day != TimeUtil.getCurrDay()) {
-            i.day = TimeUtil.getCurrDay();
+    private void setTime() {
+        if (day == -1 || day != TimeUtil.getCurrDay()) {
+            day = TimeUtil.getCurrDay();
             try {
-                MabuWar14h.TIME_OPEN = TimeUtil.getTime(TimeUtil.getTimeNow("dd/MM/yyyy") + " " + HOUR_OPEN + ":" + MIN_OPEN + ":" + SECOND_OPEN, "dd/MM/yyyy HH:mm:ss");
-                MabuWar14h.TIME_CLOSE = TimeUtil.getTime(TimeUtil.getTimeNow("dd/MM/yyyy") + " " + HOUR_CLOSE + ":" + MIN_CLOSE + ":" + SECOND_CLOSE, "dd/MM/yyyy HH:mm:ss");
+                String today = TimeUtil.getTimeNow("dd/MM/yyyy");
+                TIME_OPEN = TimeUtil.getTime(today + " " + HOUR_OPEN + ":" + MIN_OPEN + ":0", "dd/MM/yyyy HH:mm:ss");
+                TIME_CLOSE = TimeUtil.getTime(today + " " + HOUR_CLOSE + ":" + MIN_CLOSE + ":0", "dd/MM/yyyy HH:mm:ss");
             } catch (Exception e) {
-                e.printStackTrace();
+                e.printStackTrace(); // Lỗi set thời gian thì kệ, in ra cho vui 😂
             }
         }
     }
 
     public boolean isTimeMabuWar() {
-        long now = System.currentTimeMillis();
-        return now > TIME_OPEN && now < TIME_CLOSE;
+        LocalDateTime now = LocalDateTime.now();
+        return TIME_OPEN.isBefore(now) && TIME_CLOSE.isAfter(now); // Đúng giờ thì chiến, sai giờ thì nghỉ! ⚡
     }
 
     public void update(Player player) {
+        if (player == null || player.zone == null) return; // Player null thì nghỉ, khỏi làm gì 😅
+
+        if (!MapService.gI().isMapMabuWar14H(player.zone.map.mapId)) return; // Sai map thì bye bye! 👋
+
         try {
-            if (player != null && player.zone != null) {
-                if (MapService.gI().isMapMabuWar14H(player.zone.map.mapId)) {
-                    if (isTimeMabuWar()) {
-                        if (!initBoss) {
-                            BossFactory.initBossMabuWar14H();
-                            initBoss = true;
-                        }
-                    }
-                    try {
-                        if (!isTimeMabuWar() && !MabuWar.gI().isTimeMabuWar()) {
-                            kickOutOfMap(player);
-                            removeAllBoss();
-                        }
-                    } catch (Exception ex) {
-                        System.out.println("Log bug player: " + player.name);
-                        Service.getInstance().sendThongBao(player, "Đã có lỗi xảy ra!");
-                        ex.printStackTrace();
-                    }
+            if (isTimeMabuWar()) {
+                if (!initBoss) {
+                    BossFactory.initBossMabuWar14H(); // Spawn boss, giờ chiến đấu bắt đầu! 🚀
+                    initBoss = true;
                 }
+            } else if (!MabuWar.gI().isTimeMabuWar()) {
+                kickOutOfMap(player); // Hết giờ, về nhà thôi bro!
+                removeAllBoss(); // Dọn boss cho sạch sẽ 😛
             }
         } catch (Exception e) {
-            System.out.println("Log bug player: " + player.name);
-            Service.getInstance().sendThongBao(player, "Đã có lỗi xảy ra!");
+            System.out.println("Bug player: " + player.name + " - Lỗi rồi bro!");
+            Service.getInstance().sendThongBao(player, "Có lỗi xảy ra, chịu khó tí nha! 😢");
             e.printStackTrace();
         }
     }
 
     private void kickOutOfMap(Player player) {
-        synchronized (player) {
-            Service.getInstance().sendThongBao(player, "Trận đại chiến đã kết thúc, tàu vận chuyển sẽ đưa bạn về nhà");
-            ChangeMapService.gI().changeMapBySpaceShip(player, player.gender + 21, -1, 250);
-        }
+        Service.getInstance().sendThongBao(player, "Đại chiến kết thúc, về nhà bằng tàu nha bro!");
+        ChangeMapService.gI().changeMapBySpaceShip(player, player.gender + 21, -1, 250);
     }
 
     public void removeAllBoss() {
-        if (!clearBoss) {
-            for (Boss boss : bosses) {
-                boss.leaveMap();
-            }
-            this.bosses.clear();
-            clearBoss = true;
-        }
+        if (clearBoss) return; // Đã dọn rồi thì thôi, khỏi làm lại 😅
+
+        bosses.forEach(Boss::leaveMap); // Tiễn boss đi hết, bye bye! 👋
+        bosses.clear();
+        clearBoss = true; // Đánh dấu đã dọn, xong việc rồi! 🎉
     }
 }

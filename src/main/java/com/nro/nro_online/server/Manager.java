@@ -952,9 +952,9 @@ public class Manager {
     }
 
     public static Costume getCaiTrangByItemId(int itemId) {
-        for (Costume caiTrang : CAI_TRANGS) {
-            if (caiTrang.tempId == itemId) {
-                return caiTrang;
+        for (Costume costume : CAI_TRANGS) {
+            if (costume.tempId == itemId) {
+                return costume;
             }
         }
         return null;

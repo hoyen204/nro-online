@@ -153,13 +153,13 @@ public class LoginSession {
 
     private byte readKey(byte b) {
         byte result = (byte) ((key[curR++] & 0xFF) ^ (b & 0xFF));
-        curR %= key.length;
+        curR %= (byte) key.length;
         return result;
     }
 
     private byte writeKey(byte b) {
         byte result = (byte) ((key[curW++] & 0xFF) ^ (b & 0xFF));
-        curW %= key.length;
+        curW %= (byte) key.length;
         return result;
     }
 
@@ -175,7 +175,7 @@ public class LoginSession {
             while (connected) {
                 try {
                     if (getKeyComplete && !sendingMessage.isEmpty()) {
-                        doSendMessage(sendingMessage.remove(0));
+                        doSendMessage(sendingMessage.removeFirst());
                     }
                     Thread.sleep(10);
                 } catch (IOException | InterruptedException e) {
@@ -217,7 +217,7 @@ public class LoginSession {
                 key[i] ^= key[i - 1];
             }
             getKeyComplete = true;
-            Log.info("Lấy key mã hóa xong, an toàn rồi nha! 🔑");
+            Log.log("Lấy key mã hóa xong, an toàn rồi nha! 🔑");
         }
 
         private Message readMessage() throws IOException {

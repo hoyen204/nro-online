@@ -3,25 +3,20 @@ package com.nro.nro_online.models.map.phoban;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.models.boss.boss_ban_do_kho_bau.BossBanDoKhoBau;
-import nro.models.boss.boss_ban_do_kho_bau.TrungUyXanhLo;
-import nro.models.clan.Clan;
-import nro.models.map.TrapMap;
-import nro.models.map.Zone;
-import nro.models.mob.GuardRobot;
-import nro.models.mob.Mob;
-import nro.models.mob.Octopus;
-import nro.models.player.Player;
-import nro.services.ItemTimeService;
-import nro.services.MobService;
-import nro.services.func.ChangeMapService;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.boss_ban_do_kho_bau.BossBanDoKhoBau;
+import com.nro.nro_online.models.boss.boss_ban_do_kho_bau.TrungUyXanhLo;
+import com.nro.nro_online.models.clan.Clan;
+import com.nro.nro_online.models.map.TrapMap;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.mob.GuardRobot;
+import com.nro.nro_online.models.mob.Mob;
+import com.nro.nro_online.models.mob.Octopus;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.ItemTimeService;
+import com.nro.nro_online.services.MobService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @stole Arriety
- *
- */
 public class BanDoKhoBau {
 
     public static final long POWER_CAN_GO_TO_DBKB = 2000000000;
@@ -112,7 +107,7 @@ public class BanDoKhoBau {
 
     //kết thúc bản đồ kho báu
     private void finish() {
-        List<Player> plOutDT = new ArrayList();
+        List<Player> plOutDT = new ArrayList<>();
         for (Zone zone : zones) {
             List<Player> players = zone.getPlayers();
             synchronized (players) {

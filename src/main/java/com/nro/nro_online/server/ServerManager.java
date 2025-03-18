@@ -14,17 +14,29 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.nro.nro_online.attr.AttributeManager;
-import com.nro.nro_online.jdbc.daos.AccountDAO;
+import com.nro.nro_online.jdbc.DBService;
 import com.nro.nro_online.jdbc.daos.HistoryTransactionDAO;
+import com.nro.nro_online.jdbc.daos.PlayerDAO;
 import com.nro.nro_online.login.LoginSession;
+import com.nro.nro_online.manager.ConsignManager;
 import com.nro.nro_online.manager.SieuHangControl;
+import com.nro.nro_online.manager.SieuHangManager;
 import com.nro.nro_online.manager.TopCoin;
+import com.nro.nro_online.manager.TopManager;
+import com.nro.nro_online.manager.TopWhis;
 import com.nro.nro_online.manager.TranhNgocManager;
 import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.boss.BossManager;
+import com.nro.nro_online.models.map.challenge.MartialCongressManager;
 import com.nro.nro_online.models.map.dungeon.DungeonManager;
+import com.nro.nro_online.models.map.phoban.BanDoKhoBau;
+import com.nro.nro_online.models.map.phoban.DoanhTrai;
+import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.io.Session;
+import com.nro.nro_online.services.ClanService;
 import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.TimeUtil;
+import com.nro.nro_online.utils.Util;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -62,7 +74,7 @@ public class ServerManager {
         return this.sieuHangControl;
     }
 
-    private ServerManager(){
+    private ServerManager() {
         timeStart = TimeUtil.getTimeNow("dd/MM/yyyy HH:mm:ss");
     }
 
@@ -71,9 +83,6 @@ public class ServerManager {
         HistoryTransactionDAO.deleteHistory();
         BossFactory.initBoss();
         this.controller = new Controller();
-        if (updateTimeLogin) {
-            AccountDAO.updateLastTimeLoginAllAccount();
-        }
     }
 
     public static ServerManager gI() {
@@ -96,7 +105,6 @@ public class ServerManager {
         new Thread(TopCoin.getInstance(), "Update Top Coin").start();
         activeLogin();
         autoTask();
-        //        (new AutoMaintenance(23, 0, 0)).start();
         activeServerSocket();
     }
 
@@ -299,36 +307,6 @@ public class ServerManager {
                 }
             }
         }, "Update giai sieu hang pending").start();
-
-//        new Thread(() -> {
-//            while (isRunning) {
-//                try {
-//                    long start = System.currentTimeMillis();
-//                    ChuyenKhoanManager.HandleTransactionAuto();
-//                    long timeUpdate = System.currentTimeMillis() - start;
-//                    if (timeUpdate < delaySecond) {
-//                        Thread.sleep(delaySecond - timeUpdate);
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }, "Check nap the").start();
-        //
-//        new Thread(() -> {
-//            while (isRunning) {
-//                try {
-//                    long start = System.currentTimeMillis();
-//                    ChuyenKhoanManager.HandleTransactionAddMoneyAuto();
-//                    long timeUpdate = System.currentTimeMillis() - start;
-//                    if (timeUpdate < delay) {
-//                        Thread.sleep(delay - timeUpdate);
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }, "Cong qua nap the").start();
     }
 
     public void close(long delay) {

@@ -4,10 +4,10 @@
  */
 package com.nro.nro_online.services;
 
-import nro.consts.ConstTask;
-import nro.models.item.Item;
-import nro.models.player.Player;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstTask;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

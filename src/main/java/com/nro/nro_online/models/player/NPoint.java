@@ -3,28 +3,28 @@ package com.nro.nro_online.models.player;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.attr.Attribute;
-import nro.card.Card;
-import nro.card.CollectionBook;
-import nro.consts.ConstAttribute;
-import nro.consts.ConstPet;
-import nro.consts.ConstPlayer;
-import nro.consts.ConstRatio;
-import nro.manager.TopWhis;
-import nro.models.clan.Buff;
-import nro.models.intrinsic.Intrinsic;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.skill.Skill;
-import nro.power.PowerLimit;
-import nro.power.PowerLimitManager;
-import nro.server.Manager;
-import nro.server.ServerManager;
-import nro.server.ServerNotify;
-import nro.services.*;
-import nro.utils.Log;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
+import com.nro.nro_online.models.intrinsic.Intrinsic;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.power.PowerLimit;
+import com.nro.nro_online.power.PowerLimitManager;
+import com.nro.nro_online.attr.Attribute;
+import com.nro.nro_online.card.Card;
+import com.nro.nro_online.card.CollectionBook;
+import com.nro.nro_online.consts.ConstAttribute;
+import com.nro.nro_online.consts.ConstPet;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.consts.ConstRatio;
+import com.nro.nro_online.manager.TopWhis;
+import com.nro.nro_online.models.clan.Buff;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.server.ServerManager;
+import com.nro.nro_online.server.ServerNotify;
+import com.nro.nro_online.services.*;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @Stole By Arriety
@@ -194,6 +194,7 @@ public class NPoint {
     }
 
     /*-------------------------------------------------------------------------*/
+
     /**
      * Tính toán mọi chỉ số sau khi có thay đổi
      */
@@ -210,171 +211,171 @@ public class NPoint {
 
     public void setPoint(ItemOption io) {
         switch (io.optionTemplate.id) {
-            case 0: //Tấn công +#
-                this.dameAdd += io.param;
-                break;
-            case 2: //HP, KI+#000
-                this.hpAdd += io.param * 1000;
-                this.mpAdd += io.param * 1000;
-                break;
-            case 3: // vô hiệu vả biến st chưởng thành ki
-                this.mstChuong += io.param;
-                break;
-            case 5: //+#% sức đánh chí mạng
-                this.tlDameCrit.add(io.param);
-                break;
-            case 6: //HP+#
-                this.hpAdd += io.param;
-                break;
-            case 7: //KI+#
-                this.mpAdd += io.param;
-                break;
-            case 8: //Hút #% HP, KI xung quanh mỗi 5 giây
-                this.tlHutHpMpXQ += io.param;
-                break;
-            case 14: //Chí mạng+#%
-                this.critAdd += io.param;
-                break;
-            case 19: //Tấn công+#% khi đánh quái
-                this.tlDameAttMob.add(io.param);
-                break;
-            case 22: //HP+#K
-                this.hpAdd += io.param * 1000;
-                break;
-            case 23: //MP+#K
-                this.mpAdd += io.param * 1000;
-                break;
-            case 24:
-                this.wearingBuiBui = true;
-                break;
-            case 25:
-                this.wearingYacon = true;
-                break;
-            case 26:
-                this.wearingDrabula = true;
-                this.player.effectSkin.lastTimeDrabula = System.currentTimeMillis();
-                break;
-            case 29:
-                this.wearingMabu = true;
-                break;
-            case 27: //+# HP/30s
-                this.hpHoiAdd += io.param;
-                break;
-            case 28: //+# KI/30s
-                this.mpHoiAdd += io.param;
-                break;
-            case 33: //dịch chuyển tức thời
-                this.teleport = true;
-                break;
-            case 47: //Giáp+#
-                this.defAdd += io.param;
-                break;
-            case 48: //HP/KI+#
-                this.hpAdd += io.param;
-                this.mpAdd += io.param;
-                break;
-            case 49: //Tấn công+#%
-            case 50: //Sức đánh+#%
-                this.tlDame.add(io.param);
-                break;
-            case 77: //HP+#%
-                this.tlHp.add(io.param);
-                break;
-            case 80: //HP+#%/30s
-                this.tlHpHoi += io.param;
-                break;
-            case 81: //MP+#%/30s
-                this.tlMpHoi += io.param;
-                break;
-            case 88: //Cộng #% exp khi đánh quái
-                this.tlTNSM.add(io.param);
-                break;
-            case 94: //Giáp #%
-                this.tlDef.add(io.param);
-                break;
-            case 95: //Biến #% tấn công thành HP
-                this.tlHutHp += io.param;
-                break;
-            case 96: //Biến #% tấn công thành MP
-                this.tlHutMp += io.param;
-                break;
-            case 97: //Phản #% sát thương
-                this.tlPST += io.param;
-                break;
-            case 100: //+#% vàng từ quái
-                this.tlGold += io.param;
-                break;
-            case 101: //+#% TN,SM
-                this.tlTNSM.add(io.param);
-                break;
-            case 103: //KI +#%
-                this.tlMp.add(io.param);
-                break;
-            case 104: //Biến #% tấn công quái thành HP
-                this.tlHutHpMob += io.param;
-                break;
-            case 105: //Vô hình khi không đánh quái và boss
-                this.wearingVoHinh = true;
-                break;
-            case 106: //Không ảnh hưởng bởi cái lạnh
-                this.isKhongLanh = true;
-                break;
-            case 108: //#% Né đòn
-                this.tlNeDon += io.param;
-                break;
-            case 109: //Hôi, giảm #% HP
-                this.tlHpGiamODo += io.param;
-                break;
-            case 114:
-                this.tlSpeed.add(io.param);
-                break;
-            case 116: //Kháng thái dương hạ san
-                this.khangTDHS = true;
-                break;
-            case 117: //Đẹp +#% SĐ cho mình và người xung quanh
-                this.tlSDDep.add(io.param);
-                break;
-            case 147: //+#% sức đánh
-                this.tlDame.add(io.param);
-                break;
-            case 156: //Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng từ quái
-                this.tlSubSD += 50;
-                this.tlTNSM.add(io.param);
-                this.tlGold += io.param;
-                break;
-            case 160:
-                this.tlTNSMPet += io.param;
-                break;
-            case 162: //Cute hồi #% KI/s bản thân và xung quanh
-                this.mpHoiCute += io.param;
-                break;
-            case 173: //Phục hồi #% HP và KI cho đồng đội
-                this.tlHpHoiBanThanVaDongDoi += io.param;
-                this.tlMpHoiBanThanVaDongDoi += io.param;
-                break;
-            case 189:
-                this.wearingNezuko = true;
-                break;
-            case 190:
-                this.wearingTanjiro = true;
-                break;
-            case 191:
-                this.wearingInoHashi = true;
-                break;
-            case 192:
-                this.wearingInosuke = true;
-                break;
-            case 193:
-                this.wearingZenitsu = true;
-                break;
-            case 194:
-                this.tlDameChuong = 3;
-                break;
-            case 195:
-                this.tlDameChuong = 4;
-            case 231:
-                this.isKhongAnhHuongBoiLoiNguyen = true;
-                break;
+        case 0: //Tấn công +#
+            this.dameAdd += io.param;
+            break;
+        case 2: //HP, KI+#000
+            this.hpAdd += io.param * 1000;
+            this.mpAdd += io.param * 1000;
+            break;
+        case 3: // vô hiệu vả biến st chưởng thành ki
+            this.mstChuong += io.param;
+            break;
+        case 5: //+#% sức đánh chí mạng
+            this.tlDameCrit.add(io.param);
+            break;
+        case 6: //HP+#
+            this.hpAdd += io.param;
+            break;
+        case 7: //KI+#
+            this.mpAdd += io.param;
+            break;
+        case 8: //Hút #% HP, KI xung quanh mỗi 5 giây
+            this.tlHutHpMpXQ += io.param;
+            break;
+        case 14: //Chí mạng+#%
+            this.critAdd += io.param;
+            break;
+        case 19: //Tấn công+#% khi đánh quái
+            this.tlDameAttMob.add(io.param);
+            break;
+        case 22: //HP+#K
+            this.hpAdd += io.param * 1000;
+            break;
+        case 23: //MP+#K
+            this.mpAdd += io.param * 1000;
+            break;
+        case 24:
+            this.wearingBuiBui = true;
+            break;
+        case 25:
+            this.wearingYacon = true;
+            break;
+        case 26:
+            this.wearingDrabula = true;
+            this.player.effectSkin.lastTimeDrabula = System.currentTimeMillis();
+            break;
+        case 29:
+            this.wearingMabu = true;
+            break;
+        case 27: //+# HP/30s
+            this.hpHoiAdd += io.param;
+            break;
+        case 28: //+# KI/30s
+            this.mpHoiAdd += io.param;
+            break;
+        case 33: //dịch chuyển tức thời
+            this.teleport = true;
+            break;
+        case 47: //Giáp+#
+            this.defAdd += io.param;
+            break;
+        case 48: //HP/KI+#
+            this.hpAdd += io.param;
+            this.mpAdd += io.param;
+            break;
+        case 49: //Tấn công+#%
+        case 50: //Sức đánh+#%
+            this.tlDame.add(io.param);
+            break;
+        case 77: //HP+#%
+            this.tlHp.add(io.param);
+            break;
+        case 80: //HP+#%/30s
+            this.tlHpHoi += io.param;
+            break;
+        case 81: //MP+#%/30s
+            this.tlMpHoi += io.param;
+            break;
+        case 88: //Cộng #% exp khi đánh quái
+            this.tlTNSM.add(io.param);
+            break;
+        case 94: //Giáp #%
+            this.tlDef.add(io.param);
+            break;
+        case 95: //Biến #% tấn công thành HP
+            this.tlHutHp += io.param;
+            break;
+        case 96: //Biến #% tấn công thành MP
+            this.tlHutMp += io.param;
+            break;
+        case 97: //Phản #% sát thương
+            this.tlPST += io.param;
+            break;
+        case 100: //+#% vàng từ quái
+            this.tlGold += io.param;
+            break;
+        case 101: //+#% TN,SM
+            this.tlTNSM.add(io.param);
+            break;
+        case 103: //KI +#%
+            this.tlMp.add(io.param);
+            break;
+        case 104: //Biến #% tấn công quái thành HP
+            this.tlHutHpMob += io.param;
+            break;
+        case 105: //Vô hình khi không đánh quái và boss
+            this.wearingVoHinh = true;
+            break;
+        case 106: //Không ảnh hưởng bởi cái lạnh
+            this.isKhongLanh = true;
+            break;
+        case 108: //#% Né đòn
+            this.tlNeDon += io.param;
+            break;
+        case 109: //Hôi, giảm #% HP
+            this.tlHpGiamODo += io.param;
+            break;
+        case 114:
+            this.tlSpeed.add(io.param);
+            break;
+        case 116: //Kháng thái dương hạ san
+            this.khangTDHS = true;
+            break;
+        case 117: //Đẹp +#% SĐ cho mình và người xung quanh
+            this.tlSDDep.add(io.param);
+            break;
+        case 147: //+#% sức đánh
+            this.tlDame.add(io.param);
+            break;
+        case 156: //Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng từ quái
+            this.tlSubSD += 50;
+            this.tlTNSM.add(io.param);
+            this.tlGold += io.param;
+            break;
+        case 160:
+            this.tlTNSMPet += io.param;
+            break;
+        case 162: //Cute hồi #% KI/s bản thân và xung quanh
+            this.mpHoiCute += io.param;
+            break;
+        case 173: //Phục hồi #% HP và KI cho đồng đội
+            this.tlHpHoiBanThanVaDongDoi += io.param;
+            this.tlMpHoiBanThanVaDongDoi += io.param;
+            break;
+        case 189:
+            this.wearingNezuko = true;
+            break;
+        case 190:
+            this.wearingTanjiro = true;
+            break;
+        case 191:
+            this.wearingInoHashi = true;
+            break;
+        case 192:
+            this.wearingInosuke = true;
+            break;
+        case 193:
+            this.wearingZenitsu = true;
+            break;
+        case 194:
+            this.tlDameChuong = 3;
+            break;
+        case 195:
+            this.tlDameChuong = 4;
+        case 231:
+            this.isKhongAnhHuongBoiLoiNguyen = true;
+            break;
         }
     }
 
@@ -389,43 +390,43 @@ public class NPoint {
             }
             if (item.isNotNullItem()) {
                 switch (this.player.fusion.typeFusion) {
-                    case ConstPlayer.HOP_THE_PORATA2:
-                        idbt = 921;
-                        break;
-                    case ConstPlayer.HOP_THE_PORATA3:
-                        idbt = 1995;
-                        break;
+                case ConstPlayer.HOP_THE_PORATA2:
+                    idbt = 921;
+                    break;
+                case ConstPlayer.HOP_THE_PORATA3:
+                    idbt = 1995;
+                    break;
                 }
                 if (item.template.id == idbt) {
                     for (ItemOption io : item.itemOptions) {
                         switch (io.optionTemplate.id) {
-                            case 80: //HP+#%/30s
-                                this.tlHpHoi += io.param;
-                                break;
-                            case 81: //MP+#%/30s
-                                this.tlMpHoi += io.param;
-                                break;
-                            case 50: //Sức đánh+#%
-                                this.tlDame.add(io.param);
-                                break;
-                            case 77: //HP+#%
-                                this.tlHp.add(io.param);
-                                break;
-                            case 94: //Giáp #%
-                                this.tlDef.add(io.param);
-                                break;
-                            case 101: //+#% TN,SM
-                                this.tlTNSM.add(io.param);
-                                break;
-                            case 103: //KI +#%
-                                this.tlMp.add(io.param);
-                                break;
-                            case 108: //#% Né đòn
-                                this.tlNeDon += io.param;
-                                break;
-                            case 14:// chí mạng
-                                this.critAdd += io.param;
-                                break;
+                        case 80: //HP+#%/30s
+                            this.tlHpHoi += io.param;
+                            break;
+                        case 81: //MP+#%/30s
+                            this.tlMpHoi += io.param;
+                            break;
+                        case 50: //Sức đánh+#%
+                            this.tlDame.add(io.param);
+                            break;
+                        case 77: //HP+#%
+                            this.tlHp.add(io.param);
+                            break;
+                        case 94: //Giáp #%
+                            this.tlDef.add(io.param);
+                            break;
+                        case 101: //+#% TN,SM
+                            this.tlTNSM.add(io.param);
+                            break;
+                        case 103: //KI +#%
+                            this.tlMp.add(io.param);
+                            break;
+                        case 108: //#% Né đòn
+                            this.tlNeDon += io.param;
+                            break;
+                        case 14:// chí mạng
+                            this.critAdd += io.param;
+                            break;
                         }
                     }
                     countbt++;
@@ -449,29 +450,29 @@ public class NPoint {
                 if (itemsBody.get(5).isNotNullItem()) {
                     int tempID = itemsBody.get(5).getId();
                     switch (tempID) {
-                        case 386:
-                        case 389:
-                        case 392:
-                            wearingGrayNoelHat = true;
-                            wearingNoelHat = true;
-                            break;
-                        case 387:
-                        case 390:
-                        case 393:
-                            wearingRedNoelHat = true;
-                            wearingNoelHat = true;
-                            break;
-                        case 388:
-                        case 391:
-                        case 394:
-                            wearingBlueNoelHat = true;
-                            wearingNoelHat = true;
-                            break;
-                        default:
-                            wearingRedNoelHat = false;
-                            wearingBlueNoelHat = false;
-                            wearingGrayNoelHat = false;
-                            wearingNoelHat = false;
+                    case 386:
+                    case 389:
+                    case 392:
+                        wearingGrayNoelHat = true;
+                        wearingNoelHat = true;
+                        break;
+                    case 387:
+                    case 390:
+                    case 393:
+                        wearingRedNoelHat = true;
+                        wearingNoelHat = true;
+                        break;
+                    case 388:
+                    case 391:
+                    case 394:
+                        wearingBlueNoelHat = true;
+                        wearingNoelHat = true;
+                        break;
+                    default:
+                        wearingRedNoelHat = false;
+                        wearingBlueNoelHat = false;
+                        wearingGrayNoelHat = false;
+                        wearingNoelHat = false;
                     }
                 }
             }
@@ -555,7 +556,8 @@ public class NPoint {
         this.hpMax += this.hpAdd;
         //đồ
         if (this.player.playerSkill.skills.size() > 4) {
-            if (this.player.isPet && this.player.playerSkill.skills.get(4).skillId != -1 && this.player.playerSkill.skills.get(4).template.id == Skill.HUYT_SAO) {
+            if (this.player.isPet && this.player.playerSkill.skills.get(4).skillId != -1 && this.player.playerSkill.skills.get(
+                    4).template.id == Skill.HUYT_SAO) {
                 this.hpMax += hpMax / 100 * (3 * this.player.playerSkill.skills.get(4).point);
             }
         }
@@ -592,21 +594,21 @@ public class NPoint {
                     || ((Pet) this.player).master.fusion.typeFusion == ConstPlayer.HOP_THE_PORATA2
                     || ((Pet) this.player).master.fusion.typeFusion == ConstPlayer.HOP_THE_PORATA3) {
                 switch (((Pet) this.player).typePet) {
-                    case ConstPet.MABU:
-                        this.hpMax += calPercent(this.hpMax, 5);
-                        break;
-                    case ConstPet.BILL:
-                        this.hpMax += calPercent(this.hpMax, 15);
-                        break;
-                    case ConstPet.VIDEL:
-                        this.hpMax += calPercent(this.hpMax, percent);
-                        break;
-                    case ConstPet.SUPER:
-                        this.hpMax += calPercent(this.hpMax, 15);
-                        break;
-                    case ConstPet.WHIS:
-                        this.hpMax += calPercent(this.hpMax, 30 + percent);
-                        break;
+                case ConstPet.MABU:
+                    this.hpMax += calPercent(this.hpMax, 5);
+                    break;
+                case ConstPet.BILL:
+                    this.hpMax += calPercent(this.hpMax, 15);
+                    break;
+                case ConstPet.VIDEL:
+                    this.hpMax += calPercent(this.hpMax, percent);
+                    break;
+                case ConstPet.SUPER:
+                    this.hpMax += calPercent(this.hpMax, 15);
+                    break;
+                case ConstPet.WHIS:
+                    this.hpMax += calPercent(this.hpMax, 30 + percent);
+                    break;
                 }
             }
         }
@@ -724,21 +726,21 @@ public class NPoint {
                     this.mpMax += calPercent(this.mpMax, 10);
                 }
                 switch (((Pet) this.player).typePet) {
-                    case ConstPet.MABU:
-                        this.mpMax += calPercent(this.mpMax, 5);
-                        break;
-                    case ConstPet.SUPER:
-                        this.mpMax += calPercent(this.mpMax, 10);
-                        break;
-                    case ConstPet.BILL:
-                        this.mpMax += calPercent(this.mpMax, 15);
-                        break;
-                    case ConstPet.VIDEL:
-                        this.mpMax += calPercent(this.mpMax, percent);
-                        break;
-                    case ConstPet.WHIS:
-                        this.mpMax += calPercent(this.mpMax, 30 + percent);
-                        break;
+                case ConstPet.MABU:
+                    this.mpMax += calPercent(this.mpMax, 5);
+                    break;
+                case ConstPet.SUPER:
+                    this.mpMax += calPercent(this.mpMax, 10);
+                    break;
+                case ConstPet.BILL:
+                    this.mpMax += calPercent(this.mpMax, 15);
+                    break;
+                case ConstPet.VIDEL:
+                    this.mpMax += calPercent(this.mpMax, percent);
+                    break;
+                case ConstPet.WHIS:
+                    this.mpMax += calPercent(this.mpMax, 30 + percent);
+                    break;
                 }
             }
         }
@@ -825,7 +827,8 @@ public class NPoint {
             this.dame += calPercent(this.dame, tl);
         }
         if (this.player.playerSkill.skills.size() > 4) {
-            if (this.player.isPet && this.player.playerSkill.skills.get(4).skillId != -1 && this.player.playerSkill.skills.get(4).template.id == Skill.DICH_CHUYEN_TUC_THOI) {
+            if (this.player.isPet && this.player.playerSkill.skills.get(4).skillId != -1 && this.player.playerSkill.skills.get(
+                    4).template.id == Skill.DICH_CHUYEN_TUC_THOI) {
                 this.dame += dame / 100 * (3 * this.player.playerSkill.skills.get(4).point);
             }
         }
@@ -838,18 +841,18 @@ public class NPoint {
                     || ((Pet) this.player).master.fusion.typeFusion == ConstPlayer.HOP_THE_PORATA2
                     || ((Pet) this.player).master.fusion.typeFusion == ConstPlayer.HOP_THE_PORATA3) {
                 switch (((Pet) this.player).typePet) {
-                    case ConstPet.MABU:
-                        this.dame += calPercent(this.dame, 5);
-                        break;
-                    case ConstPet.SUPER:
-                        this.dame += calPercent(this.dame, 10);
-                        break;
-                    case ConstPet.BILL:
-                        this.dame += calPercent(this.dame, 15);
-                        break;
-                    case ConstPet.WHIS:
-                        this.dame += calPercent(this.dame, 30 + percent);
-                        break;
+                case ConstPet.MABU:
+                    this.dame += calPercent(this.dame, 5);
+                    break;
+                case ConstPet.SUPER:
+                    this.dame += calPercent(this.dame, 10);
+                    break;
+                case ConstPet.BILL:
+                    this.dame += calPercent(this.dame, 15);
+                    break;
+                case ConstPet.WHIS:
+                    this.dame += calPercent(this.dame, 30 + percent);
+                    break;
                 }
             }
         }
@@ -1093,105 +1096,105 @@ public class NPoint {
         int percentXDame = 0;
         Skill skillSelect = player.playerSkill.skillSelect;
         switch (skillSelect.template.id) {
-            case Skill.DRAGON:
-                if (intrinsic.id == 1) {
-                    percentDameIntrinsic = intrinsic.param1;
-                }
-                percentDameSkill = skillSelect.damage;
-                break;
-            case Skill.KAMEJOKO:
-                if (intrinsic.id == 2) {
-                    percentDameIntrinsic = intrinsic.param1;
-                }
-                percentDameSkill = skillSelect.damage;
-                if (this.player.setClothes.songoku2 == 5) {
-                    percentXDame = 100;
-                }
-                if (this.player.setClothes.songoku1 == 5) {
-                    percentXDame = 50;
-                }
-//                if (this.player.effectSkin.xDameChuong) {
-//                    percentXDame += tlDameChuong;
-//                    this.player.effectSkin.xDameChuong = false;
-//                }
-                break;
-            case Skill.GALICK:
-                if (intrinsic.id == 16) {
-                    percentDameIntrinsic = intrinsic.param1;
-                }
-                percentDameSkill = skillSelect.damage;
-                if (this.player.setClothes.kakarot2 == 5) {
-                    percentXDame = 100;
-                }
-                if (this.player.setClothes.kakarot1 == 5) {
-                    percentXDame = 50;
-                }
-                break;
-            case Skill.ANTOMIC:
-                if (intrinsic.id == 17) {
-                    percentDameIntrinsic = intrinsic.param1;
-                }
-                percentDameSkill = skillSelect.damage;
-//                if (this.player.effectSkin.xDameChuong) {
-//                    percentXDame += tlDameChuong;
-//                    this.player.effectSkin.xDameChuong = false;
-//                }
-                break;
-            case Skill.DEMON:
-                if (intrinsic.id == 8) {
-                    percentDameIntrinsic = intrinsic.param1;
-                }
-                percentDameSkill = skillSelect.damage;
-                break;
-            case Skill.MASENKO:
-                if (intrinsic.id == 9) {
-                    percentDameIntrinsic = intrinsic.param1;
-                }
-                percentDameSkill = skillSelect.damage;
-                break;
-            case Skill.KAIOKEN:
-                percentDameSkill = skillSelect.damage;
-//                if (this.player.setClothes.kaioken2 == 5) {
-//                    percentXDame = 100;
-//                }
-//                if (this.player.setClothes.kaioken1 == 5) {
-//                    percentXDame = 50;
-//                }
-                break;
-            case Skill.LIEN_HOAN:
-                if (intrinsic.id == 13) {
-                    percentDameIntrinsic = intrinsic.param1;
-                }
-                percentDameSkill = skillSelect.damage;
-                if (this.player.setClothes.lienhoan2 == 5) {
-                    percentXDame = 100;
-                }
-                if (this.player.setClothes.lienhoan1 == 5) {
-                    percentXDame = 50;
-                }
-                break;
-            case Skill.DICH_CHUYEN_TUC_THOI:
-                dameAttack *= 2;
-                dameAttack = Util.nextInt((int) (dameAttack - calPercent(dameAttack, 5)),
-                        (int) (dameAttack + calPercent(dameAttack, 5)));
-                return (int) dameAttack;
-            case Skill.MAKANKOSAPPO:
-                percentDameSkill = skillSelect.damage;
-                int dameSkill = (int) calPercent(this.mpMax, percentDameSkill);
-                return dameSkill;
-            case Skill.QUA_CAU_KENH_KHI:
-                long totalHP = 0;
-                if (player.zone != null) {
-                    totalHP = player.zone.getTotalHP();
-                }
-                int damage = (int) ((totalHP / 10) + (this.dame * 10));
-                if (this.player.setClothes.kaioken1 == 5) {
-                    damage *= 2;
-                }
-                if (this.player.setClothes.kaioken2 == 5) {
-                    damage *= 2;
-                }
-                return damage;
+        case Skill.DRAGON:
+            if (intrinsic.id == 1) {
+                percentDameIntrinsic = intrinsic.param1;
+            }
+            percentDameSkill = skillSelect.damage;
+            break;
+        case Skill.KAMEJOKO:
+            if (intrinsic.id == 2) {
+                percentDameIntrinsic = intrinsic.param1;
+            }
+            percentDameSkill = skillSelect.damage;
+            if (this.player.setClothes.songoku2 == 5) {
+                percentXDame = 100;
+            }
+            if (this.player.setClothes.songoku1 == 5) {
+                percentXDame = 50;
+            }
+            //                if (this.player.effectSkin.xDameChuong) {
+            //                    percentXDame += tlDameChuong;
+            //                    this.player.effectSkin.xDameChuong = false;
+            //                }
+            break;
+        case Skill.GALICK:
+            if (intrinsic.id == 16) {
+                percentDameIntrinsic = intrinsic.param1;
+            }
+            percentDameSkill = skillSelect.damage;
+            if (this.player.setClothes.kakarot2 == 5) {
+                percentXDame = 100;
+            }
+            if (this.player.setClothes.kakarot1 == 5) {
+                percentXDame = 50;
+            }
+            break;
+        case Skill.ANTOMIC:
+            if (intrinsic.id == 17) {
+                percentDameIntrinsic = intrinsic.param1;
+            }
+            percentDameSkill = skillSelect.damage;
+            //                if (this.player.effectSkin.xDameChuong) {
+            //                    percentXDame += tlDameChuong;
+            //                    this.player.effectSkin.xDameChuong = false;
+            //                }
+            break;
+        case Skill.DEMON:
+            if (intrinsic.id == 8) {
+                percentDameIntrinsic = intrinsic.param1;
+            }
+            percentDameSkill = skillSelect.damage;
+            break;
+        case Skill.MASENKO:
+            if (intrinsic.id == 9) {
+                percentDameIntrinsic = intrinsic.param1;
+            }
+            percentDameSkill = skillSelect.damage;
+            break;
+        case Skill.KAIOKEN:
+            percentDameSkill = skillSelect.damage;
+            //                if (this.player.setClothes.kaioken2 == 5) {
+            //                    percentXDame = 100;
+            //                }
+            //                if (this.player.setClothes.kaioken1 == 5) {
+            //                    percentXDame = 50;
+            //                }
+            break;
+        case Skill.LIEN_HOAN:
+            if (intrinsic.id == 13) {
+                percentDameIntrinsic = intrinsic.param1;
+            }
+            percentDameSkill = skillSelect.damage;
+            if (this.player.setClothes.lienhoan2 == 5) {
+                percentXDame = 100;
+            }
+            if (this.player.setClothes.lienhoan1 == 5) {
+                percentXDame = 50;
+            }
+            break;
+        case Skill.DICH_CHUYEN_TUC_THOI:
+            dameAttack *= 2;
+            dameAttack = Util.nextInt((int) (dameAttack - calPercent(dameAttack, 5)),
+                    (int) (dameAttack + calPercent(dameAttack, 5)));
+            return (int) dameAttack;
+        case Skill.MAKANKOSAPPO:
+            percentDameSkill = skillSelect.damage;
+            int dameSkill = (int) calPercent(this.mpMax, percentDameSkill);
+            return dameSkill;
+        case Skill.QUA_CAU_KENH_KHI:
+            long totalHP = 0;
+            if (player.zone != null) {
+                totalHP = player.zone.getTotalHP();
+            }
+            int damage = (int) ((totalHP / 10) + (this.dame * 10));
+            if (this.player.setClothes.kaioken1 == 5) {
+                damage *= 2;
+            }
+            if (this.player.setClothes.kaioken2 == 5) {
+                damage *= 2;
+            }
+            return damage;
         }
         if (intrinsic.id == 18 && this.player.effectSkill.isMonkey) {
             percentDameIntrinsic = intrinsic.param1;
@@ -1218,27 +1221,27 @@ public class NPoint {
             }
         }
         dameAttack += calPercent(dameAttack, percentXDame);
-//        System.out.println(dameAttack);
+        //        System.out.println(dameAttack);
         dameAttack = Util.nextInt((int) (dameAttack - calPercent(dameAttack, 5)), (int) (dameAttack + calPercent(dameAttack, 5)));
 
         if (dameAttack >= 50_000_000 && player.isPl()) {
             String skillName = player.playerSkill.skillSelect.template.name;
             String str = player.name + " đã đánh một " + skillName + " với sát thương " + Util.numberToMoney(dameAttack);
             switch (skillSelect.template.id) {
-                case Skill.KAMEJOKO:
-                case Skill.LIEN_HOAN:
-                case Skill.GALICK:
-                case Skill.DEMON:
-                case Skill.DRAGON:
-                case Skill.KAIOKEN:
-                case Skill.DE_TRUNG:
-                case Skill.MAKANKOSAPPO:
-                case Skill.TU_SAT:
-                case Skill.QUA_CAU_KENH_KHI:
-                    ServerNotify.gI().notify(str);
-                    break;
-                default:
-                    break;
+            case Skill.KAMEJOKO:
+            case Skill.LIEN_HOAN:
+            case Skill.GALICK:
+            case Skill.DEMON:
+            case Skill.DRAGON:
+            case Skill.KAIOKEN:
+            case Skill.DE_TRUNG:
+            case Skill.MAKANKOSAPPO:
+            case Skill.TU_SAT:
+            case Skill.QUA_CAU_KENH_KHI:
+                ServerNotify.gI().notify(str);
+                break;
+            default:
+                break;
             }
         }
         return (int) dameAttack;
@@ -1507,121 +1510,121 @@ public class NPoint {
         long tiemNangUse = 0;
         boolean check = false;
         switch (type) {
-            case 0:
-                int hpOld = hpg;
-                switch (point) {
-                    case 1:
-                        tiemNangUse = hpOld + 1000;
-                        break;
-                    case 10:
-                        tiemNangUse = 10 * (2 * (hpOld + 1000) + 180) / 2;
-                        break;
-                    case 100:
-                        tiemNangUse = 100 * (2 * (hpOld + 1000) + 1980) / 2;
-                        break;
-                    default:
-                        Service.getInstance().sendThongBaoOK(player, "Giá trị nhập vào không chính xác");
-                        return;
-                }
-                if (tiemNang < tiemNangUse) {
-                    Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
-                    return;
-                }
-                int hpNew = hpOld + 20 * point;
-                if (hpNew > powerLimit.getHp()) {
-                    Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
-                    return;
-                }
-                this.hpg = hpNew;
-                check = true;
-                break;
+        case 0:
+            int hpOld = hpg;
+            switch (point) {
             case 1:
-                int mpOld = mpg;
-                switch (point) {
-                    case 1:
-                        tiemNangUse = mpOld + 1000;
-                        break;
-                    case 10:
-                        tiemNangUse = 10 * (2 * (mpOld + 1000) + 180) / 2;
-                        break;
-                    case 100:
-                        tiemNangUse = 100 * (2 * (mpOld + 1000) + 1980) / 2;
-                        break;
-                    default:
-                        Service.getInstance().sendThongBaoOK(player, "Giá trị nhập vào không chính xác");
-                        return;
-                }
-                if (tiemNang < tiemNangUse) {
-                    Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
-                    return;
-                }
-                int mpNew = mpOld + 20 * point;
-                if (mpNew > powerLimit.getMp()) {
-                    Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
-                    return;
-                }
-                mpg = mpNew;
-                check = true;
+                tiemNangUse = hpOld + 1000;
                 break;
-            case 2:
-                int damageOld = this.dameg;
-                switch (point) {
-                    case 1:
-                        tiemNangUse = damageOld * 100;
-                        break;
-                    case 10:
-                        tiemNangUse = 10 * (2 * damageOld + 9) / 2 * 100;
-                        break;
-                    case 100:
-                        tiemNangUse = 100 * (2 * damageOld + 99) / 2 * 100;
-                        break;
-                    default:
-                        Service.getInstance().sendThongBaoOK(player, "Giá trị nhập vào không chính xác");
-                        return;
-                }
-                if (tiemNang < tiemNangUse) {
-                    Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
-                    return;
-                }
-                int damageNew = damageOld + 1 * point;
-                if (damageNew > powerLimit.getDamage()) {
-                    Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
-                    return;
-                }
-                dameg = damageNew;
-                check = true;
+            case 10:
+                tiemNangUse = 10 * (2 * (hpOld + 1000) + 180) / 2;
                 break;
-            case 3:
-                int defOld = this.defg;
-                tiemNangUse = 2 * (defOld + 5) / 2 * 100000;
-                if (tiemNang < tiemNangUse) {
-                    Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
-                    return;
-                }
-                if (defOld >= powerLimit.getDefense()) {
-                    Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
-                    return;
-                }
-                defg += 1;
-                check = true;
+            case 100:
+                tiemNangUse = 100 * (2 * (hpOld + 1000) + 1980) / 2;
                 break;
-            case 4:
-                int critOld = critg;
-                tiemNangUse = 50000000;
-                for (byte i = 0; i < critOld; i++) {
-                    tiemNangUse *= 5;
-                }
-                if (tiemNang < tiemNangUse) {
-                    Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
-                    return;
-                }
-                if (critOld >= powerLimit.getCritical()) {
-                    Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
-                    return;
-                }
-                critg += 1;
-                check = true;
+            default:
+                Service.getInstance().sendThongBaoOK(player, "Giá trị nhập vào không chính xác");
+                return;
+            }
+            if (tiemNang < tiemNangUse) {
+                Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
+                return;
+            }
+            int hpNew = hpOld + 20 * point;
+            if (hpNew > powerLimit.getHp()) {
+                Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
+                return;
+            }
+            this.hpg = hpNew;
+            check = true;
+            break;
+        case 1:
+            int mpOld = mpg;
+            switch (point) {
+            case 1:
+                tiemNangUse = mpOld + 1000;
                 break;
+            case 10:
+                tiemNangUse = 10 * (2 * (mpOld + 1000) + 180) / 2;
+                break;
+            case 100:
+                tiemNangUse = 100 * (2 * (mpOld + 1000) + 1980) / 2;
+                break;
+            default:
+                Service.getInstance().sendThongBaoOK(player, "Giá trị nhập vào không chính xác");
+                return;
+            }
+            if (tiemNang < tiemNangUse) {
+                Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
+                return;
+            }
+            int mpNew = mpOld + 20 * point;
+            if (mpNew > powerLimit.getMp()) {
+                Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
+                return;
+            }
+            mpg = mpNew;
+            check = true;
+            break;
+        case 2:
+            int damageOld = this.dameg;
+            switch (point) {
+            case 1:
+                tiemNangUse = damageOld * 100;
+                break;
+            case 10:
+                tiemNangUse = 10 * (2 * damageOld + 9) / 2 * 100;
+                break;
+            case 100:
+                tiemNangUse = 100 * (2 * damageOld + 99) / 2 * 100;
+                break;
+            default:
+                Service.getInstance().sendThongBaoOK(player, "Giá trị nhập vào không chính xác");
+                return;
+            }
+            if (tiemNang < tiemNangUse) {
+                Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
+                return;
+            }
+            int damageNew = damageOld + 1 * point;
+            if (damageNew > powerLimit.getDamage()) {
+                Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
+                return;
+            }
+            dameg = damageNew;
+            check = true;
+            break;
+        case 3:
+            int defOld = this.defg;
+            tiemNangUse = 2 * (defOld + 5) / 2 * 100000;
+            if (tiemNang < tiemNangUse) {
+                Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
+                return;
+            }
+            if (defOld >= powerLimit.getDefense()) {
+                Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
+                return;
+            }
+            defg += 1;
+            check = true;
+            break;
+        case 4:
+            int critOld = critg;
+            tiemNangUse = 50000000;
+            for (byte i = 0; i < critOld; i++) {
+                tiemNangUse *= 5;
+            }
+            if (tiemNang < tiemNangUse) {
+                Service.getInstance().sendThongBaoOK(player, "Bạn không có đủ tiềm năng để cộng điểm");
+                return;
+            }
+            if (critOld >= powerLimit.getCritical()) {
+                Service.getInstance().sendThongBaoOK(player, "Hãy mở giới hạn để cộng điểm này");
+                return;
+            }
+            critg += 1;
+            check = true;
+            break;
         }
         this.tiemNang -= tiemNangUse;
         TaskService.gI().checkDoneTaskUseTiemNang(player);

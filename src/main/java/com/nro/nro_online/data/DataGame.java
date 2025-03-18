@@ -2,8 +2,8 @@ package com.nro.nro_online.data;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 
 import com.nro.nro_online.consts.Cmd;
 import com.nro.nro_online.models.PartManager;
@@ -55,9 +55,9 @@ public class DataGame {
             msg.writer().writeByte(vsSkill);
             msg.writer().writeByte(vsItem);
             msg.writer().writeByte(0);
-            List<Caption> captions = CaptionManager.getInstance().getCaptions();
+            NavigableMap<Long, Caption> captions = CaptionManager.getInstance().getCaptionsByPower();
             msg.writer().writeByte(captions.size());
-            for(Caption caption : captions) {
+            for (Caption caption : captions.values()) {
                 msg.writer().writeLong(caption.getPower());
             }
             session.sendMessage(msg);
@@ -90,7 +90,8 @@ public class DataGame {
         try (Message msg = Service.getInstance().messageNotMap((byte) 6)) {
             msg.writer().writeByte(vsMap);
             msg.writer().writeByte(Manager.MAP_TEMPLATES.length);
-            for (MapTemplate temp : Manager.MAP_TEMPLATES) msg.writer().writeUTF(temp.name);
+            for (MapTemplate temp : Manager.MAP_TEMPLATES)
+                msg.writer().writeUTF(temp.name);
             msg.writer().writeByte(Manager.NPC_TEMPLATES.size());
             for (NpcTemplate temp : Manager.NPC_TEMPLATES) {
                 msg.writer().writeUTF(temp.name);
@@ -144,9 +145,11 @@ public class DataGame {
         msg.writer().writeUTF(skillTemp.description);
         int skillCount = skillTemp.id == 0 ? skillTemp.skillss.size() + 2 : skillTemp.skillss.size();
         msg.writer().writeByte(skillCount);
-        for (Skill skill : skillTemp.skillss) writeSkill(msg, skill);
+        for (Skill skill : skillTemp.skillss)
+            writeSkill(msg, skill);
         if (skillTemp.id == 0) {
-            for (int i = 105; i <= 106; i++) writeEmptySkill(msg, i);
+            for (int i = 105; i <= 106; i++)
+                writeEmptySkill(msg, i);
         }
     }
 
@@ -180,7 +183,8 @@ public class DataGame {
 
     public static void sendDataImageVersion(Session session) {
         try (Message msg = new Message(-111)) {
-            msg.writer().write(FileIO.readFile("resources/data/nro/data_img_version/x" + session.zoomLevel + "/img_version"));
+            msg.writer().write(
+                    FileIO.readFile("resources/data/nro/data_img_version/x" + session.zoomLevel + "/img_version"));
             session.doSendMessage(msg);
         } catch (Exception e) {
             Log.error(DataGame.class, e);

@@ -17,16 +17,23 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.nro.nro_online.consts.Cmd;
 import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.jdbc.daos.PlayerDAO;
+import com.nro.nro_online.models.JsonResponse;
 import com.nro.nro_online.models.Part;
 import com.nro.nro_online.models.PartManager;
 import com.nro.nro_online.models.Transaction;
+import com.nro.nro_online.models.TransactionHistory;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
 import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.TimeUtil;
 import com.nro.nro_online.utils.Util;
 
 public class ChuyenKhoanManager {
 
-    public static void InsertTransaction(long player_id, long amount, String description) {
+    public static void insertTransaction(long player_id, long amount, String description) {
         String sql = "INSERT INTO transaction_banking (player_id, amount, DESCRIPTION, STATUS, is_recieve, last_time_check, created_date) VALUES (?, ?, ?, 0, 0, NULL, NOW());";
         PreparedStatement ps = null;
         try {
@@ -49,8 +56,8 @@ public class ChuyenKhoanManager {
         }
     }
 
-    public static void ShowTransaction(Player player) {
-        List<Transaction> list = GetTransaction((int) player.id);
+    public static void showTransaction(Player player) {
+        List<Transaction> list = getTransaction((int) player.id);
         Message msg = new Message(Cmd.TOP);
         try {
             msg.writer().writeByte(0);
@@ -125,7 +132,7 @@ public class ChuyenKhoanManager {
         return result;
     }
 
-    public static List<Transaction> GetTransactionDoneAuto() {
+    public static List<Transaction> getTransactionDoneAuto() {
         List<Transaction> result = new ArrayList<>();
         Connection con = null;
         CallableStatement ps = null;
@@ -168,7 +175,7 @@ public class ChuyenKhoanManager {
         return result;
     }
 
-    public static List<Transaction> GetTransaction(int player_id) {
+    public static List<Transaction> getTransaction(int player_id) {
         List<Transaction> result = new ArrayList<>();
         Connection con = null;
         CallableStatement ps = null;
@@ -212,7 +219,7 @@ public class ChuyenKhoanManager {
         return result;
     }
 
-    public static Transaction GetTransactionById(long player_id, int id) {
+    public static Transaction getTransactionById(long player_id, int id) {
         Transaction result = null;
         Connection con = null;
         CallableStatement ps = null;
@@ -255,7 +262,7 @@ public class ChuyenKhoanManager {
         return result;
     }
 
-    public static Transaction GetTransactionLast(long player_id) {
+    public static Transaction getTransactionLast(long player_id) {
         Transaction result = null;
         Connection con = null;
         CallableStatement ps = null;
@@ -297,7 +304,7 @@ public class ChuyenKhoanManager {
         return result;
     }
 
-    public static LocalDateTime GetLastimeCreateTransaction(Player player) {
+    public static LocalDateTime getLasTimeCreateTransaction(Player player) {
         LocalDateTime result = null;
 
         try {
@@ -318,7 +325,7 @@ public class ChuyenKhoanManager {
         return result;
     }
 
-    public static LocalDateTime GetLastimeCheckTransaction(Player player) {
+    public static LocalDateTime getLastimeCheckTransaction(Player player) {
         LocalDateTime result = null;
 
         try {
@@ -342,7 +349,7 @@ public class ChuyenKhoanManager {
         return result;
     }
 
-    public static void UpdateLastTimeCheck(long player_id, int transactionId) {
+    public static void updateLastTimeCheck(long player_id, int transactionId) {
         PreparedStatement ps = null;
         try (Connection con = DBService.gI().getConnectionForGetPlayer();) {
             ps = con.prepareStatement("UPDATE transaction_banking set last_time_check = NOW() WHERE id = ? AND player_id = ?;");
@@ -361,7 +368,7 @@ public class ChuyenKhoanManager {
         }
     }
 
-    public static void UpdateGift(long player_id, Long transactionId) {
+    public static void updateGift(long player_id, Long transactionId) {
         PreparedStatement ps = null;
         try (Connection con = DBService.gI().getConnectionForGetPlayer();) {
             ps = con.prepareStatement("UPDATE transaction_banking set status = 1, is_recieve = 1 WHERE id = ? AND player_id = ?;");
@@ -379,7 +386,7 @@ public class ChuyenKhoanManager {
         }
     }
 
-    public static void UpdateDoneNap(long player_id, Long transactionId) {
+    public static void updateDoneNap(long player_id, Long transactionId) {
         PreparedStatement ps = null;
         try (Connection con = DBService.gI().getConnectionForGetPlayer();) {
             ps = con.prepareStatement("UPDATE transaction_banking set status = 1 WHERE id = ? AND player_id = ?;");
@@ -397,7 +404,7 @@ public class ChuyenKhoanManager {
         }
     }
 
-    public static void UpdateDoneRecieve(long player_id, Long transactionId) {
+    public static void updateDoneReceive(long player_id, Long transactionId) {
         PreparedStatement ps = null;
         try (Connection con = DBService.gI().getConnectionForGetPlayer();) {
             ps = con.prepareStatement("UPDATE transaction_banking set is_recieve = 1 WHERE id = ? AND player_id = ?;");
@@ -415,7 +422,7 @@ public class ChuyenKhoanManager {
         }
     }
 
-    public static void UpdatePointNap(long player_id, double point) {
+    public static void updatePointNap(long player_id, double point) {
         PreparedStatement ps = null;
         try (Connection con = DBService.gI().getConnectionForGetPlayer();) {
             ps = con.prepareStatement("UPDATE account a INNER JOIN player b ON a.id = b.account_id SET a.pointNap = a.pointNap + ? WHERE b.id = ?;");
@@ -433,9 +440,9 @@ public class ChuyenKhoanManager {
         }
     }
 
-    public static void HandleTransaction(Player player, int transactionId) {
+    public static void handleTransaction(Player player, int transactionId) {
         boolean canCheck = false;
-        LocalDateTime lastTimeCheck = GetLastimeCheckTransaction(player);
+        LocalDateTime lastTimeCheck = getLastimeCheckTransaction(player);
         Transaction transaction = null;
         long timeDifference = 0;
 
@@ -451,7 +458,7 @@ public class ChuyenKhoanManager {
                 canCheck = true;
             }
 
-            transaction = GetTransactionById(player.id, transactionId);
+            transaction = getTransactionById(player.id, transactionId);
 
             if (transaction != null && (transaction.status || transaction.isReceive)) {
                 Service.getInstance().sendThongBao(player, "Bạn thanh toán giao dịch này và đã nhận được ruby!");
@@ -464,26 +471,25 @@ public class ChuyenKhoanManager {
         }
 
         if (canCheck) {
-            transaction = GetTransactionById(player.id, transactionId);
-            String history = GetTransactionOnline("https://api.web2m.com/historyapimb/Tuanbeo@12345/02147019062000/F3CAC210-DAC1-BD7F-7A26-A2643A5B3DD7");
+            transaction = getTransactionById(player.id, transactionId);
+            String history = getTransactionOnline("https://api.web2m.com/historyapimb/Tuanbeo@12345/02147019062000/F3CAC210-DAC1-BD7F-7A26-A2643A5B3DD7");
 
             JsonResponse response = parseApiResponse(history);
 
-            UpdateLastTimeCheck(player.id, transactionId);
+            updateLastTimeCheck(player.id, transactionId);
 
             if (response != null && response.getData() != null && response.getData().size() > 0) {
                 for (TransactionHistory transactionHistory : response.getData()) {
                     if (Double.parseDouble(transactionHistory.getCreditAmount()) == transaction.amount && Util.containsSubstring(transactionHistory.getDescription(), transaction.description)) {
                         double ruby = transaction.amount;
 
-                        // TODO
                         PlayerDAO.addVnd(player, (int) transaction.amount);
                         player.getSession().vnd += ruby;
                         player.getSession().poinCharging += ruby;
                         System.out.println("Add ruby: " + ruby);
                         Service.getInstance().sendThongBao(player, "Bạn nhận được tiền là: " + ruby);
-                        UpdateGift(player.id, (long) transactionId);
-                        UpdatePointNap(player.id, ruby);
+                        updateGift(player.id, (long) transactionId);
+                        updatePointNap(player.id, ruby);
                         return;
                     }
                 }
@@ -494,19 +500,19 @@ public class ChuyenKhoanManager {
         }
     }
 
-    public static void HandleTransactionAuto() {
+    public static void handleTransactionAuto() {
         List<Transaction> transactions = getTransactionAuto();
 
         if (!transactions.isEmpty()) {
-            String history = GetTransactionOnline("https://api.web2m.com/historyapimb/Tuanbeo@12345/02147019062000/F3CAC210-DAC1-BD7F-7A26-A2643A5B3DD7");
+            String history = getTransactionOnline("https://api.web2m.com/historyapimb/Tuanbeo@12345/02147019062000/F3CAC210-DAC1-BD7F-7A26-A2643A5B3DD7");
             JsonResponse response = parseApiResponse(history);
 
             if (response != null && response.getData() != null && !response.getData().isEmpty()) {
                 for (TransactionHistory transactionHistory : response.getData()) {
                     for (Transaction transaction : transactions) {
                         if (Double.parseDouble(transactionHistory.getCreditAmount()) == transaction.amount && Util.containsSubstring(transactionHistory.getDescription(), transaction.description)) {
-                            UpdateDoneNap(transaction.playerId, transaction.id);
-                            UpdatePointNap(transaction.playerId, transaction.amount);
+                            updateDoneNap(transaction.playerId, transaction.id);
+                            updatePointNap(transaction.playerId, transaction.amount);
                             break;
                         }
                     }
@@ -515,8 +521,8 @@ public class ChuyenKhoanManager {
         }
     }
 
-    public static void HandleTransactionAddMoneyAuto() {
-        List<Transaction> transactions = GetTransactionDoneAuto();
+    public static void handleTransactionAddMoneyAuto() {
+        List<Transaction> transactions = getTransactionDoneAuto();
 
         if (!transactions.isEmpty()) {
             for (Transaction transaction : transactions) {
@@ -526,13 +532,13 @@ public class ChuyenKhoanManager {
                     player.getSession().vnd += (int) transaction.amount;
                     System.out.println("Add ruby: " + transaction.amount);
                     Service.getInstance().sendThongBao(player, "Bạn nhận được tiền là: " + transaction.amount);
-                    UpdateDoneRecieve(player.id, transaction.id);
+                    updateDoneReceive(player.id, transaction.id);
                 }
             }
         }
     }
 
-    private static String GetTransactionOnline(String apiUrl) {
+    private static String getTransactionOnline(String apiUrl) {
         try {
             URL url = new URL(apiUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

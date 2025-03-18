@@ -4,6 +4,17 @@
  */
 package com.nro.nro_online.models.boss.list_boss;
 
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.manager.TopWhis;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.boss.BossManager;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 import lombok.Getter;
 import nro.consts.ConstPlayer;
 import nro.manager.TopWhis;
@@ -41,14 +52,14 @@ public class WhisTop extends Boss {
                 Boss.DAME_NORMAL, //type dame
                 Boss.HP_NORMAL, //type hp
                 100_000 * level, //dame
-                new int[][]{{15_000_000 * level}}, //hp
-                new short[]{838, 839, 840}, //outfit
-                new short[]{154}, //map join
-                new int[][]{ //skill
-                    {Skill.DRAGON, 1, 1000}, {Skill.DRAGON, 2, 2000}, {Skill.DRAGON, 3, 3000}, {Skill.DRAGON, 7, 7000},
-                    {Skill.ANTOMIC, 1, 1000}, {Skill.ANTOMIC, 2, 1200}, {Skill.ANTOMIC, 4, 1500}, {Skill.ANTOMIC, 5, 1700},
-                    {Skill.MASENKO, 1, 1000}, {Skill.MASENKO, 2, 1200}, {Skill.MASENKO, 4, 1500}, {Skill.MASENKO, 5, 1700},
-                    {Skill.GALICK, 1, 1000}
+                new int[][] { { 15_000_000 * level } }, //hp
+                new short[] { 838, 839, 840 }, //outfit
+                new short[] { 154 }, //map join
+                new int[][] { //skill
+                        { Skill.DRAGON, 1, 1000 }, { Skill.DRAGON, 2, 2000 }, { Skill.DRAGON, 3, 3000 }, { Skill.DRAGON, 7, 7000 },
+                        { Skill.ANTOMIC, 1, 1000 }, { Skill.ANTOMIC, 2, 1200 }, { Skill.ANTOMIC, 4, 1500 }, { Skill.ANTOMIC, 5, 1700 },
+                        { Skill.MASENKO, 1, 1000 }, { Skill.MASENKO, 2, 1200 }, { Skill.MASENKO, 4, 1500 }, { Skill.MASENKO, 5, 1700 },
+                        { Skill.GALICK, 1, 1000 }
                 },
                 _15_PHUT
         ));
@@ -73,22 +84,22 @@ public class WhisTop extends Boss {
                     dame = dame / 100 * (100 - level);
                 }
                 if (this.isDie()) {
-                    Finish(plAtt);
-                    TopWhis.AddHistory(plAtt);
+                    finish(plAtt);
+                    TopWhis.addHistory(plAtt);
                     leaveMap();
                 }
             } else {
-//                if (plAtt.nPoint.eatOsin) {
-//                    dame = dame / 100 * (100 - level);
-//                    return dame;
-//                }
+                //                if (plAtt.nPoint.eatOsin) {
+                //                    dame = dame / 100 * (100 - level);
+                //                    return dame;
+                //                }
                 Service.getInstance().sendThongBao(plAtt, "Hụt");
             }
             return dame;
         }
     }
 
-    private void Finish(Player plAtt) {
+    private void finish(Player plAtt) {
         if (plAtt.zone != null) {
             plAtt.location.x = 716;
             plAtt.location.y = 312;
@@ -117,7 +128,7 @@ public class WhisTop extends Boss {
         if (pl.nPoint.hp <= 0) {
             Service.getInstance().sendThongBao(pl, "Hãy quay lại khi mạnh hơn");
             leaveMap();
-            Finish(pl);
+            finish(pl);
         }
     }
 
@@ -128,12 +139,10 @@ public class WhisTop extends Boss {
     @Override
     public void joinMap() {
         try {
-            if (this != null) {
-                if (this.zone != null) {
-                    MapService.gI().goToMap(this, this.zone);
-                } else {
-                    BossManager.gI().removeBoss(this);
-                }
+            if (this.zone != null) {
+                MapService.gI().goToMap(this, this.zone);
+            } else {
+                BossManager.gI().removeBoss(this);
             }
         } catch (Exception e) {
             e.printStackTrace();

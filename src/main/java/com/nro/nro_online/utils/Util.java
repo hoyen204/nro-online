@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
 import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.map.ItemMap;
@@ -174,5 +175,18 @@ public class Util {
     public static String formatLocalDateTime(LocalDateTime localDateTime) {
         return localDateTime == null ? "Chưa có giờ!" :
                 localDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + " ⏰";
+    }
+
+    public static boolean containsSubstring(String inputString, String pattern) {
+        String cleanedString = inputString.replaceAll("[^a-zA-Z0-9]", "");
+        return cleanedString.contains(pattern);
+    }
+
+    public static <T> boolean allTrue(T[] array, Predicate<T> predicate) {
+        if (array == null) return true; // or false, depending on your preference
+        for (T item : array) {
+            if (!predicate.test(item)) return false;
+        }
+        return true;
     }
 }

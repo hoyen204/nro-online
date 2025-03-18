@@ -1,127 +1,117 @@
 package com.nro.nro_online.models.map.mabu;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.models.boss.Boss;
 import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.npc.Npc;
+import com.nro.nro_online.models.npc.NpcManager;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.services.EffSkinService;
 import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.NpcService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.TimeUtil;
 import com.nro.nro_online.utils.Util;
-import nro.consts.ConstNpc;
-import nro.models.boss.Boss;
-import nro.models.boss.BossFactory;
-import nro.models.map.Map;
-import nro.models.map.Zone;
-import nro.models.npc.Npc;
-import nro.models.npc.NpcManager;
-import nro.models.player.Player;
-import nro.services.EffSkinService;
-import nro.services.MapService;
-import nro.services.NpcService;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
-import nro.utils.TimeUtil;
-import nro.utils.Util;
 
-/**
- * @build by arriety
- */
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class MabuWar {
-
-    private static MabuWar i;
-    public final List<Boss> bosses = new ArrayList<>();
-    public static long TIME_OPEN;
-
-    public static long TIME_CLOSE;
-    public static final byte HOUR_OPEN = 12;
-    public static final byte MIN_OPEN = 0;
-    public static final byte SECOND_OPEN = 0;
-    public static final byte HOUR_CLOSE = 13;
-    public static final byte MIN_CLOSE = 0;
-    public static final byte SECOND_CLOSE = 0;
+    private static volatile MabuWar instance;
+    private final List<Boss> bosses = Collections.synchronizedList(new ArrayList<>());
+    private static LocalDateTime TIME_OPEN;
+    private static LocalDateTime TIME_CLOSE;
+    private static final byte HOUR_OPEN = 12;
+    private static final byte MIN_OPEN = 0;
+    private static final byte HOUR_CLOSE = 13;
+    private static final byte MIN_CLOSE = 0;
     private int day = -1;
-    public boolean initBoss;
-    public boolean clearBoss;
+    private boolean initBoss;
+    private boolean clearBoss;
+
+    private MabuWar() {}
 
     public static MabuWar gI() {
-        if (i == null) {
-            i = new MabuWar();
+        if (instance == null) {
+            synchronized (MabuWar.class) {
+                if (instance == null) {
+                    instance = new MabuWar();
+                }
+            }
         }
-        i.setTime();
-        return i;
+        instance.setTime();
+        return instance;
     }
 
-    public void setTime() {
-        if (i.day == -1 || i.day != TimeUtil.getCurrDay()) {
-            i.day = TimeUtil.getCurrDay();
-            try {
-                this.TIME_OPEN = TimeUtil.getTime(TimeUtil.getTimeNow("dd/MM/yyyy") + " " + HOUR_OPEN + ":" + MIN_OPEN + ":" + SECOND_OPEN, "dd/MM/yyyy HH:mm:ss");
-                this.TIME_CLOSE = TimeUtil.getTime(TimeUtil.getTimeNow("dd/MM/yyyy") + " " + HOUR_CLOSE + ":" + MIN_CLOSE + ":" + SECOND_CLOSE, "dd/MM/yyyy HH:mm:ss");
-            } catch (Exception e) {
-            }
+    private void setTime() {
+        int currentDay = TimeUtil.getCurrDay();
+        if (day != currentDay) {
+            day = currentDay;
+            String today = TimeUtil.getTimeNow("dd/MM/yyyy");
+            TIME_OPEN = TimeUtil.getTime(today + " " + HOUR_OPEN + ":" + MIN_OPEN + ":0", "dd/MM/yyyy HH:mm:ss");
+            TIME_CLOSE = TimeUtil.getTime(today + " " + HOUR_CLOSE + ":" + MIN_CLOSE + ":0", "dd/MM/yyyy HH:mm:ss");
         }
     }
 
     public boolean isTimeMabuWar() {
-        long now = System.currentTimeMillis();
-        if (now > TIME_OPEN && now < TIME_CLOSE) {
-            return true;
-        }
-        return false;
+        LocalDateTime now = LocalDateTime.now();
+        return TIME_OPEN.isBefore(now) && TIME_CLOSE.isAfter(now);
     }
 
     public void update(Player player) {
-        try {
-            if (player != null && player.zone != null && MapService.gI().isMapMabuWar(player.zone.map.mapId)) {
-                    if (isTimeMabuWar()) {
-                        if (!initBoss) {
-                            BossFactory.initBossMabuWar();
-                            initBoss = true;
-                        }
-                        if (Util.canDoWithTime(player.lastTimeBabiday, 30000)) {
-                            if (player.cFlag == 9) {
-                                if (Util.isTrue(50, 100)) {
-                                    Service.getInstance().changeFlag(player, 10);
-                                    Service.getInstance().sendThongBao(player, "Bạn bị Babiđây thôi miên");
-                                }
-                            } else if (Util.isTrue(50, 100)) {
-                                Service.getInstance().changeFlag(player, 9);
-                                Service.getInstance().sendThongBao(player, "Bạn được Ôsin giải trừ phép thuật");
-                            }
-                            player.lastTimeBabiday = System.currentTimeMillis();
-                        }
-                        sendMenuGotoNextFloorMabuWar(player);
-                        Zone zone = player.zone;
-                        if (zone.map.mapId == 117) {
-                            EffSkinService.gI().setSlow(player, System.currentTimeMillis(), 1000);
-                        }
-                        if (zone.map.mapId == 120 && !zone.initBossMabu) {
-                                Service.getInstance().sendPercentMabuEgg(player, zone.percentMabuEgg);
-                                if (zone.percentMabuEgg == 100) {
-                                    zone.initBossMabu = true;
-                                }
-                            }
+        if (player == null || player.zone == null || !MapService.gI().isMapMabuWar(player.zone.map.mapId)) return;
 
-                        if (zone.finishMabuWar) {
-                            sendMenuFinishMabuWar(player);
-                        }
-                    }
-                    try {
-                        if (!isTimeMabuWar() && !MabuWar14h.gI().isTimeMabuWar()) {
-                            kickOutOfMap(player);
-                            removeAllBoss();
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+        try {
+            Zone zone = player.zone;
+            if (isTimeMabuWar()) {
+                if (!initBoss) {
+                    BossFactory.initBossMabuWar();
+                    initBoss = true;
                 }
 
+                if (Util.canDoWithTime(player.lastTimeBabiday, 30000)) {
+                    updatePlayerFlag(player);
+                    player.lastTimeBabiday = System.currentTimeMillis();
+                }
+
+                sendMenuGotoNextFloorMabuWar(player);
+
+                if (zone.map.mapId == 117) {
+                    EffSkinService.gI().setSlow(player, System.currentTimeMillis(), 1000);
+                }
+
+                if (zone.map.mapId == 120 && !zone.initBossMabu) {
+                    Service.getInstance().sendPercentMabuEgg(player, zone.percentMabuEgg);
+                    zone.initBossMabu = (zone.percentMabuEgg == 100);
+                }
+
+                if (zone.finishMabuWar) {
+                    sendMenuFinishMabuWar(player);
+                }
+            } else if (!MabuWar14h.gI().isTimeMabuWar()) {
+                kickOutOfMap(player);
+                removeAllBoss();
+            }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void updatePlayerFlag(Player player) {
+        Service service = Service.getInstance();
+        if (player.cFlag == 9) {
+            if (Util.isTrue(50, 100)) {
+                service.changeFlag(player, 10);
+                service.sendThongBao(player, "Bạn bị Babiđây thôi miên");
+            }
+        } else if (Util.isTrue(50, 100)) {
+            service.changeFlag(player, 9);
+            service.sendThongBao(player, "Bạn được Ôsin giải trừ phép thuật");
         }
     }
 
@@ -138,52 +128,40 @@ public class MabuWar {
 
     public void removeAllBoss() {
         if (!clearBoss) {
-            for (Boss boss : bosses) {
-                boss.leaveMap();
-            }
-            this.bosses.clear();
+            bosses.forEach(Boss::leaveMap);
+            bosses.clear();
             clearBoss = true;
         }
     }
 
-    public void sendMenuGotoNextFloorMabuWar(Player player) {
-        if (player.zone.map.mapId != 120) {
-            if (!player.sendMenuGotoNextFloorMabuWar) {
-                if (player.getPowerPoint() >= 20 || player.getPercentPowerPont() >= 20) {
-                    NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_MABU_WAR, player.cFlag == 9 ? 4390 : 4388, "Mau theo ta xuống tầng tiếp theo",
-                            "Ok");
-                    player.sendMenuGotoNextFloorMabuWar = true;
-                }
-            }
+    private void sendMenuGotoNextFloorMabuWar(Player player) {
+        if (player.zone.map.mapId != 120 && !player.sendMenuGotoNextFloorMabuWar &&
+                (player.getPowerPoint() >= 20 || player.getPercentPowerPont() >= 20)) {
+            NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_MABU_WAR, player.cFlag == 9 ? 4390 : 4388,
+                    "Mau theo ta xuống tầng tiếp theo", "Ok");
+            player.sendMenuGotoNextFloorMabuWar = true;
         }
     }
 
-    public void sendMenuFinishMabuWar(Player player) {
+    private void sendMenuFinishMabuWar(Player player) {
         if (!player.sendMenuGotoNextFloorMabuWar) {
-            NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_MABU_WAR, 4390, "Trận chiến đã kết thúc,mau rời khỏi đây",
-                    "Ok");
+            NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_MABU_WAR, 4390,
+                    "Trận chiến đã kết thúc, mau rời khỏi đây", "Ok");
             player.sendMenuGotoNextFloorMabuWar = true;
         }
     }
 
     public void BabidayTalk(Player player, String text) {
         Npc npc = NpcManager.getByIdAndMap(ConstNpc.BABIDAY, player.zone.map.mapId);
-        npc.npcChat(text);
+        if (npc != null) npc.npcChat(text);
     }
 
     public Zone getMapLastFloor(int mapId) {
         Map map = MapService.gI().getMapById(mapId);
-        try {
-            if (map != null) {
-                for (Zone zone : map.zones) {
-                    if (!zone.finishMabuWar) {
-                        return zone;
-                    }
-                }
-            }
-        } catch (Exception e) {
-        }
-        return null;
+        return (map != null) ? map.zones.stream()
+                .filter(zone -> !zone.finishMabuWar)
+                .findFirst()
+                .orElse(null) : null;
     }
 
     public void initMabu(Zone zone) {
@@ -193,8 +171,7 @@ public class MabuWar {
                 Boss boss = BossFactory.createBoss(BossFactory.MABU_MAP);
                 boss.zone = zone;
                 bosses.add(boss);
-            } catch (Exception e) {
-            }
+            } catch (Exception ignored) {}
         }).start();
     }
 }

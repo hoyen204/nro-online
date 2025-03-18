@@ -2,7 +2,6 @@ package com.nro.nro_online.jdbc.daos;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.TimeUtil;
-import nro.models.player.Player;
 
 public class HistoryTransactionDAO {
 
@@ -64,7 +62,7 @@ public class HistoryTransactionDAO {
     public static void deleteHistory() {
         try (Connection con = DBService.gI().getConnectionForAutoSave();
                 PreparedStatement ps = con.prepareStatement(
-                        "DELETE FROM history_transaction WHERE time_tran < ?")) {
+                        "DELETE FROM history_transaction WHERE created_at < ?")) {
             ps.setString(1, TimeUtil.getTimeBeforeCurrent(3 * 24 * 60 * 60 * 1000, "yyyy-MM-dd"));
             ps.executeUpdate();
         } catch (Exception e) {

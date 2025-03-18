@@ -8,27 +8,17 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.nro.nro_online.consts.ConstAchive;
 import com.nro.nro_online.models.clan.Clan;
+import com.nro.nro_online.models.clan.ClanMessage;
 import com.nro.nro_online.models.item.FlagBag;
+import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.Manager;
-import nro.consts.Cmd;
-import nro.consts.ConstAchive;
-import nro.consts.ConstNpc;
-import nro.jdbc.DBService;
-import nro.models.Part;
-import nro.models.PartManager;
-import nro.models.clan.Clan;
-import nro.models.clan.ClanMember;
-import nro.models.clan.ClanMessage;
-import nro.models.item.FlagBag;
-import nro.models.item.Item;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.server.Manager;
-import nro.server.io.Message;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
+
 
 /**
  *
@@ -74,11 +64,11 @@ public class ClanService {
         return i;
     }
 
-    public Clan getClanById(int id) throws Exception {
+    public Clan getClanById(int id){
         return getClanById(0, Manager.getNumClan(), id);
     }
 
-    private Clan getClanById(int l, int r, int id) throws Exception {
+    private Clan getClanById(int l, int r, int id) {
         if (l <= r) {
             int m = (l + r) / 2;
             Clan clan = null;
@@ -95,7 +85,8 @@ public class ClanService {
             }
             return getClanById(l, r, id);
         } else {
-            throw new Exception("Không tìm thấy clan id: " + id);
+            Log.error(ClanService.class, "Không tìm thấy clan id: " + id);
+            return null;
         }
     }
 
@@ -104,7 +95,7 @@ public class ClanService {
     }
 
     public List<Clan> getClans(String name) {
-        List<Clan> listClan = new ArrayList();
+        List<Clan> listClan = new ArrayList<>();
         if (Manager.CLANS.size() <= 20) {
             for (Clan clan : Manager.CLANS) {
                 if (clan.name.contains(name)) {

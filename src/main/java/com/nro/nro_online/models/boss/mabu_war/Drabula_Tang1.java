@@ -1,20 +1,17 @@
 package com.nro.nro_online.models.boss.mabu_war;
 
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.map.ItemMap;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.services.*;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.TaskService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
-/**
- * @build by arriety
- */
 public class Drabula_Tang1 extends BossMabuWar {
 
     public Drabula_Tang1(int mapID, int zoneId) {

@@ -6,14 +6,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import nro.consts.ConstMap;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.models.sieu_hang.SieuHang;
-import nro.models.sieu_hang.SieuHangModel;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
+import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.sieu_hang.SieuHang;
+import com.nro.nro_online.models.sieu_hang.SieuHangModel;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
 
 public class SieuHangControl extends ReentrantReadWriteLock implements Runnable {
 
@@ -117,7 +117,7 @@ public class SieuHangControl extends ReentrantReadWriteLock implements Runnable 
                 return;
             }
 
-            Zone zone = getMapChalllenge(ConstMap.DAI_HOI_VO_THUAT_113);
+            Zone zone = getMapChallenge(ConstMap.DAI_HOI_VO_THUAT_113);
 
             Player pl = SieuHangManager.LoadPlayerByID(s.player_id);
             if (pl == null) {
@@ -151,7 +151,7 @@ public class SieuHangControl extends ReentrantReadWriteLock implements Runnable 
         }
     }
 
-    public Zone getMapChalllenge(int mapId) {
+    public Zone getMapChallenge(int mapId) {
         lock.readLock().lock();
         try {
             Zone map = MapService.gI().getMapWithRandZone(mapId);

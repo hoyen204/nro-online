@@ -1,42 +1,38 @@
 package com.nro.nro_online.models.boss.boss_ban_do_kho_bau;
 
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossManager;
-import nro.models.map.phoban.BanDoKhoBau;
-import nro.models.mob.Mob;
-import nro.models.player.Player;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossManager;
+import com.nro.nro_online.models.map.phoban.BanDoKhoBau;
+import com.nro.nro_online.models.mob.Mob;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
 public abstract class BossBanDoKhoBau extends Boss {
-
-    protected BanDoKhoBau banDoKhoBau;
+    private static final int JOIN_X = 1065;
+    protected final BanDoKhoBau banDoKhoBau;
 
     public BossBanDoKhoBau(byte id, BossData data, BanDoKhoBau banDoKhoBau) {
         super(id, data);
         this.banDoKhoBau = banDoKhoBau;
-        this.spawn(banDoKhoBau.level);
+        spawn(banDoKhoBau.level);
     }
 
     private void spawn(byte level) {
         this.nPoint.hpg = level * this.data.hp[0][0];
-        switch (this.data.typeDame) {
-            case DAME_PERCENT_HP_THOU:
-                this.nPoint.dameg = this.nPoint.hpg / 1000 * this.data.dame;
-                break;
-            case DAME_PERCENT_HP_HUND:
-                this.nPoint.dameg = this.nPoint.hpg / 100 * this.data.dame;
-                break;
-        }
+        this.nPoint.dameg = calculateDamage();
         this.nPoint.calPoint();
         this.nPoint.setFullHpMp();
+    }
+
+    private int calculateDamage() {
+        return switch (this.data.typeDame) {
+            case DAME_PERCENT_HP_THOU -> this.nPoint.hpg / 1000 * this.data.dame;
+            case DAME_PERCENT_HP_HUND -> this.nPoint.hpg / 100 * this.data.dame;
+            default -> 0;
+        };
     }
 
     @Override
@@ -46,14 +42,8 @@ public abstract class BossBanDoKhoBau extends Boss {
 
     @Override
     public void idle() {
-        boolean allMobDie = true;
-        for (Mob mob : this.zone.mobs) {
-            if (!mob.isDie()) {
-                allMobDie = false;
-                break;
-            }
-        }
-        if (allMobDie) {
+        if (this.zone.mobs == null || this.zone.mobs.length == 0) return;
+        if (Util.allTrue(this.zone.mobs, Mob::isDie)) {
             this.changeToAttack();
         }
     }
@@ -66,9 +56,7 @@ public abstract class BossBanDoKhoBau extends Boss {
     }
 
     @Override
-    public void initTalk() {
-
-    }
+    public void initTalk() {}
 
     @Override
     public void leaveMap() {
@@ -78,9 +66,9 @@ public abstract class BossBanDoKhoBau extends Boss {
 
     @Override
     public void rewards(Player pl) {
-        this.dropItemReward(2040, (int) pl.id);
-        this.dropItemReward(2040, (int) pl.id);
-        this.dropItemReward(2011, (int) pl.id);
+        dropItemReward(2040, (int) pl.id);
+        dropItemReward(2040, (int) pl.id);
+        dropItemReward(2011, (int) pl.id);
     }
 
     @Override
@@ -89,17 +77,14 @@ public abstract class BossBanDoKhoBau extends Boss {
     }
 
     @Override
-    protected void notifyPlayeKill(Player player) {
-    }
+    protected void notifyPlayeKill(Player player) {}
 
     @Override
     public void joinMap() {
-        try {
-            this.zone = this.banDoKhoBau.getMapById(mapJoin[Util.nextInt(0, mapJoin.length - 1)]);
-            ChangeMapService.gI().changeMap(this, this.zone, 1065, this.zone.map.yPhysicInTop(1065, 0));
-        } catch (Exception e) {
-
+        if (this.mapJoin == null || this.mapJoin.length == 0) return;
+        this.zone = this.banDoKhoBau.getMapById(mapJoin[Util.nextInt(0, mapJoin.length - 1)]);
+        if (this.zone != null) {
+            ChangeMapService.gI().changeMap(this, this.zone, JOIN_X, this.zone.map.yPhysicInTop(JOIN_X, 0));
         }
     }
-
 }

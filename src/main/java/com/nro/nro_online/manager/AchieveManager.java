@@ -1,7 +1,7 @@
 package com.nro.nro_online.manager;
 
 import com.nro.nro_online.jdbc.DBService;
-import com.nro.nro_online.models.task.AchivementTemplate;
+import com.nro.nro_online.models.task.AchievementTemplate;
 import com.nro.nro_online.utils.Log;
 import lombok.Getter;
 
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AchieveManager implements IManager<AchivementTemplate> {
+public class AchieveManager implements IManager<AchievementTemplate> {
 
     private static final AchieveManager INSTANCE = new AchieveManager();
     private static final String SELECT_QUERY = "SELECT id, name, detail, money, max_count FROM achivements";
@@ -22,7 +22,7 @@ public class AchieveManager implements IManager<AchivementTemplate> {
     }
 
     @Getter
-    private final List<AchivementTemplate> list = new ArrayList<>();
+    private final List<AchievementTemplate> list = new ArrayList<>();
 
     public void load() {
         try (Connection conn = DBService.gI().getConnectionForGame();
@@ -34,7 +34,7 @@ public class AchieveManager implements IManager<AchivementTemplate> {
                 String detail = rs.getString("detail");
                 int money = rs.getInt("money");
                 int maxCount = rs.getInt("max_count");
-                list.add(new AchivementTemplate(id, name, detail, money, maxCount));
+                list.add(new AchievementTemplate(id, name, detail, money, maxCount));
             }
             Log.log("Load " + list.size() + " thành tựu xong, ngon lành nha! 😎");
         } catch (SQLException ex) {
@@ -43,7 +43,7 @@ public class AchieveManager implements IManager<AchivementTemplate> {
     }
 
     @Override
-    public AchivementTemplate findById(int id) {
+    public AchievementTemplate findById(int id) {
         return list.stream()
                 .filter(template -> template.getId() == id)
                 .findFirst()
@@ -51,22 +51,22 @@ public class AchieveManager implements IManager<AchivementTemplate> {
     }
 
     @Override
-    public void add(AchivementTemplate achivementTemplate) {
-        if (achivementTemplate == null) {
+    public void add(AchievementTemplate achievementTemplate) {
+        if (achievementTemplate == null) {
             return;
         }
-        if (findById(achivementTemplate.getId()) == null) {
-            list.add(achivementTemplate);
-            Log.log("Thêm thành tựu " + achivementTemplate.getName() + " thành công, đỉnh quá! 🌟");
+        if (findById(achievementTemplate.getId()) == null) {
+            list.add(achievementTemplate);
+            Log.log("Thêm thành tựu " + achievementTemplate.getName() + " thành công, đỉnh quá! 🌟");
         }
     }
 
     @Override
-    public void remove(AchivementTemplate achivementTemplate) {
-        if (achivementTemplate == null || !list.remove(achivementTemplate)) {
+    public void remove(AchievementTemplate achievementTemplate) {
+        if (achievementTemplate == null || !list.remove(achievementTemplate)) {
             Log.warning("Xóa thành tựu fail, có gì đâu mà xóa hả? 😛");
         } else {
-            Log.log("Xóa thành tựu " + achivementTemplate.getName() + " xong, sạch sẽ! 🧹");
+            Log.log("Xóa thành tựu " + achievementTemplate.getName() + " xong, sạch sẽ! 🧹");
         }
     }
 }

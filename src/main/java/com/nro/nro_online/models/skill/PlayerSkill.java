@@ -1,108 +1,90 @@
 package com.nro.nro_online.models.skill;
 
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.Service;
+import lombok.Setter;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 
-import nro.consts.Cmd;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.Service;
-
-/**
- * Arriety
- */
 public class PlayerSkill {
-
-    public Timer timer;
-    private Player player;
-    public List<Skill> skills;
+    private final Player player;
+    public final List<Skill> skills;
     public Skill skillSelect;
-    public long lastTimePrepareTuSat;
-
-    public PlayerSkill(Player player) {
-        this.player = player;
-        skills = new ArrayList<>();
-        timer = new Timer();
-    }
-
-    public Skill getSkillbyId(int id) {
-        for (Skill skill : skills) {
-            if (skill.template.id == id) {
-                return skill;
-            }
-        }
-        return null;
-    }
-
+    private final Timer timer;
     public byte[] skillShortCut = new byte[10];
-
-    public void sendSkillShortCut() {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand((byte) 61);
-            msg.writer().writeUTF("KSkill");
-            msg.writer().writeInt(skillShortCut.length);
-            msg.writer().write(skillShortCut);
-            player.sendMessage(msg);
-            msg.cleanup();
-            msg = Service.getInstance().messageSubCommand((byte) 61);
-            msg.writer().writeUTF("OSkill");
-            msg.writer().writeInt(skillShortCut.length);
-            msg.writer().write(skillShortCut);
-            player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-        }
-    }
-
-    public void sendSkillShortCutNew() {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand(Cmd.CHANGE_ONSKILL);
-            msg.writer().writeInt(skillShortCut.length);
-            msg.writer().write(skillShortCut);
-            player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-        }
-    }
-
     public boolean prepareQCKK;
     public boolean prepareTuSat;
     public boolean prepareLaze;
     public long lastTimeUseQCKK;
+    public long lastTimePrepareTuSat;
+
+    public PlayerSkill(Player player) {
+        this.player = player;
+        this.skills = Collections.synchronizedList(new ArrayList<>());
+        this.timer = new Timer();
+    }
+
+    public Skill getSkillbyId(int id) {
+        return skills.stream()
+                .filter(skill -> skill.template.id == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void sendSkillShortCut() {
+        Service service = Service.getInstance();
+        try (Message msg = service.messageSubCommand((byte) 61)) {
+            msg.writer().writeUTF("KSkill");
+            msg.writer().writeInt(skillShortCut.length);
+            msg.writer().write(skillShortCut);
+            player.sendMessage(msg);
+        } catch (IOException ignored) {}
+
+        try (Message msg = service.messageSubCommand((byte) 61)) {
+            msg.writer().writeUTF("OSkill");
+            msg.writer().writeInt(skillShortCut.length);
+            msg.writer().write(skillShortCut);
+            player.sendMessage(msg);
+        } catch (IOException ignored) {}
+    }
+
+    public void sendSkillShortCutNew() {
+        try (Message msg = Service.getInstance().messageSubCommand(Cmd.CHANGE_ONSKILL)) {
+            msg.writer().writeInt(skillShortCut.length);
+            msg.writer().write(skillShortCut);
+            player.sendMessage(msg);
+        } catch (IOException ignored) {}
+    }
 
     public byte getIndexSkillSelect() {
-        switch (skillSelect.template.id) {
-            case Skill.DRAGON:
-            case Skill.DEMON:
-            case Skill.GALICK:
-            case Skill.KAIOKEN:
-            case Skill.LIEN_HOAN:
-                return 1;
-            case Skill.KAMEJOKO:
-            case Skill.ANTOMIC:
-            case Skill.MASENKO:
-                return 2;
-            default:
-                return 3;
+        if (skillSelect == null) return 3;
+        int skillId = skillSelect.template.id;
+
+        if (skillId == Skill.DRAGON || skillId == Skill.DEMON || skillId == Skill.GALICK ||
+                skillId == Skill.KAIOKEN || skillId == Skill.LIEN_HOAN) {
+            return (byte) 1;
         }
+        if (skillId == Skill.KAMEJOKO || skillId == Skill.ANTOMIC || skillId == Skill.MASENKO) {
+            return (byte) 2;
+        }
+        return (byte) 3;
     }
 
     public byte getSizeSkill() {
-        byte size = 0;
-        for (Skill skill : skills) {
-            if (skill.skillId != -1) {
-                size++;
-            }
-        }
-        return size;
+        return (byte) skills.stream()
+                .filter(skill -> skill.skillId != -1)
+                .count();
     }
 
     public void dispose() {
-        this.player = null;
-        this.skillSelect = null;
-        this.skills = null;
+        timer.cancel();
+        skills.clear();
+        skillSelect = null;
     }
 }

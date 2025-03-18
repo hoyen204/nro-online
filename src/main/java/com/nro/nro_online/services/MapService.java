@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.nro.nro_online.models.map.Map;
+import com.nro.nro_online.models.map.WayPoint;
 import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.Manager;

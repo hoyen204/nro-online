@@ -33,6 +33,7 @@ import com.nro.nro_online.models.npc.specialnpc.BillEgg;
 import com.nro.nro_online.models.npc.specialnpc.EggLinhThu;
 import com.nro.nro_online.models.npc.specialnpc.MabuEgg;
 import com.nro.nro_online.models.npc.specialnpc.MagicTree;
+import com.nro.nro_online.models.npc.specialnpc.SpecialEgg;
 import com.nro.nro_online.models.pvp.PVP;
 import com.nro.nro_online.models.skill.PlayerSkill;
 import com.nro.nro_online.models.task.TaskPlayer;
@@ -40,6 +41,8 @@ import com.nro.nro_online.server.Client;
 import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.server.io.Session;
+import com.nro.nro_online.services.EffectSkillService;
+import com.nro.nro_online.services.FriendAndEnemyService;
 import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.services.PlayerService;
 import com.nro.nro_online.services.RewardService;
@@ -49,6 +52,7 @@ import com.nro.nro_online.services.func.ChangeMapService;
 import com.nro.nro_online.services.func.CombineNew;
 import com.nro.nro_online.services.func.PVPServcice;
 import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.SkillUtil;
 import com.nro.nro_online.utils.Util;
 import lombok.Getter;
 import lombok.Setter;
@@ -490,12 +494,9 @@ public class Player {
     public byte getAura() {
         CollectionBook book = this.collectionBook;
         if (book != null) {
-            Card card = book.getCards().stream()
-                    .filter(t -> t.isUse() && t.getCardTemplate().getAura() != -1)
-                    .findFirst()
-                    .orElse(null);
-            if (card != null) {
-                return (byte) card.getCardTemplate().getAura();
+            Card usedCard = book.getCardEquip();
+            if (usedCard != null) {
+                return (byte) usedCard.getCardTemplate().getAura();
             }
         }
         return -1;
@@ -632,7 +633,7 @@ public class Player {
             return 456;
         } else if (fusion != null && fusion.typeFusion != ConstPlayer.NON_FUSION) {
             if (checkSkinFusion()) {
-                Costume ct = Manager.gI().getCaiTrangByItemId(inventory.itemsBody.get(5).template.id);
+                Costume ct = Manager.getCaiTrangByItemId(inventory.itemsBody.get(5).template.id);
                 return (short) ct.getId()[2];
             }
             if (fusion.typeFusion == ConstPlayer.LUONG_LONG_NHAT_THE) {
@@ -645,11 +646,10 @@ public class Player {
                 return idOutfitFusion[6 + this.gender][2];
             }
         } else if (inventory != null && inventory.itemsBody.get(5).isNotNullItem()) {
-            if (checkSkinFusion()) {
-                if (inventory != null && inventory.itemsBody.get(1).isNotNullItem()) {
+            if (checkSkinFusion() && inventory != null && inventory.itemsBody.get(1).isNotNullItem()) {
                     return inventory.itemsBody.get(1).template.part;
                 }
-            }
+
             Costume ct = Manager.getCaiTrangByItemId(inventory.itemsBody.get(5).template.id);
             if (ct != null && ct.getId()[2] != -1) {
                 return (short) ct.getId()[2];
@@ -896,6 +896,14 @@ public class Player {
         this.immortal = true;
     }
 
+
+    public void setEgg(SpecialEgg egg, String eggName) {
+        switch (eggName) {
+        case "mabuEgg": this.mabuEgg = (MabuEgg) egg; break;
+        case "egglinhthu": this.egglinhthu = (EggLinhThu) egg; break;
+        case "billEgg": this.billEgg = (BillEgg) egg; break;
+        }
+    }
     public void dispose() {
         if (escortedBoss != null) {
             escortedBoss.stopEscorting();

@@ -43,7 +43,6 @@ import com.nro.nro_online.services.func.TransactionService;
 import com.nro.nro_online.services.func.UseItem;
 import com.nro.nro_online.utils.Util;
 import com.nro.nro_online.services.*;
-import com.nro.nro_online.services.func.*;
 import com.nro.nro_online.utils.Log;
 
 public class Controller {
@@ -76,13 +75,9 @@ public class Controller {
                                 ServerManager.gI().getSieuHangController().InviteOther(player, idPk);
                                 break;
                             }
-//                            case ConstMap.DAO_KAME: {
-//                                ChuyenKhoanManager.HandleTransaction(player, idPk);
-//                                break;
-//                            }
                             default: {
                                 if (player.getSession().isAdmin) {
-                                    BossManager.gI().FindBoss(player, idPk);
+                                    BossManager.gI().findBoss(player, idPk);
                                 }
                                 break;
                             }

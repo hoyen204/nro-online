@@ -1,62 +1,54 @@
 package com.nro.nro_online.services;
 
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.models.Part;
+import com.nro.nro_online.models.PartManager;
+import com.nro.nro_online.models.map.war.NamekBallWar;
+import com.nro.nro_online.models.player.Enemy;
+import com.nro.nro_online.models.player.Friend;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.services.func.PVPServcice;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import nro.consts.Cmd;
-import nro.consts.ConstNpc;
-import nro.models.Part;
-import nro.models.PartManager;
-import nro.models.map.war.NamekBallWar;
-import nro.models.player.Enemy;
-import nro.models.player.Friend;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.server.io.Message;
-import nro.services.func.ChangeMapService;
-import nro.services.func.PVPServcice;
-import nro.utils.Log;
-import nro.utils.Util;
-
-/**
- * @Build by Arriety
- */
 public class FriendAndEnemyService {
-
     private static final byte OPEN_LIST = 0;
-
     private static final byte MAKE_FRIEND = 1;
     private static final byte REMOVE_FRIEND = 2;
-
     private static final byte REVENGE = 1;
     private static final byte REMOVE_ENEMY = 2;
+    private static final int MAX_FRIENDS = 10; // Giới hạn bạn, khỏi hardcode lung tung 😜
+    private static final List<Integer> NO_TELEPORT_MAPS = Arrays.asList(
+            114, 115, 116, 117, 118, 119, 120, 121, 122, 123,
+            53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
+            160, 161, 162, 163, 164, 124, 125, 126, 127, 128, 155,
+            206, 207, 208, 209, 210, 211
+    ); // Map không tele được, gom lại cho gọn 🚀
 
-    private static FriendAndEnemyService i;
+    private static final FriendAndEnemyService instance = new FriendAndEnemyService();
 
     public static FriendAndEnemyService gI() {
-        if (i == null) {
-            i = new FriendAndEnemyService();
-        }
-        return i;
+        return instance; // Singleton đơn giản, khỏi khởi tạo nhiều lần 😎
     }
 
     public void controllerFriend(Player player, Message msg) {
         try {
             byte action = msg.reader().readByte();
             switch (action) {
-                case OPEN_LIST:
-                    openListFriend(player);
-                    break;
-                case MAKE_FRIEND:
-                    makeFriend(player, msg.reader().readInt());
-                    break;
-                case REMOVE_FRIEND:
-                    removeFriend(player, msg.reader().readInt());
-                    break;
+            case OPEN_LIST -> openListFriend(player);
+            case MAKE_FRIEND -> makeFriend(player, msg.reader().readInt());
+            case REMOVE_FRIEND -> removeFriend(player, msg.reader().readInt());
             }
-        } catch (IOException ex) {
-
+        } catch (IOException e) {
+            Log.error(FriendAndEnemyService.class, e, "Lỗi xử lý friend, chill đi! 😅");
         }
     }
 
@@ -64,271 +56,213 @@ public class FriendAndEnemyService {
         try {
             byte action = msg.reader().readByte();
             switch (action) {
-                case OPEN_LIST:
-                    openListEnemy(player);
-                    break;
-                case REVENGE:
-                    int id = msg.reader().readInt();
-                    boolean flag = false;
-                    for (Enemy e : player.enemies) {
-                        if (e.id == id) {
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if (flag) {
-                        Player enemy = Client.gI().getPlayer(id);
-                        if (enemy != null) {
-                            PVPServcice.gI().openSelectRevenge(player, enemy);
-                        } else {
-                            Service.getInstance().sendThongBao(player, "Đang offline");
-                        }
-                    } else {
-                        Service.getInstance().sendThongBao(player, "Không thể thực hiện");
-                    }
-                    break;
-                case REMOVE_ENEMY:
-                    removeEnemy(player, msg.reader().readInt());
-                    break;
+            case OPEN_LIST -> openListEnemy(player);
+            case REVENGE -> handleRevenge(player, msg.reader().readInt());
+            case REMOVE_ENEMY -> removeEnemy(player, msg.reader().readInt());
             }
-        } catch (IOException ex) {
-
+        } catch (IOException e) {
+            Log.error(FriendAndEnemyService.class, e, "Lỗi xử lý enemy, xui thật! 😢");
         }
     }
 
     private void reloadFriend(Player player) {
-        for (Friend f : player.friends) {
-            Player pl = null;
-            if ((pl = Client.gI().getPlayerByUser(f.id)) != null || (pl = Client.gI().getPlayer(f.name)) != null) {
-                try {
-                    f.power = pl.nPoint.power;
-                    f.head = pl.getHead();
-                    f.body = pl.getBody();
-                    f.leg = pl.getLeg();
-                    f.bag = (byte) pl.getFlagBag();
-                } catch (Exception e) {
-                }
-                f.online = true;
-            } else {
-                f.online = false;
-            }
-        }
+        player.friends.forEach(f -> updatePlayerInfo(f, Client.gI().getPlayer(f.id)));
     }
 
     private void reloadEnemy(Player player) {
-        for (Enemy e : player.enemies) {
-            Player pl = null;
-            if ((pl = Client.gI().getPlayerByUser(e.id)) != null || (pl = Client.gI().getPlayer(e.name)) != null) {
-                try {
-                    e.power = pl.nPoint.power;
-                    e.head = pl.getHead();
-                    e.body = pl.getBody();
-                    e.leg = pl.getLeg();
-                    e.bag = (byte) pl.getFlagBag();
-                } catch (Exception ex) {
-                }
-                e.online = true;
-            } else {
-                e.online = false;
-            }
+        player.enemies.forEach(e -> updatePlayerInfo(e, Client.gI().getPlayer(e.id)));
+    }
+
+    private void updatePlayerInfo(Friend foe, Player pl) {
+        foe.online = pl != null;
+        if (pl != null) {
+            foe.power = pl.nPoint.power;
+            foe.head = pl.getHead();
+            foe.body = pl.getBody();
+            foe.leg = pl.getLeg();
+            foe.bag = (byte) pl.getFlagBag();
+        }
+    }
+
+    private void updatePlayerInfo(Enemy foe, Player pl) {
+        foe.online = pl != null;
+        if (pl != null) {
+            foe.power = pl.nPoint.power;
+            foe.head = pl.getHead();
+            foe.body = pl.getBody();
+            foe.leg = pl.getLeg();
+            foe.bag = (byte) pl.getFlagBag();
         }
     }
 
     private void openListFriend(Player player) {
         reloadFriend(player);
-        Message msg;
-        try {
-            msg = new Message(Cmd.FRIEND);
+        try (Message msg = new Message(Cmd.FRIEND)) {
             msg.writer().writeByte(OPEN_LIST);
             msg.writer().writeByte(player.friends.size());
             for (Friend f : player.friends) {
-                msg.writer().writeInt(f.id);
-                msg.writer().writeShort(f.head);
-                if (player.isVersionAbove(220)) {
-                    Part part = PartManager.getInstance().find(f.head);
-                    msg.writer().writeShort(part.getIcon(0));
-                }
-                msg.writer().writeShort(f.body);
-                msg.writer().writeShort(f.leg);
-                msg.writer().writeByte(f.bag);
-                msg.writer().writeUTF(f.name);
-                msg.writer().writeBoolean(Client.gI().getPlayer((int) f.id) != null);
-                msg.writer().writeUTF(Util.numberToMoney(f.power));
+                writeFriendData(msg, f, player.isVersionAbove(220));
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
-            Log.error(FriendAndEnemyService.class, e);
+            Log.error(FriendAndEnemyService.class, e, "Lỗi mở list friend, buồn ghê! 😭");
         }
     }
 
     private void openListEnemy(Player player) {
         reloadEnemy(player);
-        Message msg;
-        try {
-            msg = new Message(-99);
+        try (Message msg = new Message(-99)) {
             msg.writer().writeByte(OPEN_LIST);
             msg.writer().writeByte(player.enemies.size());
             for (Enemy e : player.enemies) {
-                msg.writer().writeInt(e.id);
-                msg.writer().writeShort(e.head);
-                if (player.isVersionAbove(220)) {
-                    Part part = PartManager.getInstance().find(e.head);
-                    msg.writer().writeShort(part.getIcon(0));
-                }
-                msg.writer().writeShort(e.body);
-                msg.writer().writeShort(e.leg);
-                msg.writer().writeShort(e.bag);
-                msg.writer().writeUTF(e.name);
-                msg.writer().writeUTF(Util.numberToMoney(e.power));
-                msg.writer().writeBoolean(Client.gI().getPlayer((int) e.id) != null);
+                writeEnemyData(msg, e, player.isVersionAbove(220));
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
-            Log.error(FriendAndEnemyService.class, e);
+            Log.error(FriendAndEnemyService.class, e, "Lỗi mở list enemy, xui quá! 😅");
         }
     }
 
-    private void makeFriend(Player player, int playerId) {// debug
-        boolean madeFriend = false;
-        if (player.friends.size() >= 10) {
-            Service.getInstance().sendThongBao(player, "Kết bạn được 10 đứa nữa thôi địt mẹ mày");
-        } else {
-            for (Friend friend : player.friends) {
-                if (friend.id == playerId) {
-                    Service.getInstance().sendThongBao(player, "Đã có trong danh sách bạn bè");
-                    madeFriend = true;
-                    break;
-                }
-            }
-            if (!madeFriend) {
-                Player pl = Client.gI().getPlayer(playerId);
-                if (pl != null) {
-                    String npcSay;
-                    if (player.friends.size() >= 5) {
-                        npcSay = "Bạn có muốn kết bạn với " + pl.name + " với phí là 5 ngọc ?";
-                    } else {
-                        npcSay = "Bạn có muốn kết bạn với " + pl.name + " ?";
-                    }
-                    NpcService.gI().createMenuConMeo(player, ConstNpc.MAKE_FRIEND, -1, npcSay, new String[]{"Đồng ý", "Từ chối"}, playerId);
-                }
-            }
-        }
+    private void writeFriendData(Message msg, Friend f, boolean isVersionAbove220) throws IOException {
+        msg.writer().writeInt(f.id);
+        msg.writer().writeShort(f.head);
+        if (isVersionAbove220) msg.writer().writeShort(PartManager.getInstance().find(f.head).getIcon(0));
+        msg.writer().writeShort(f.body);
+        msg.writer().writeShort(f.leg);
+        msg.writer().writeByte(f.bag);
+        msg.writer().writeUTF(f.name);
+        msg.writer().writeBoolean(f.online);
+        msg.writer().writeUTF(Util.numberToMoney(f.power));
+    }
 
+    private void writeEnemyData(Message msg, Enemy e, boolean isVersionAbove220) throws IOException {
+        msg.writer().writeInt(e.id);
+        msg.writer().writeShort(e.head);
+        if (isVersionAbove220) msg.writer().writeShort(PartManager.getInstance().find(e.head).getIcon(0));
+        msg.writer().writeShort(e.body);
+        msg.writer().writeShort(e.leg);
+        msg.writer().writeShort(e.bag);
+        msg.writer().writeUTF(e.name);
+        msg.writer().writeUTF(Util.numberToMoney(e.power));
+        msg.writer().writeBoolean(e.online);
+    }
+
+    private void makeFriend(Player player, int playerId) {
+        if (player.friends.size() >= MAX_FRIENDS) {
+            Service.getInstance().sendThongBao(player, "Đủ 10 thằng bạn rồi, thêm nữa lag lắm! 😂");
+            return;
+        }
+        if (player.friends.stream().anyMatch(f -> f.id == playerId)) {
+            Service.getInstance().sendThongBao(player, "Thằng này là bạn mày rồi mà! 😛");
+            return;
+        }
+        Player pl = Client.gI().getPlayer(playerId);
+        if (pl != null) {
+            String npcSay = player.friends.size() >= 5 ?
+                    "Kết bạn với " + pl.name + " mất 5 ngọc, chịu không?" :
+                    "Kết bạn với " + pl.name + " miễn phí nè, chịu không?";
+            NpcService.gI().createMenuConMeo(player, ConstNpc.MAKE_FRIEND, -1, npcSay, new String[]{"Đồng ý", "Từ chối"}, playerId);
+        }
     }
 
     private void removeFriend(Player player, int playerId) {
-        for (int i = 0; i < player.friends.size(); i++) {
-            if (player.friends.get(i).id == playerId) {
-                Service.getInstance().sendThongBao(player, "Đã xóa thành công "
-                        + player.friends.get(i).name + " khỏi danh sách bạn");
-                Message msg;
-                try {
-                    msg = new Message(Cmd.FRIEND);
-                    msg.writer().writeByte(REMOVE_FRIEND);
-                    msg.writer().writeInt((int) player.friends.get(i).id);
-                    player.sendMessage(msg);
-                    msg.cleanup();
-                } catch (Exception e) {
-                }
-                player.friends.remove(i);
-                break;
+        Friend friend = player.friends.stream().filter(f -> f.id == playerId).findFirst().orElse(null);
+        if (friend != null) {
+            player.friends.remove(friend);
+            Service.getInstance().sendThongBao(player, "Xóa " + friend.name + " khỏi list bạn thành công! 👋");
+            try (Message msg = new Message(Cmd.FRIEND)) {
+                msg.writer().writeByte(REMOVE_FRIEND);
+                msg.writer().writeInt(friend.id);
+                player.sendMessage(msg);
+            } catch (Exception e) {
+                Log.error(FriendAndEnemyService.class, e, "Lỗi xóa friend, xui ghê! 😢");
             }
+        }
+    }
+
+    private void handleRevenge(Player player, int enemyId) {
+        if (player.enemies.stream().noneMatch(e -> e.id == enemyId)) {
+            Service.getInstance().sendThongBao(player, "Thằng này không phải kẻ thù, báo thù cái gì? 😅");
+            return;
+        }
+        Player enemy = Client.gI().getPlayer(enemyId);
+        if (enemy != null) {
+            PVPServcice.gI().openSelectRevenge(player, enemy);
+        } else {
+            Service.getInstance().sendThongBao(player, "Thằng này offline rồi, chờ nó on nha! 😛");
         }
     }
 
     public void removeEnemy(Player player, int playerId) {
-        for (int i = 0; i < player.enemies.size(); i++) {
-            if (player.enemies.get(i).id == playerId) {
-                player.enemies.remove(i);
-                break;
-            }
-        }
-        openListEnemy(player);
+        player.enemies.removeIf(e -> e.id == playerId);
+        openListEnemy(player); // Cập nhật list ngay, nhanh như chớp! ⚡
     }
 
     public void chatPrivate(Player player, Message msg) {
-        if (Util.canDoWithTime(player.lastTimeChatPrivate, 5000)) {
-            player.lastTimeChatPrivate = System.currentTimeMillis();
-            try {
-                int playerId = msg.reader().readInt();
-                String text = msg.reader().readUTF();
-                Player pl = Client.gI().getPlayer(playerId);
-                if (pl != null) {
-                    Service.getInstance().chatPrivate(player, pl, text);
-                }
-            } catch (Exception e) {
-            }
+        if (!Util.canDoWithTime(player.lastTimeChatPrivate, 5000)) return;
+        player.lastTimeChatPrivate = System.currentTimeMillis();
+        try {
+            int playerId = msg.reader().readInt();
+            String text = msg.reader().readUTF();
+            Player pl = Client.gI().getPlayer(playerId);
+            if (pl != null) Service.getInstance().chatPrivate(player, pl, text);
+        } catch (Exception e) {
+            Log.error(FriendAndEnemyService.class, e, "Chat private lỗi, buồn ghê! 😭");
         }
     }
 
     public void acceptMakeFriend(Player player, int playerId) {
         Player pl = Client.gI().getPlayer(playerId);
-        if (pl != null) {
-            Friend friend = new Friend();
-            friend.id = (int) pl.id;
-            friend.name = pl.name;
-            friend.power = pl.nPoint.power;
-            friend.head = pl.getHead();
-            friend.body = pl.getBody();
-            friend.leg = pl.getLeg();
-            friend.bag = (byte) pl.getFlagBag();
-            player.friends.add(friend);
-            Service.getInstance().sendThongBao(player, "Kết bạn thành công");
-            Service.getInstance().chatPrivate(player, pl, player.name + " vừa mới kết bạn với " + pl.name);
-            TaskService.gI().checkDoneTaskMakeFriend(player, pl);
-        } else {
-            Service.getInstance().sendThongBao(player, "Không tìm thấy hoặc đang Offline, vui lòng thử lại sau");
+        if (pl == null) {
+            Service.getInstance().sendThongBao(player, "Thằng này offline rồi, kết bạn sau nha! 😢");
+            return;
         }
+        Friend friend = new Friend();
+        friend.id = (int) pl.id;
+        friend.name = pl.name;
+        friend.power = pl.nPoint.power;
+        friend.head = pl.getHead();
+        friend.body = pl.getBody();
+        friend.leg = pl.getLeg();
+        friend.bag = (byte) pl.getFlagBag();
+        player.friends.add(friend);
+        Service.getInstance().sendThongBao(player, "Kết bạn với " + pl.name + " thành công! 🎉");
+        Service.getInstance().chatPrivate(player, pl, player.name + " vừa kết bạn với mày nè!");
+        TaskService.gI().checkDoneTaskMakeFriend(player, pl);
     }
 
     public void goToPlayerWithYardrat(Player player, Message msg) {
         try {
-            Player pl = Client.gI().getPlayer(msg.reader().readInt());
+            Player target = Client.gI().getPlayer(msg.reader().readInt());
+            if (target == null) return;
             if (player.isHoldNamecBall) {
                 NamekBallWar.gI().dropBall(player);
                 return;
             }
-            if (pl != null) {
-                if (player.isAdmin() || player.nPoint.teleport) {
-                    int mapid = pl.zone.map.mapId;
-                    List<Integer> clone = Arrays.asList(114, 115, 116, 117, 118,
-                            119, 120, 121, 122, 123,
-                            53, 54, 55, 56, 57,
-                            58, 59, 60, 61, 62,
-                            160, 161, 162, 163, 164,
-                            124, 125, 126, 127, 128, 155, 206, 207, 208, 209, 210, 211);
-                    if (clone.contains(mapid)) {
-                        Service.getInstance().sendThongBao(player, "Tele cái máu nhoàn");
-                        return;
-                    }
-                    if (!pl.itemTime.isUseAnDanh || player.isAdmin()) {
-                        if (player.isAdmin() || !pl.zone.isFullPlayer()) {
-                            ChangeMapService.gI().changeMapYardrat(player, pl.zone, pl.location.x + Util.nextInt(-5, 5), pl.location.y);
-                        } else {
-                            Service.getInstance().sendThongBao(player, "Không thể thực hiện");
-                        }
-                    } else {
-                        Service.getInstance().sendThongBao(player, "Không thể thực hiện");
-                    }
-                } else {
-                    Service.getInstance().sendThongBao(player, "Yêu cầu trang bị có khả năng dịch chuyển tức thời");
-                }
+            if (!player.isAdmin() && !player.nPoint.teleport) {
+                Service.getInstance().sendThongBao(player, "Mày cần đồ dịch chuyển tức thời mới tele được! 😛");
+                return;
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            if (NO_TELEPORT_MAPS.contains(target.zone.map.mapId)) {
+                Service.getInstance().sendThongBao(player, "Map này không tele được, chịu khó đi bộ nha! 😂");
+                return;
+            }
+            if (!player.isAdmin() && target.itemTime.isUseAnDanh) {
+                Service.getInstance().sendThongBao(player, "Thằng này ẩn danh, không tìm được! 😢");
+                return;
+            }
+            if (!player.isAdmin() && target.zone.isFullPlayer()) {
+                Service.getInstance().sendThongBao(player, "Map full người rồi, đợi tí nha! 😅");
+                return;
+            }
+            ChangeMapService.gI().changeMapYardrat(player, target.zone, target.location.x + Util.nextInt(-5, 5), target.location.y);
+        } catch (IOException e) {
+            Log.error(FriendAndEnemyService.class, e, "Tele lỗi rồi, xui ghê! 😭");
         }
     }
 
     public void addEnemy(Player player, Player enemy) {
-        boolean hadEnemy = false;
-        for (Enemy ene : player.enemies) {
-            if (ene.id == ene.id) {
-                hadEnemy = true;
-            }
-        }
-        if (!hadEnemy) {
+        if (player.enemies.stream().noneMatch(e -> e.id == enemy.id)) {
             Enemy e = new Enemy();
             e.id = (int) enemy.id;
             e.name = enemy.name;

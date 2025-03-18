@@ -4,6 +4,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import com.nro.nro_online.card.Card;
+import com.nro.nro_online.card.CollectionBook;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.Service;
 import nro.card.Card;
 import nro.card.CardTemplate;
 import nro.card.CollectionBook;
