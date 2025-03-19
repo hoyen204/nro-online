@@ -5,9 +5,9 @@
  */
 package com.nro.nro_online.models.map;
 
-import nro.models.player.Player;
-import nro.services.PlayerService;
-import nro.utils.Util;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

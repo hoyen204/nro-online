@@ -1,30 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.nro.nro_online.services;
 
 import java.util.List;
 
-import nro.consts.Cmd;
-import nro.manager.SieuHangManager;
-import nro.models.Part;
-import nro.models.PartManager;
-import nro.models.player.Player;
-import nro.models.sieu_hang.SieuHangModel;
-import nro.server.io.Message;
-import nro.utils.Util;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.manager.SieuHangManager;
+import com.nro.nro_online.models.Part;
+import com.nro.nro_online.models.PartManager;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.sieu_hang.SieuHangModel;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @author Arriety
- */
 public class SieuHangService {
 
     public static void ShowTop(Player player, int can_fight) {
         List<SieuHangModel> list = SieuHangManager.GetTop((int) player.id, can_fight);
-        Message msg = new Message(Cmd.TOP);
-        try {
+        try (Message msg = new Message(Cmd.TOP)) {
             msg.writer().writeByte(0);
             msg.writer().writeUTF("Top 100 Cao Thủ");
             msg.writer().writeByte(list.size());
@@ -64,7 +55,6 @@ public class SieuHangService {
                         + top.message.replaceAll("/n", "\n"));
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             e.printStackTrace();
         }

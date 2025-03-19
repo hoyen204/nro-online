@@ -3,19 +3,19 @@ package com.nro.nro_online.models.boss.mabu_war;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import nro.consts.ConstRatio;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.map.ItemMap;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.services.Service;
-import nro.services.SkillService;
-import nro.services.TaskService;
-import nro.services.func.ChangeMapService;
-import nro.utils.Log;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstRatio;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.SkillService;
+import com.nro.nro_online.services.TaskService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @build by arriety

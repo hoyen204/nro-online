@@ -1,12 +1,6 @@
 package com.nro.nro_online.models.player;
 
-/**
- *
- * Arriety
- *
- */
 public class Charms {
-
     public Charms(Player player) {
     }
 
@@ -25,72 +19,41 @@ public class Charms {
     public long lastTimeSubMinTriTueX4;
 
     public void addTimeCharms(int itemId, int min) {
+        long currentTime = System.currentTimeMillis();
+        long duration = min * 60 * 1000L;
         switch (itemId) {
             case 213:
-                if (tdTriTue < System.currentTimeMillis()) {
-                    tdTriTue = System.currentTimeMillis();
-                }
-                tdTriTue += min * 60 * 1000L;
+                tdTriTue = tdTriTue < currentTime ? currentTime + duration : tdTriTue + duration;
                 break;
             case 214:
-                if (tdManhMe < System.currentTimeMillis()) {
-                    tdManhMe = System.currentTimeMillis();
-                }
-                tdManhMe += min * 60 * 1000L;
+                tdManhMe = tdManhMe < currentTime ? currentTime + duration : tdManhMe + duration;
                 break;
             case 215:
-                if (tdDaTrau < System.currentTimeMillis()) {
-                    tdDaTrau = System.currentTimeMillis();
-                }
-                tdDaTrau += min * 60 * 1000L;
+                tdDaTrau = tdDaTrau < currentTime ? currentTime + duration : tdDaTrau + duration;
                 break;
             case 216:
-                if (tdOaiHung < System.currentTimeMillis()) {
-                    tdOaiHung = System.currentTimeMillis();
-                }
-                tdOaiHung += min * 60 * 1000L;
+                tdOaiHung = tdOaiHung < currentTime ? currentTime + duration : tdOaiHung + duration;
                 break;
             case 217:
-                if (tdBatTu < System.currentTimeMillis()) {
-                    tdBatTu = System.currentTimeMillis();
-                }
-                tdBatTu += min * 60 * 1000L;
+                tdBatTu = tdBatTu < currentTime ? currentTime + duration : tdBatTu + duration;
                 break;
             case 218:
-                if (tdDeoDai < System.currentTimeMillis()) {
-                    tdDeoDai = System.currentTimeMillis();
-                }
-                tdDeoDai += min * 60 * 1000L;
+                tdDeoDai = tdDeoDai < currentTime ? currentTime + duration : tdDeoDai + duration;
                 break;
             case 219:
-                if (tdThuHut < System.currentTimeMillis()) {
-                    tdThuHut = System.currentTimeMillis();
-                }
-                tdThuHut += min * 60 * 1000L;
+                tdThuHut = tdThuHut < currentTime ? currentTime + duration : tdThuHut + duration;
                 break;
             case 522:
-                if (tdDeTu < System.currentTimeMillis()) {
-                    tdDeTu = System.currentTimeMillis();
-                }
-                tdDeTu += min * 60 * 1000L;
+                tdDeTu = tdDeTu < currentTime ? currentTime + duration : tdDeTu + duration;
                 break;
             case 671:
-                if (tdTriTue3 < System.currentTimeMillis()) {
-                    tdTriTue3 = System.currentTimeMillis();
-                }
-                tdTriTue3 += min * 60 * 1000L;
+                tdTriTue3 = tdTriTue3 < currentTime ? currentTime + duration : tdTriTue3 + duration;
                 break;
             case 672:
-                if (tdTriTue4 < System.currentTimeMillis()) {
-                    tdTriTue4 = System.currentTimeMillis();
-                }
-                tdTriTue4 += min * 60 * 1000L;
+                tdTriTue4 = tdTriTue4 < currentTime ? currentTime + duration : tdTriTue4 + duration;
                 break;
             case 2025:
-                if (tdDeTuMabu < System.currentTimeMillis()) {
-                    tdDeTuMabu = System.currentTimeMillis();
-                }
-                tdDeTuMabu += min * 60 * 1000L;
+                tdDeTuMabu = tdDeTuMabu < currentTime ? currentTime + duration : tdDeTuMabu + duration;
                 break;
         }
     }

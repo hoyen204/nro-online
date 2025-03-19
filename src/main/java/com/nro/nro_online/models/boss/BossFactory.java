@@ -2,16 +2,46 @@ package com.nro.nro_online.models.boss;
 
 import org.apache.log4j.Logger;
 
+import com.nro.nro_online.consts.ConstEvent;
 import com.nro.nro_online.consts.ConstMap;
 import com.nro.nro_online.consts.ConstPlayer;
-import com.nro.nro_online.models.boss.event.noel.*;
-import com.nro.nro_online.models.boss.list_boss.*;
+import com.nro.nro_online.models.boss.NgucTu.Cumber;
+import com.nro.nro_online.models.boss.NgucTu.SuperCumber;
+import com.nro.nro_online.models.boss.Omega.OmegaPlus;
+import com.nro.nro_online.models.boss.baconsoi.Basil;
+import com.nro.nro_online.models.boss.baconsoi.Bergamo;
+import com.nro.nro_online.models.boss.baconsoi.Lavender;
+import com.nro.nro_online.models.boss.bill.*;
+import com.nro.nro_online.models.boss.bosstuonglai.*;
+import com.nro.nro_online.models.boss.broly.*;
+import com.nro.nro_online.models.boss.cell.*;
+import com.nro.nro_online.models.boss.chill.*;
+import com.nro.nro_online.models.boss.cold.*;
+import com.nro.nro_online.models.boss.event.HoaHong;
+import com.nro.nro_online.models.boss.event.SantaClaus;
+import com.nro.nro_online.models.boss.event.noel.NoelBoss;
+import com.nro.nro_online.models.boss.event.noel.NoelBossBall;
+import com.nro.nro_online.models.boss.event.noel.NoelBossOne;
+import com.nro.nro_online.models.boss.event.noel.NoelBossTwo;
+import com.nro.nro_online.models.boss.fide.*;
+import com.nro.nro_online.models.boss.halloween.BoXuong;
+import com.nro.nro_online.models.boss.halloween.MaTroi;
+import com.nro.nro_online.models.boss.hell.DraculaHutMau;
+import com.nro.nro_online.models.boss.hell.SatanKing;
+import com.nro.nro_online.models.boss.list_boss.NhanBan;
+import com.nro.nro_online.models.boss.list_boss.Raity;
+import com.nro.nro_online.models.boss.list_boss.WhisTop;
 import com.nro.nro_online.models.boss.mabu_war.*;
+import com.nro.nro_online.models.boss.nappa.*;
+import com.nro.nro_online.models.boss.robotsatthu.*;
+import com.nro.nro_online.models.boss.tieudoisatthu.*;
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.map.mabu.MabuWar;
 import com.nro.nro_online.models.map.mabu.MabuWar14h;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.services.MapService;
 
 public class BossFactory {

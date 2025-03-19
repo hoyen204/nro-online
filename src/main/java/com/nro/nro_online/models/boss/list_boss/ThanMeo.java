@@ -1,12 +1,12 @@
 package com.nro.nro_online.models.boss.list_boss;
 
-import nro.models.boss.BossData;
-import nro.models.boss.BossManager;
-import nro.models.boss.FutureBoss;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossManager;
+import com.nro.nro_online.models.boss.FutureBoss;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
 
 /**
  *
@@ -17,7 +17,7 @@ public class ThanMeo extends FutureBoss {
 
     public int idNpc;
 
-    public ThanMeo(byte bossID, BossData bossData, Zone zone, int x, int y, int IDNPC) throws Exception {
+    public ThanMeo(byte bossID, BossData bossData, Zone zone, int x, int y, int IDNPC) {
         super(bossID, bossData);
         this.zone = zone;
         this.location.x = x;

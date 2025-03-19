@@ -61,29 +61,29 @@ public class ItemTime {
     }
 
     private void initBuffMap() {
-        buffMap.put("BoHuyet", new BuffInfo(() -> isUseBoHuyet, v -> isUseBoHuyet = v, () -> lastTimeBoHuyet, v -> lastTimeBoHuyet = v, TIME_ITEM));
-        buffMap.put("BoKhi", new BuffInfo(() -> isUseBoKhi, v -> isUseBoKhi = v, () -> lastTimeBoKhi, v -> lastTimeBoKhi = v, TIME_ITEM));
-        buffMap.put("GiapXen", new BuffInfo(() -> isUseGiapXen, v -> isUseGiapXen = v, () -> lastTimeGiapXen, v -> lastTimeGiapXen = v, TIME_ITEM));
-        buffMap.put("CuongNo", new BuffInfo(() -> isUseCuongNo, v -> isUseCuongNo = v, () -> lastTimeCuongNo, v -> lastTimeCuongNo = v, TIME_ITEM));
-        buffMap.put("AnDanh", new BuffInfo(() -> isUseAnDanh, v -> isUseAnDanh = v, () -> lastTimeAnDanh, v -> lastTimeAnDanh = v, TIME_ITEM));
-        buffMap.put("BoHuyet2", new BuffInfo(() -> isUseBoHuyet2, v -> isUseBoHuyet2 = v, () -> lastTimeBoHuyet2, v -> lastTimeBoHuyet2 = v, TIME_ITEM));
-        buffMap.put("BoKhi2", new BuffInfo(() -> isUseBoKhi2, v -> isUseBoKhi2 = v, () -> lastTimeBoKhi2, v -> lastTimeBoKhi2 = v, TIME_ITEM));
-        buffMap.put("GiapXen2", new BuffInfo(() -> isUseGiapXen2, v -> isUseGiapXen2 = v, () -> lastTimeGiapXen2, v -> lastTimeGiapXen2 = v, TIME_ITEM));
-        buffMap.put("CuongNo2", new BuffInfo(() -> isUseCuongNo2, v -> isUseCuongNo2 = v, () -> lastTimeCuongNo2, v -> lastTimeCuongNo2 = v, TIME_ITEM));
-        buffMap.put("DuoiKhi", new BuffInfo(() -> isDuoiKhi, v -> isDuoiKhi = v, () -> lastTimeDuoiKhi, v -> lastTimeDuoiKhi = v, TIME_MAY_DO));
-        buffMap.put("BanhChung", new BuffInfo(() -> isUseBanhChung, v -> isUseBanhChung = v, () -> lastTimeBanhChung, v -> lastTimeBanhChung = v, TIME_ITEM));
-        buffMap.put("BanhTet", new BuffInfo(() -> isUseBanhTet, v -> isUseBanhTet = v, () -> lastTimeBanhTet, v -> lastTimeBanhTet = v, TIME_ITEM));
-        buffMap.put("BanhTrungThu1Trung", new BuffInfo(() -> isBanhTrungThu1Trung, v -> isBanhTrungThu1Trung = v, () -> lastTimeBanhTrungThu1Trung, v -> lastTimeBanhTrungThu1Trung = v, TIME_ITEM));
-        buffMap.put("BanhTrungThu2Trung", new BuffInfo(() -> isBanhTrungThu2Trung, v -> isBanhTrungThu2Trung = v, () -> lastTimeBanhTrungThu2Trung, v -> lastTimeBanhTrungThu2Trung = v, TIME_ITEM));
-        buffMap.put("EatMeal", new BuffInfo(() -> isEatMeal, v -> isEatMeal = v, () -> lastTimeEatMeal, v -> lastTimeEatMeal = v, TIME_EAT_MEAL));
-        buffMap.put("MayDo", new BuffInfo(() -> isMayDo, v -> isMayDo = v, () -> timeMayDo, v -> timeMayDo = v, TIME_MAY_DO));
-        buffMap.put("UseMayDo", new BuffInfo(() -> isUseMayDo, v -> isUseMayDo = v, () -> lastTimeUseMayDo, v -> lastTimeUseMayDo = v, TIME_MAY_DO));
-        buffMap.put("RateDragonHit", new BuffInfo(() -> rateDragonHit, v -> rateDragonHit = v, () -> lastTimerateHit, v -> lastTimerateHit = v, TIME_MAY_DO));
-        buffMap.put("RateDame", new BuffInfo(() -> rateDame, v -> rateDame = v, () -> lastTimeDameDr, v -> lastTimeDameDr = v, TIME_MAY_DO));
-        buffMap.put("RateHPKI", new BuffInfo(() -> rateHPKI, v -> rateHPKI = v, () -> lastTimerateHPKI, v -> lastTimerateHPKI = v, TIME_MAY_DO));
-        buffMap.put("MaTroi", new BuffInfo(() -> isMaTroi, v -> isMaTroi = v, () -> lastTimeMaTroi, v -> lastTimeMaTroi = v, TIME_ITEM));
-        buffMap.put("OpenPower", new BuffInfo(() -> isOpenPower, v -> isOpenPower = v, () -> lastTimeOpenPower, v -> lastTimeOpenPower = v, TIME_OPEN_POWER));
-        buffMap.put("UseTDLT", new BuffInfo(() -> isUseTDLT, v -> isUseTDLT = v, () -> lastTimeUseTDLT, v -> lastTimeUseTDLT = v, 0));
+        buffMap.put("BoHuyet", new BuffInfo(() -> isUseBoHuyet, v -> isUseBoHuyet = v, () -> lastTimeBoHuyet, TIME_ITEM));
+        buffMap.put("BoKhi", new BuffInfo(() -> isUseBoKhi, v -> isUseBoKhi = v, () -> lastTimeBoKhi, TIME_ITEM));
+        buffMap.put("GiapXen", new BuffInfo(() -> isUseGiapXen, v -> isUseGiapXen = v, () -> lastTimeGiapXen, TIME_ITEM));
+        buffMap.put("CuongNo", new BuffInfo(() -> isUseCuongNo, v -> isUseCuongNo = v, () -> lastTimeCuongNo, TIME_ITEM));
+        buffMap.put("AnDanh", new BuffInfo(() -> isUseAnDanh, v -> isUseAnDanh = v, () -> lastTimeAnDanh, TIME_ITEM));
+        buffMap.put("BoHuyet2", new BuffInfo(() -> isUseBoHuyet2, v -> isUseBoHuyet2 = v, () -> lastTimeBoHuyet2, TIME_ITEM));
+        buffMap.put("BoKhi2", new BuffInfo(() -> isUseBoKhi2, v -> isUseBoKhi2 = v, () -> lastTimeBoKhi2, TIME_ITEM));
+        buffMap.put("GiapXen2", new BuffInfo(() -> isUseGiapXen2, v -> isUseGiapXen2 = v, () -> lastTimeGiapXen2, TIME_ITEM));
+        buffMap.put("CuongNo2", new BuffInfo(() -> isUseCuongNo2, v -> isUseCuongNo2 = v, () -> lastTimeCuongNo2, TIME_ITEM));
+        buffMap.put("DuoiKhi", new BuffInfo(() -> isDuoiKhi, v -> isDuoiKhi = v, () -> lastTimeDuoiKhi, TIME_MAY_DO));
+        buffMap.put("BanhChung", new BuffInfo(() -> isUseBanhChung, v -> isUseBanhChung = v, () -> lastTimeBanhChung, TIME_ITEM));
+        buffMap.put("BanhTet", new BuffInfo(() -> isUseBanhTet, v -> isUseBanhTet = v, () -> lastTimeBanhTet, TIME_ITEM));
+        buffMap.put("BanhTrungThu1Trung", new BuffInfo(() -> isBanhTrungThu1Trung, v -> isBanhTrungThu1Trung = v, () -> lastTimeBanhTrungThu1Trung, TIME_ITEM));
+        buffMap.put("BanhTrungThu2Trung", new BuffInfo(() -> isBanhTrungThu2Trung, v -> isBanhTrungThu2Trung = v, () -> lastTimeBanhTrungThu2Trung, TIME_ITEM));
+        buffMap.put("EatMeal", new BuffInfo(() -> isEatMeal, v -> isEatMeal = v, () -> lastTimeEatMeal, TIME_EAT_MEAL));
+        buffMap.put("MayDo", new BuffInfo(() -> isMayDo, v -> isMayDo = v, () -> timeMayDo, TIME_MAY_DO));
+        buffMap.put("UseMayDo", new BuffInfo(() -> isUseMayDo, v -> isUseMayDo = v, () -> lastTimeUseMayDo, TIME_MAY_DO));
+        buffMap.put("RateDragonHit", new BuffInfo(() -> rateDragonHit, v -> rateDragonHit = v, () -> lastTimerateHit, TIME_MAY_DO));
+        buffMap.put("RateDame", new BuffInfo(() -> rateDame, v -> rateDame = v, () -> lastTimeDameDr, TIME_MAY_DO));
+        buffMap.put("RateHPKI", new BuffInfo(() -> rateHPKI, v -> rateHPKI = v, () -> lastTimerateHPKI, TIME_MAY_DO));
+        buffMap.put("MaTroi", new BuffInfo(() -> isMaTroi, v -> isMaTroi = v, () -> lastTimeMaTroi, TIME_ITEM));
+        buffMap.put("OpenPower", new BuffInfo(() -> isOpenPower, v -> isOpenPower = v, () -> lastTimeOpenPower, TIME_OPEN_POWER));
+        buffMap.put("UseTDLT", new BuffInfo(() -> isUseTDLT, v -> isUseTDLT = v, () -> lastTimeUseTDLT, 0));
     }
 
     public void update() {
@@ -137,15 +137,13 @@ public class ItemTime {
         private final BooleanSupplier isActiveGetter;
         private final BooleanConsumer isActiveSetter;
         private final LongSupplier lastTimeGetter;
-        private final LongConsumer lastTimeSetter;
         private final int duration;
 
         BuffInfo(BooleanSupplier isActiveGetter, BooleanConsumer isActiveSetter,
-                LongSupplier lastTimeGetter, LongConsumer lastTimeSetter, int duration) {
+                LongSupplier lastTimeGetter, int duration) {
             this.isActiveGetter = isActiveGetter;
             this.isActiveSetter = isActiveSetter;
             this.lastTimeGetter = lastTimeGetter;
-            this.lastTimeSetter = lastTimeSetter;
             this.duration = duration;
         }
 

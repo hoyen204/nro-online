@@ -45,7 +45,6 @@ public class MabuEgg extends SpecialEgg {
             }
             ChangeMapService.gI().changeMapInYard(this.player, this.player.gender * 7, -1, Util.nextInt(300, 500));
         } catch (Exception e) {
-            // Lỗi thì kệ, chill đi 😅
         }
     }
 

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.nro.nro_online.models.map.dungeon;
 
 import java.io.DataOutputStream;
@@ -12,17 +7,13 @@ import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
-import nro.consts.Cmd;
-import nro.models.map.dungeon.zones.ZDungeon;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.Service;
-import nro.utils.Log;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.map.dungeon.zones.ZDungeon;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
 
-/**
- *
- * @Build by Arriety
- */
 @Getter
 @Setter
 public abstract class Dungeon {
@@ -106,13 +97,11 @@ public abstract class Dungeon {
     }
 
     public void sendNotification(String text) {
-        try {
-            Message ms = new Message(Cmd.SERVER_MESSAGE);
+        try (Message ms = new Message(Cmd.SERVER_MESSAGE)) {
             DataOutputStream ds = ms.writer();
             ds.writeUTF(text);
             ds.flush();
             sendMessage(ms);
-            ms.cleanup();
         } catch (IOException ex) {
             Log.error(Dungeon.class, ex);
         }

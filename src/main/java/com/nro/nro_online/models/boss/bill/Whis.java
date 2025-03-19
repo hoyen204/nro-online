@@ -1,11 +1,11 @@
 package com.nro.nro_online.models.boss.bill;
 
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.boss.BossManager;
-import nro.models.player.Player;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.boss.BossManager;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

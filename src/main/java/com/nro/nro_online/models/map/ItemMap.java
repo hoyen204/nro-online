@@ -9,13 +9,7 @@ import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.services.ItemMapService;
 import com.nro.nro_online.services.ItemService;
 import com.nro.nro_online.utils.Util;
-import nro.models.item.ItemOption;
-import nro.models.item.ItemTemplate;
-import nro.models.player.Player;
-import nro.services.ItemMapService;
-import nro.services.ItemService;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.services.Service;
 
 public class ItemMap {
 

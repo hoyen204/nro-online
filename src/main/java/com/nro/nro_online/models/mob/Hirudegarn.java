@@ -5,19 +5,18 @@
  */
 package com.nro.nro_online.models.mob;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import nro.consts.Cmd;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.MobService;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.MobService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 /**
  *
@@ -73,18 +72,14 @@ public class Hirudegarn extends BigBoss {
     }
 
     public void send(int[][] array, byte type) {
-        try {
-            Message ms = new Message(Cmd.BIG_BOSS);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(type);
-            ds.writeByte(array.length);
+        try (Message ms = new Message(Cmd.BIG_BOSS)) {
+            ms.writer().writeByte(type);
+            ms.writer().writeByte(array.length);
             for (int[] arr : array) {
-                ds.writeInt(arr[0]);
-                ds.writeInt(arr[1]);
+                ms.writer().writeInt(arr[0]);
+                ms.writer().writeInt(arr[1]);
             }
-            ds.flush();
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -120,16 +115,12 @@ public class Hirudegarn extends BigBoss {
     }
 
     public void send(Player cAttack, int damage, byte type) {
-        try {
-            Message ms = new Message(Cmd.BIG_BOSS);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(type);
-            ds.writeByte(1);
-            ds.writeInt((int) cAttack.id);
-            ds.writeInt(damage);
-            ds.flush();
+        try (Message ms = new Message(Cmd.BIG_BOSS)) {
+            ms.writer().writeByte(type);
+            ms.writer().writeByte(1);
+            ms.writer().writeInt((int) cAttack.id);
+            ms.writer().writeInt(damage);
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -137,42 +128,34 @@ public class Hirudegarn extends BigBoss {
     }
 
     public void transform() {
-        try {
+        try (Message ms = new Message(Cmd.BIG_BOSS)) {
             this.type++;
             if (this.type <= 2) {
                 MobService.gI().hoiSinhMob(this);
             }
-            Message ms = new Message(Cmd.BIG_BOSS);
-            DataOutputStream ds = ms.writer();
             if (type == 1) {
-                ds.writeByte(6);
-                ds.writeShort(location.x);
-                ds.writeShort(location.y);
+                ms.writer().writeByte(6);
+                ms.writer().writeShort(location.x);
+                ms.writer().writeShort(location.y);
             } else if (type == 2) {
-                ds.writeByte(5);
+                ms.writer().writeByte(5);
             } else {
                 super.move(-1000, -1000);
-                ds.writeByte(9);
+                ms.writer().writeByte(9);
             }
-            ds.flush();
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
         } catch (IOException ex) {
             Logger.getLogger(Hirudegarn.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     public void flyTo(int x, int y) {
-        try {
+        try (Message ms = new Message(Cmd.BIG_BOSS)) {
             super.move(x, y);
-            Message ms = new Message(Cmd.BIG_BOSS);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(3);
-            ds.writeShort(x);
-            ds.writeShort(y);
-            ds.flush();
+            ms.writer().writeByte(3);
+            ms.writer().writeShort(x);
+            ms.writer().writeShort(y);
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
         } catch (IOException ex) {
             Logger.getLogger(Hirudegarn.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -181,15 +164,11 @@ public class Hirudegarn extends BigBoss {
     @Override
     public void move(int x, int y) {
         super.move(x, y);
-        try {
-            Message ms = new Message(Cmd.BIG_BOSS);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(8);
-            ds.writeShort(x);
-            ds.writeShort(y);
-            ds.flush();
+        try (Message ms = new Message(Cmd.BIG_BOSS)) {
+            ms.writer().writeByte(8);
+            ms.writer().writeShort(x);
+            ms.writer().writeShort(y);
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
         } catch (IOException ex) {
             Logger.getLogger(Hirudegarn.class.getName()).log(Level.SEVERE, null, ex);
         }

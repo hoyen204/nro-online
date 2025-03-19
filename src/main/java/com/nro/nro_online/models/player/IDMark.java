@@ -2,7 +2,7 @@ package com.nro.nro_online.models.player;
 
 import lombok.Getter;
 import lombok.Setter;
-import nro.consts.ConstNpc;
+import com.nro.nro_online.consts.ConstNpc;
 
 /**
  *

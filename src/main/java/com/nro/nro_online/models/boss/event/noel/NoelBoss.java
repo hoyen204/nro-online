@@ -10,13 +10,6 @@ import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.utils.Util;
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossManager;
-import nro.models.player.Player;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.utils.Util;
 
 public class NoelBoss extends Boss {
 

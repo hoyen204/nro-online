@@ -1,15 +1,14 @@
 package com.nro.nro_online.models.player;
 
 import com.nro.nro_online.models.mob.Mob;
-import nro.consts.ConstPlayer;
-import nro.models.mob.Mob;
-import nro.services.EffectSkillService;
-import nro.services.ItemTimeService;
-import nro.services.PlayerService;
-import nro.services.Service;
-import nro.services.SkillService;
-import nro.services.func.ChangeMapService;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.services.EffectSkillService;
+import com.nro.nro_online.services.ItemTimeService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.SkillService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

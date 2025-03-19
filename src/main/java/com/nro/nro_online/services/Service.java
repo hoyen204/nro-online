@@ -13,6 +13,7 @@ import static nro.manager.TopPlayerManager.GetTopNap;
 import static nro.manager.TopPlayerManager.GetTopPower;
 
 import com.nro.nro_online.data.DataGame;
+import com.nro.nro_online.models.boss.Boss;
 import com.nro.nro_online.models.boss.BossManager;
 import com.nro.nro_online.models.boss.list_boss.WhisTop;
 import com.nro.nro_online.models.item.Item;
@@ -31,6 +32,7 @@ import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.server.io.Session;
 import com.nro.nro_online.services.func.ChangeMapService;
 import com.nro.nro_online.services.func.Input;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @Build Arriety
@@ -299,7 +301,7 @@ public class Service {
                         synchronized (players) {
                             for (Player pl : players) {
                                 try {
-                                    if (pl != null && pl.id == (long) Util.GetPropertyByName(player, "player_id")) {
+                                    if (pl != null && pl.id == (long) Util.getPropertyByName(player, "player_id")) {
                                         pl.sendMessage(msg);
                                     }
                                 } catch (IllegalAccessException e) {
@@ -553,7 +555,7 @@ public class Service {
                         Service.getInstance().clearMap(player);
                         zone.mapInfo(player);
                         player.zone.loadAnotherToMe(player);
-                        player.zone.load_Me_To_Another(player);
+                        player.zone.loadMeToAnother(player);
                     }
                     return;
                 } catch (Exception e) {

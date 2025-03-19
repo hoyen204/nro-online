@@ -2,12 +2,12 @@ package com.nro.nro_online.models.boss.tieudoisatthu;
 
 import java.util.Calendar;
 
-import nro.models.boss.*;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.services.Service;
-import nro.services.TaskService;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.*;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.TaskService;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

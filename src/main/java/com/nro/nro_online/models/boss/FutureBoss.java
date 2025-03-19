@@ -6,20 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.nro.nro_online.models.player.Player;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @stole Arriety
- */
 public abstract class FutureBoss extends Boss {
 
-    public HashMap<Long, Integer> topDame = new HashMap<>();
+    public Map<Long, Integer> topDame = new HashMap<>();
 
-    public FutureBoss(byte id, BossData data) {
+    protected FutureBoss(byte id, BossData data) {
         super(id, data);
     }
 
@@ -36,7 +31,7 @@ public abstract class FutureBoss extends Boss {
                 d += topDame.get(plAtt.id);
             }
             topDame.put(plAtt.id, d);
-            HashMap<Long, Integer> hashMap = Util.sortHashMapByValue(topDame);
+            Map<Long, Integer> hashMap = Util.sortHashMapByValue(topDame);
             List<Map.Entry<Long, Integer>> entryList = new ArrayList<>(hashMap.entrySet());
             for (int i = 0; i < 3; i++) {
                 if (i < entryList.size()) {

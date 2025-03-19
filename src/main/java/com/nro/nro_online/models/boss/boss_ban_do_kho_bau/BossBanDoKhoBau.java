@@ -42,8 +42,14 @@ public abstract class BossBanDoKhoBau extends Boss {
 
     @Override
     public void idle() {
-        if (this.zone.mobs == null || this.zone.mobs.length == 0) return;
-        if (Util.allTrue(this.zone.mobs, Mob::isDie)) {
+        boolean allMobDie = true;
+        for (Mob mob : this.zone.mobs) {
+            if (!mob.isDie()) {
+                allMobDie = false;
+                break;
+            }
+        }
+        if (allMobDie) {
             this.changeToAttack();
         }
     }

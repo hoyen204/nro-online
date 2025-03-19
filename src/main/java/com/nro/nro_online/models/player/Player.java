@@ -10,7 +10,7 @@ import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.consts.ConstTask;
 import com.nro.nro_online.data.DataGame;
 import com.nro.nro_online.dialog.ConfirmDialog;
-import com.nro.nro_online.models.DragonNamecWar.TranhNgocService;
+import com.nro.nro_online.models.dragon_namec_war.TranhNgocService;
 import com.nro.nro_online.models.boss.event.EscortedBoss;
 import com.nro.nro_online.models.boss.event.noel.NoelBossBall;
 import com.nro.nro_online.models.clan.Buff;
@@ -225,9 +225,9 @@ public class Player {
         setClothes = new SetClothes(this);
         effectSkill = new EffectSkill(this);
         fusion = new Fusion(this);
-        playerIntrinsic = new IntrinsicPlayer(this);
+        playerIntrinsic = new IntrinsicPlayer();
         rewardBlackBall = new RewardBlackBall(this);
-        effectFlagBag = new EffectFlagBag(this);
+        effectFlagBag = new EffectFlagBag();
         //----------------------------------------------------------------------
         iDMark = new IDMark();
         combineNew = new CombineNew();
@@ -343,7 +343,7 @@ public class Player {
                     if (event != null) {
                         event.update();
                     }
-                    UpdateEffChar.getInstance().updateEff(this);
+                    UpdateEffChar.gI().updateEff(this);
                     BlackBallWar.gI().update(this);
                     if (this.isPl()) {
                         MabuWar.gI().update(this);

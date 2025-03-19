@@ -1,16 +1,8 @@
 package com.nro.nro_online.models.player;
 
-/**
- *
- * Arriety
- *
- */
 public class EffectFlagBag {
 
-    private Player player;
-
-    public EffectFlagBag(Player player) {
-        this.player = player;
+    public EffectFlagBag() {
     }
 
     public boolean useVoOc;
@@ -42,6 +34,5 @@ public class EffectFlagBag {
     }
 
     public void dispose() {
-        this.player = null;
     }
 }

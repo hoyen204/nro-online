@@ -42,7 +42,7 @@ public class AttributeManager {
                         at.update();
                     }
                 } catch (Exception e) {
-                    log.error("Update attribute lỗi to, huhu: {}", e.getMessage());
+                    log.error("update attribute lỗi to, huhu: {}", e.getMessage());
                 }
             }
         }

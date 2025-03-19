@@ -1,115 +1,81 @@
 package com.nro.nro_online.services.func;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.List;
-
 import com.nro.nro_online.card.Card;
 import com.nro.nro_online.card.CollectionBook;
+import com.nro.nro_online.consts.Cmd;
 import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.services.InventoryService;
 import com.nro.nro_online.services.Service;
-import nro.card.Card;
-import nro.card.CardTemplate;
-import nro.card.CollectionBook;
-import nro.consts.Cmd;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.InventoryService;
-import nro.services.Service;
 
-/**
- *
- * @Build Arriety
- *
- */
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class RadaService {
 
-    private static RadaService instance;
+    private static final Logger LOGGER = Logger.getLogger(RadaService.class.getName());
+    private static final RadaService INSTANCE = new RadaService();
 
     private RadaService() {
-
     }
 
     public static RadaService getInstance() {
-        if (instance == null) {
-            instance = new RadaService();
-        }
-        return instance;
+        return INSTANCE;
     }
 
     public void controller(Player player, Message msg) {
-        try {
-            byte type = msg.reader().readByte();
-            int id = -1;
-            if (msg.reader().available() > 0) {
-                id = msg.reader().readShort();
-            }
+        try (var reader = msg.reader()) {
+            byte type = reader.readByte();
+            int id = reader.available() > 0 ? reader.readShort() : -1;
             switch (type) {
-                case 0:
-                    viewCollectionBook(player);
-                    break;
-                case 1:
-                    cardAction(player, id);
-                    break;
+                case 0 -> viewCollectionBook(player);
+                case 1 -> cardAction(player, id);
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error processing controller message", e);
         }
     }
 
     public void cardAction(Player player, int id) {
         CollectionBook book = player.getCollectionBook();
-        Card c = book.findWithItemID(id);
-        if (c != null) {
-            if (c.getLevel() > 0) {
-                if (!c.isUse()) {
-                    long size = book.getCards().stream().filter(a -> a.isUse()).count();
-                    if (size >= 3) {
-                        return;
-                    }
-                }
-                byte auraOld = player.getAura();
-                c.setUse(!c.isUse());
-                byte auraNew = player.getAura();
-                useCard(player, c);
-                player.nPoint.calPoint();
-                Service.getInstance().point(player);
-                if (auraOld != auraNew) {
-                    setIDAuraEff(player, auraNew);
-                }
-            }
-        }
+        Card card = book.findWithItemID(id);
+        if (card == null || card.getLevel() <= 0)
+            return;
+
+        if (!card.isUse() && book.getCards().values().stream().filter(Card::isUse).count() >= 3)
+            return;
+
+        byte auraOld = player.getAura();
+        card.setUse(!card.isUse());
+        byte auraNew = player.getAura();
+
+        useCard(player, card);
+        player.nPoint.calPoint();
+        Service.getInstance().point(player);
+        if (auraOld != auraNew)
+            setIDAuraEff(player, auraNew);
     }
 
     public void useCard(Player player, Card card) {
-        try {
-            Message mss = new Message(Cmd.RADA_CARD);
-            DataOutputStream ds = mss.writer();
+        sendMessage(player, Cmd.RADA_CARD, ds -> {
             ds.writeByte(1);
             ds.writeShort(card.getCardTemplate().getItemID());
             ds.writeBoolean(card.isUse());
-            ds.flush();
-            player.sendMessage(mss);
-            mss.cleanup();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        });
     }
 
     public void viewCollectionBook(Player player) {
-        try {
-            CollectionBook book = player.getCollectionBook();
-            Message mss = new Message(Cmd.RADA_CARD);
-            DataOutputStream ds = mss.writer();
+        CollectionBook book = player.getCollectionBook();
+        sendMessage(player, Cmd.RADA_CARD, ds -> {
             ds.writeByte(0);
-            List<Card> cards = book.getCards();
+            var cards = book.getCards().values();
             ds.writeShort(cards.size());
             for (Card card : cards) {
-                CardTemplate cardT = card.getCardTemplate();
+                var cardT = card.getCardTemplate();
                 ds.writeShort(cardT.getItemID());
                 ds.writeShort(cardT.getIcon());
                 ds.writeByte(cardT.getRank());
@@ -128,7 +94,7 @@ public class RadaService {
                 ds.writeUTF(cardT.getInfo());
                 ds.writeByte(card.getLevel());
                 ds.writeBoolean(card.isUse());
-                List<ItemOption> options = cardT.getOptions();
+                var options = cardT.getOptions();
                 ds.writeByte(options.size());
                 for (ItemOption option : options) {
                     ds.writeByte(option.optionTemplate.id);
@@ -136,59 +102,65 @@ public class RadaService {
                     ds.writeByte(option.activeCard);
                 }
             }
-            ds.flush();
-            player.sendMessage(mss);
-            mss.cleanup();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        });
     }
 
     public void useItemCard(Player player, Item item) {
         CollectionBook book = player.getCollectionBook();
         Card card = book.findWithItemID(item.template.id);
-        if (card != null) {
-            InventoryService.gI().subQuantityItemsBag(player, item, 1);
-            int cardLevelOld = card.getLevel();
-            card.addAmount(1);
-            int cardLevelNew = card.getLevel();
-            if (cardLevelOld != cardLevelNew) {
-                if (card.isUse()) {
-                    player.nPoint.calPoint();
-                    Service.getInstance().point(player);
-                }
-            }
-            setCardLevel(player, card);
+        if (card == null)
+            return;
+
+        InventoryService.gI().subQuantityItemsBag(player, item, 1);
+        int oldLevel = card.getLevel();
+        card.addAmount(1);
+        int newLevel = card.getLevel();
+
+        if (oldLevel != newLevel && card.isUse()) {
+            player.nPoint.calPoint();
+            Service.getInstance().point(player);
         }
+        setCardLevel(player, card);
     }
 
     public void setCardLevel(Player player, Card card) {
-        try {
-            Message mss = new Message(Cmd.RADA_CARD);
-            DataOutputStream ds = mss.writer();
+        sendMessage(player, Cmd.RADA_CARD, ds -> {
             ds.writeByte(2);
             ds.writeShort(card.getCardTemplate().getItemID());
             ds.writeByte(card.getLevel());
-            ds.flush();
-            player.sendMessage(mss);
-            mss.cleanup();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        });
     }
 
     public void setIDAuraEff(Player player, byte aura) {
-        try {
-            Message mss = new Message(Cmd.RADA_CARD);
-            DataOutputStream ds = mss.writer();
+        sendMessageToAllInMap(player, Cmd.RADA_CARD, ds -> {
             ds.writeByte(4);
             ds.writeInt((int) player.id);
             ds.writeShort(aura);
-            ds.flush();
-            Service.getInstance().sendMessAllPlayerInMap(player, mss);
-            mss.cleanup();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        });
+    }
+
+    private void sendMessage(Player player, int cmd, MessageWriter writer) {
+        try (Message msg = new Message(cmd)) {
+            writer.write(msg.writer());
+            msg.writer().flush();
+            player.sendMessage(msg);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error sending message to player", e);
         }
+    }
+
+    private void sendMessageToAllInMap(Player player, int cmd, MessageWriter writer) {
+        try (Message msg = new Message(cmd)) {
+            writer.write(msg.writer());
+            msg.writer().flush();
+            Service.getInstance().sendMessAllPlayerInMap(player, msg);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error sending message to all players in map", e);
+        }
+    }
+
+    @FunctionalInterface
+    private interface MessageWriter {
+        void write(DataOutputStream ds) throws IOException;
     }
 }

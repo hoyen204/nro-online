@@ -2,21 +2,16 @@ package com.nro.nro_online.models.boss.fide;
 
 import java.util.Calendar;
 
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.boss.FutureBoss;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.services.Service;
-import nro.services.TaskService;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.boss.FutureBoss;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.TaskService;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
 public class FideDaiCa1 extends FutureBoss {
 
     public FideDaiCa1() {

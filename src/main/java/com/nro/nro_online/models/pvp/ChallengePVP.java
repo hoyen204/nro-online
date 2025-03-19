@@ -1,9 +1,9 @@
 package com.nro.nro_online.models.pvp;
 
-import nro.consts.ConstPlayer;
-import nro.models.player.Player;
-import nro.services.PlayerService;
-import nro.services.Service;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
 
 /**
  *

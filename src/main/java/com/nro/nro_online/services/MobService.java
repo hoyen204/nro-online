@@ -7,18 +7,14 @@ import com.nro.nro_online.models.map.ItemMap;
 import com.nro.nro_online.models.mob.Mob;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.io.Message;
-import nro.consts.ConstMob;
-import nro.consts.ConstTask;
-import nro.models.boss.BossFactory;
-import nro.models.clan.Clan;
-import nro.models.clan.ClanMember;
-import nro.models.map.ItemMap;
-import nro.models.mob.Mob;
-import nro.models.player.Pet;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstMob;
+import com.nro.nro_online.consts.ConstTask;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.clan.Clan;
+import com.nro.nro_online.models.clan.ClanMember;
+import com.nro.nro_online.models.player.Pet;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @Build by Arriety
@@ -39,18 +35,15 @@ public class MobService {
     }
 
     public void sendMobStillAliveAffterAttacked(Mob mob, int dameHit, boolean crit, Player player) {
-        Message msg;
-        try {
+        try (Message msg = new Message(-9)) {
             if (player != null) {
                 player.checkHutMau();
-                msg = new Message(-9);
                 msg.writer().writeByte(mob.id);
                 msg.writer().writeInt(mob.point.getHP());
                 msg.writer().writeInt(dameHit);
                 msg.writer().writeBoolean(crit); // chí mạng
                 msg.writer().writeByte(player.checkHutMau() ? 37 : -1);
                 Service.getInstance().sendMessAllPlayerInMap(mob.zone, msg);
-                msg.cleanup();
             }
         } catch (Exception e) {
             Log.error(MobService.class, e);
@@ -58,15 +51,12 @@ public class MobService {
     }
 
     public void sendMobDieAffterAttacked(Mob mob, Player plKill, int dameHit) {
-        Message msg;
-        try {
-            msg = new Message(-12);
+        try (Message msg = new Message(-12)) {
             msg.writer().writeByte(mob.id);
             msg.writer().writeInt(dameHit);
             msg.writer().writeBoolean(plKill.nPoint.isCrit); // crit
             List<ItemMap> items = mobReward(mob, plKill, msg);
             Service.getInstance().sendMessAllPlayerInMap(mob.zone, msg);
-            msg.cleanup();
             hutItem(plKill, items);
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,13 +112,10 @@ public class MobService {
 
     public void sendMobAttackMe(Mob mob, Player player, int dame) {
         if (!player.isPet) {
-            Message msg;
-            try {
-                msg = new Message(-11);
+            try (Message msg = new Message(-11)) {
                 msg.writer().writeByte(mob.id);
                 msg.writer().writeInt(dame); //dame
                 player.sendMessage(msg);
-                msg.cleanup();
             } catch (Exception e) {
                 Log.error(MobService.class, e);
             }
@@ -136,14 +123,11 @@ public class MobService {
     }
 
     public void sendMobAttackPlayer(Mob mob, Player player) {
-        Message msg;
-        try {
-            msg = new Message(-10);
+        try (Message msg = new Message(-10)) {
             msg.writer().writeByte(mob.id);
             msg.writer().writeInt((int) player.id);
             msg.writer().writeInt(player.nPoint.hp);
             Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
-            msg.cleanup();
         } catch (Exception e) {
             Log.error(MobService.class, e);
         }
@@ -154,15 +138,12 @@ public class MobService {
         mob.point.hp = mob.point.maxHp;
         mob.setTiemNang();
         if (isDie) {
-            Message msg;
-            try {
-                msg = new Message(-13);
+            try (Message msg = new Message(-13)) {
                 msg.writer().writeByte(mob.id);
                 msg.writer().writeByte(mob.tempId);
-                msg.writer().writeByte(0); //level mob
+                msg.writer().writeByte(0); // level mob
                 msg.writer().writeInt((mob.point.hp));
                 Service.getInstance().sendMessAllPlayerInMap(mob.zone, msg);
-                msg.cleanup();
             } catch (Exception e) {
                 Log.error(MobService.class, e);
             }

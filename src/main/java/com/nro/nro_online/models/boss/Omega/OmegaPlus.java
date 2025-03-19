@@ -3,16 +3,16 @@ package com.nro.nro_online.models.boss.Omega;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.item.Item;
-import nro.models.map.mabu.MabuWar;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.services.*;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.map.mabu.MabuWar;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.services.*;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 
 public class OmegaPlus extends Boss {
 

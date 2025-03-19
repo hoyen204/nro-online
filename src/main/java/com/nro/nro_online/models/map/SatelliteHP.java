@@ -1,18 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.nro.nro_online.models.map;
 
-import nro.models.player.Player;
-import nro.services.PlayerService;
-import nro.utils.Util;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @Build by Arriety
- */
 public class SatelliteHP extends Satellite {
 
     public SatelliteHP(Zone zone, int itemID, int x, int y, Player player) {

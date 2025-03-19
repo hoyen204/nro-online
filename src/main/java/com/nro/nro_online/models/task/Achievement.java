@@ -1,13 +1,11 @@
 package com.nro.nro_online.models.task;
 
+import com.nro.nro_online.consts.ConstAchive;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import nro.consts.ConstAchive;
 
-/**
- * @build by arriety
- */
 @Setter
 @Getter
 @NoArgsConstructor

@@ -8,21 +8,19 @@ package com.nro.nro_online.models.map.dungeon.zones;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static nro.services.func.ChangeMapService.NON_SPACE_SHIP;
+import static com.nro.nro_online.services.func.ChangeMapService.NON_SPACE_SHIP;
 
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.dungeon.Dungeon;
-import nro.consts.ConstMap;
-import nro.models.map.Map;
-import nro.models.map.WayPoint;
-import nro.models.map.Zone;
-import nro.models.map.dungeon.Dungeon;
-import nro.models.map.dungeon.SnakeRoad;
-import nro.models.mob.Mob;
-import nro.models.player.Player;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
+import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.models.map.WayPoint;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.map.dungeon.SnakeRoad;
+import com.nro.nro_online.models.mob.Mob;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
 
 /**
  *

@@ -2,9 +2,9 @@ package com.nro.nro_online.models.player;
 
 import java.util.Date;
 
-import nro.services.Service;
-import nro.utils.TimeUtil;
-import nro.utils.Util;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.TimeUtil;
+import com.nro.nro_online.utils.Util;
 
 /**
  *
@@ -75,7 +75,7 @@ public class RewardBlackBall {
         } else {
             Service.getInstance().sendThongBao(player, "Chưa thể nhận phần quà ngay lúc này, vui lòng đợi "
                     + TimeUtil.diffDate(new Date(lastTimeGetReward[star - 1]), new Date(lastTimeGetReward[star - 1] + TIME_WAIT),
-                            TimeUtil.MINUTE) + " phút nữa");
+                            TimeUtil.TimeUnit.MINUTE) + " phút nữa");
         }
     }
 

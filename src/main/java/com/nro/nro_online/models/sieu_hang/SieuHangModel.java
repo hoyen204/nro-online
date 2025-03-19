@@ -1,7 +1,6 @@
 package com.nro.nro_online.models.sieu_hang;
 
 import com.nro.nro_online.models.player.Player;
-import nro.models.player.Player;
 
 public class SieuHangModel {
 

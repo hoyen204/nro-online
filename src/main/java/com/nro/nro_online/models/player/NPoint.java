@@ -479,23 +479,23 @@ public class NPoint {
         }
         CollectionBook book = player.getCollectionBook();
         if (book != null) {
-            List<Card> cards = book.getCards();
-            if (cards != null) {
-                for (Card c : cards) {
-                    if (c.getLevel() > 0) {
-                        int index = 0;
-                        for (ItemOption o : c.getCardTemplate().getOptions()) {
-                            if ((index == 0 || c.isUse()) && c.getLevel() >= o.activeCard) {
-                                setPoint(o);
-                            }
-                            index++;
-                        }
-                    }
-                }
-            }
+            book.getCards().values().stream()
+                    .filter(card -> card.getLevel() > 0)
+                    .forEach(this::processCardOptions);
         }
         setDameTrainArmor();
         setBasePoint();
+    }
+
+    private void processCardOptions(Card card) {
+        boolean isUsed = card.isUse();
+        int index = 0;
+        for (ItemOption option : card.getCardTemplate().getOptions()) {
+            if ((index == 0 || isUsed) && card.getLevel() >= option.activeCard) {
+                setPoint(option);
+            }
+            index++;
+        }
     }
 
     private void setDameTrainArmor() {

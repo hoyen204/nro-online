@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.nro.nro_online.models.item.Item;
 import lombok.Getter;
-import nro.models.item.Item;
 
 /**
  *
@@ -29,7 +28,8 @@ public class Inventory {
     public List<Item> itemsBoxCrackBall;
 
     @Getter
-    public long gold, goldLimit;
+    public long gold;
+    public long goldLimit;
     @Getter
     public int gem;
     @Getter

@@ -1,25 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.nro.nro_online.models.mob;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.MobService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
+
 import java.util.List;
 
-import nro.consts.Cmd;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.MobService;
-import nro.services.Service;
-import nro.utils.Util;
-
-/**
- *
- * @Build by Arriety
- */
 public class Octopus extends BigBoss {
 
     public Octopus(Mob mob) {
@@ -30,24 +19,16 @@ public class Octopus extends BigBoss {
     public Player getPlayerCanAttack() {
         int distance = 500;
         Player plAttack = null;
-        try {
-            List<Player> players = this.zone.getNotBosses();
-            for (Player pl : players) {
-
-                if (!pl.isDie() && !pl.isBoss && !pl.effectSkin.isVoHinh && !pl.isMiniPet) {
-                    int x = pl.location.x;
-                    int y = pl.location.y;
-                    if (x >= 442 && x <= 960 && y >= 400) {
-                        int dis = Util.getDistance(pl, this);
-                        if (dis <= distance) {
-                            plAttack = pl;
-                            distance = dis;
-                        }
-                    }
+        List<Player> players = zone.getNotBosses();
+        for (Player pl : players) {
+            if (!pl.isDie() && !pl.isBoss && !pl.effectSkin.isVoHinh && !pl.isMiniPet
+                    && pl.location.x >= 442 && pl.location.x <= 960 && pl.location.y >= 400) {
+                int dis = Util.getDistance(pl, this);
+                if (dis <= distance) {
+                    plAttack = pl;
+                    distance = dis;
                 }
             }
-        } catch (Exception e) {
-
         }
         return plAttack;
     }
@@ -55,61 +36,46 @@ public class Octopus extends BigBoss {
     @Override
     public void move(int x, int y) {
         super.move(x, y);
-        if (x > 0 && y > 0) {
+        if (x > 0 && y > 0)
             moveX((short) x);
-        }
     }
 
     public void hide() {
-        try {
-            move(-1000, -1000);
-            Message ms = new Message(Cmd.BIG_BOSS_2);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(7);
-            ds.flush();
+        move(-1000, -1000);
+        try (Message ms = new Message(Cmd.BIG_BOSS_2)) {
+            ms.writer().writeByte(7);
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
     public void send(Player cAttack, int damage, byte type) {
-        try {
-            Message ms = new Message(Cmd.BIG_BOSS_2);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(type);
-            ds.writeByte(1);
-            ds.writeInt((int) cAttack.id);
-            ds.writeInt(damage);
-            ds.flush();
+        try (Message ms = new Message(Cmd.BIG_BOSS_2)) {
+            ms.writer().writeByte(type);
+            ms.writer().writeByte(1);
+            ms.writer().writeInt((int) cAttack.id);
+            ms.writer().writeInt(damage);
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     public void moveX(short x) {
-        try {
-            Message ms = new Message(Cmd.BIG_BOSS_2);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(5);
-            ds.writeShort(x);
-            ds.flush();
+        try (Message ms = new Message(Cmd.BIG_BOSS_2)) {
+            ms.writer().writeByte(5);
+            ms.writer().writeShort(x);
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
     public void attack(Player target) {
         byte action = (byte) Util.nextInt(3, 5);
-        if ((action == 3 || action == 5) && target.location.y != 576) {
+        if ((action == 3 || action == 5) && target.location.y != 576)
             action = 4;
-        }
         if (action == 5) {
             move(target.location.x, 576);
             return;
@@ -127,5 +93,4 @@ public class Octopus extends BigBoss {
         super.setDie();
         hide();
     }
-
 }

@@ -30,10 +30,10 @@ import java.util.Map;
 import java.util.Objects;
 
 public class Session {
-    private static final Map<String, AntiLogin> ANTI_LOGIN_MAP = new HashMap<>();
-    private static final int TIME_WAIT_READ_MESSAGE = 180_000;
-    private static final byte[] KEYS = {0};
-    private static int baseId = 0;
+    public static final Map<String, AntiLogin> ANTI_LOGIN_MAP = new HashMap<>();
+    public static final int TIME_WAIT_READ_MESSAGE = 180_000;
+    public static final byte[] KEYS = {0};
+    public static int baseId = 0;
 
     // Instance fields
     public final int id;
@@ -58,11 +58,11 @@ public class Session {
     @Setter
     private boolean logging;
 
-    private Socket socket;
-    private Controller controller;
-    private Thread sendThread, receiveThread;
-    private MessageCollector collector;
-    private MessageSender sender;
+    public Socket socket;
+    public Controller controller;
+    public Thread sendThread, receiveThread;
+    public MessageCollector collector;
+    public MessageSender sender;
 
     public Session(Socket socket, Controller controller, String ip) {
         this.id = baseId++;

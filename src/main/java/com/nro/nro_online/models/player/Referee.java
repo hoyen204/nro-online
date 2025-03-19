@@ -1,12 +1,12 @@
 package com.nro.nro_online.models.player;
 
-import nro.consts.ConstMap;
-import nro.models.map.Map;
-import nro.models.map.Zone;
-import nro.server.Manager;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.models.map.Map;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @build by arriety
@@ -38,7 +38,7 @@ public class Referee extends Player {
 
     public void joinMap(Zone z, Player player) {
         MapService.gI().goToMap(player, z);
-        z.load_Me_To_Another(player);
+        z.loadMeToAnother(player);
     }
 
     @Override

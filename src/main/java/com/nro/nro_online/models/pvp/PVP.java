@@ -5,6 +5,7 @@ import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.services.PlayerService;
 import com.nro.nro_online.services.func.PVPServcice;
+import com.nro.nro_online.utils.Util;
 
 /**
  *
@@ -46,7 +47,7 @@ public abstract class PVP {
     public void finishPVP(Player plLose, byte typeWin) {
         if (plLose.typePk != ConstPlayer.NON_PK) {
             Player plWin = player1.equals(plLose) ? player2 : player1;
-            plWin.playerTask.achivements.get(ConstAchive.TRAM_TRAN_TRAM_THANG).count++;
+            plWin.playerTask.achievements.get(ConstAchive.TRAM_TRAN_TRAM_THANG).count++;
             reward(plWin);
             PlayerService.gI().changeAndSendTypePK(player1, ConstPlayer.NON_PK);
             PlayerService.gI().changeAndSendTypePK(player2, ConstPlayer.NON_PK);

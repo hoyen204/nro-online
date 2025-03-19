@@ -5,15 +5,14 @@
  */
 package com.nro.nro_online.models.mob;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 
-import nro.consts.Cmd;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.MobService;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.MobService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 /**
  *
@@ -50,16 +49,12 @@ public class GuardRobot extends BigBoss {
     }
 
     public void send(Player cAttack, int damage, byte type) {
-        try {
-            Message ms = new Message(Cmd.BIG_BOSS_2);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(type);
-            ds.writeByte(1);
-            ds.writeInt((int) cAttack.id);
-            ds.writeInt(damage);
-            ds.flush();
+        try (Message ms = new Message(Cmd.BIG_BOSS_2)) {
+            ms.writer().writeByte(type);
+            ms.writer().writeByte(1);
+            ms.writer().writeInt((int) cAttack.id);
+            ms.writer().writeInt(damage);
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -67,14 +62,10 @@ public class GuardRobot extends BigBoss {
     }
 
     public void hide() {
-        try {
-            move(-1000, -1000);
-            Message ms = new Message(Cmd.BIG_BOSS_2);
-            DataOutputStream ds = ms.writer();
-            ds.writeByte(6);
-            ds.flush();
+        move(-1000, -1000);
+        try (Message ms = new Message(Cmd.BIG_BOSS_2)) {
+            ms.writer().writeByte(6);
             Service.getInstance().sendMessAllPlayerInMap(zone, ms);
-            ms.cleanup();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

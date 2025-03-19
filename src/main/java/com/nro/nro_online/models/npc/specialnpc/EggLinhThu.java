@@ -49,7 +49,6 @@ public class EggLinhThu extends SpecialEgg {
             Service.getInstance().sendThongBao(player, "Chúc mừng bro nhận được Linh Thú " + linhThu.template.name + "! 🎉");
             ChangeMapService.gI().changeMapInYard(this.player, this.player.gender * 7, -1, Util.nextInt(300, 500));
         } catch (Exception e) {
-            // Lỗi thì thôi, chill đi 😂
         }
     }
 

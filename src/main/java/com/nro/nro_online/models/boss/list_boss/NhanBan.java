@@ -135,7 +135,7 @@ public class NhanBan extends Boss {
             pl.location.y = JOIN_Y;
             pl.zone.mapInfo(pl);
             pl.zone.loadAnotherToMe(pl);
-            pl.zone.load_Me_To_Another(pl);
+            pl.zone.loadMeToAnother(pl);
         }
     }
 }

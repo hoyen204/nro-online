@@ -1,19 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.nro.nro_online.models.mob;
 
 import java.util.List;
 
-import nro.models.player.Player;
-import nro.utils.Util;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @Build by Arriety
- */
 public abstract class BigBoss extends Mob implements IBigBoss {
 
     public BigBoss(Mob mob) {

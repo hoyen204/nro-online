@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.nro.nro_online.consts.ConstItem;
+import com.nro.nro_online.dialog.ConfirmDialog;
 import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.player.Inventory;
@@ -20,17 +21,6 @@ import com.nro.nro_online.services.ItemService;
 import com.nro.nro_online.services.NpcService;
 import com.nro.nro_online.services.Service;
 import lombok.Getter;
-import nro.consts.ConstItem;
-import nro.dialog.ConfirmDialog;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.player.Inventory;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.InventoryService;
-import nro.services.ItemService;
-import nro.services.NpcService;
-import nro.services.Service;
 
 /**
  * @debug Arriety
@@ -413,8 +403,7 @@ public class ConsignmentShop {
     }
 
     public void nextPage(Player player, byte tab, int page) {
-        Message msg = new Message(-100);
-        try {
+        try (Message msg = new Message(-100)) {
             int maxPage = (byte) (list.size() / 20 > 0 ? list.size() / 20 : 1);
             DataOutputStream ds = msg.writer();
             ds.writeByte(tab);
@@ -446,15 +435,13 @@ public class ConsignmentShop {
             showItemCanConsign(player, ds);
             ds.flush();
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void show(Player player) {
-        Message msg = new Message(-44);
-        try {
+        try (Message msg = new Message(-44)) {
             int tabLength = tabName.length;
             int maxPage = (byte) (list.size() / 20 > 0 ? list.size() / 20 : 1);
             DataOutputStream ds = msg.writer();
@@ -466,7 +453,6 @@ public class ConsignmentShop {
                 ds.writeByte(maxPage); // max page
                 ds.writeByte(list.size());
                 for (ConsignmentItem item : list) {
-//                    System.err.println("ConsignID " + item.getConsignID());
                     ds.writeShort(item.template.id);
                     ds.writeShort(item.getConsignID());
                     ds.writeInt(item.getPriceGold());
@@ -490,7 +476,6 @@ public class ConsignmentShop {
             showItemCanConsign(player, ds);
             ds.flush();
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (IOException e) {
             e.printStackTrace();
         }

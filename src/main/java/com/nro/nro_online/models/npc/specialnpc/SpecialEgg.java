@@ -2,7 +2,6 @@ package com.nro.nro_online.models.npc.specialnpc;
 
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.io.Message;
-import com.nro.nro_online.utils.Util;
 
 public abstract class SpecialEgg {
     protected static final short EGG_ID = 50; // ID NPC chung
@@ -31,7 +30,6 @@ public abstract class SpecialEgg {
             msg.writer().writeInt(getSecondDone());
             this.player.sendMessage(msg);
         } catch (Exception e) {
-            // Lỗi thì kệ, im lặng cho sang 😅
         }
     }
 
@@ -58,6 +56,11 @@ public abstract class SpecialEgg {
     public void subTimeDone(int d, int h, int m, int s) {
         long subtractTime = (d * 86_400_000L) + (h * 3_600_000L) + (m * 60_000L) + (s * 1000L);
         this.timeDone -= subtractTime;
+        this.sendEgg();
+    }
+
+    public void setTimeDone(long timeDone) {
+        this.timeDone = timeDone;
         this.sendEgg();
     }
 

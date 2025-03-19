@@ -11,17 +11,7 @@ import com.nro.nro_online.models.boss.BossData;
 import com.nro.nro_online.models.map.dungeon.SnakeRoad;
 import com.nro.nro_online.models.map.dungeon.zones.ZSnakeRoad;
 import com.nro.nro_online.models.player.Player;
-import nro.consts.ConstMap;
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.map.dungeon.SnakeRoad;
-import nro.models.map.dungeon.zones.ZSnakeRoad;
-import nro.models.player.Player;
 
-/**
- *
- * @stole Arriety
- */
 public abstract class CBoss extends Boss {
 
     protected SnakeRoad snakeRoad;

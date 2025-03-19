@@ -3,7 +3,7 @@ package com.nro.nro_online.models.skill;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.utils.Util;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

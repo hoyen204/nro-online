@@ -5,68 +5,40 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import nro.consts.ConstPlayer;
-import nro.consts.ConstRatio;
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.boss.BossManager;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.server.ServerNotify;
-import nro.services.*;
-import nro.services.func.ChangeMapService;
-import nro.utils.Log;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.consts.ConstRatio;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.boss.BossManager;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.server.ServerNotify;
+import com.nro.nro_online.services.*;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
 public class Broly extends Boss {
 
     boolean xhpnext;
 
     static final int MAX_HP = 16777080;
-    private static final int DIS_ANGRY = 100;
 
-    private static final int HP_CREATE_SUPER_1 = 1000000;
-    private static final int HP_CREATE_SUPER_2 = 2000000;
-    private static final int HP_CREATE_SUPER_3 = 4000000;
-    private static final int HP_CREATE_SUPER_4 = 6000000;
-    private static final int HP_CREATE_SUPER_5 = 7000000;
-    private static final int HP_CREATE_SUPER_6 = 10000000;
-    private static final int HP_CREATE_SUPER_7 = 13000000;
-    private static final int HP_CREATE_SUPER_8 = 14000000;
-    private static final int HP_CREATE_SUPER_9 = 15000000;
-    private static final int HP_CREATE_SUPER_10 = 16000000;
-
-    private static final byte RATIO_CREATE_SUPER_10 = 10;
-    private static final byte RATIO_CREATE_SUPER_20 = 20;
-    private static final byte RATIO_CREATE_SUPER_30 = 30;
-    private static final byte RATIO_CREATE_SUPER_40 = 40;
-    private static final byte RATIO_CREATE_SUPER_50 = 50;
-    private static final byte RATIO_CREATE_SUPER_60 = 60;
-    private static final byte RATIO_CREATE_SUPER_70 = 70;
-    private static final byte RATIO_CREATE_SUPER_80 = 80;
-    private static final byte RATIO_CREATE_SUPER_90 = 90;
-    private static final byte RATIO_CREATE_SUPER_100 = 100;
-
-    private final Map angryPlayers;
+    private final Map<Player, Integer> angryPlayers;
     private final List<Player> playersAttack;
 
     public Broly() {
         super(BossFactory.BROLY, BossData.BROLY);
-        this.angryPlayers = new HashMap();
+        this.angryPlayers = new HashMap<>();
         this.playersAttack = new LinkedList<>();
     }
 
     protected Broly(byte id, BossData bossData) {
         super(id, bossData);
-        this.angryPlayers = new HashMap();
+        this.angryPlayers = new HashMap<>();
         this.playersAttack = new LinkedList<>();
     }
 
@@ -243,34 +215,6 @@ public class Broly extends Boss {
         }
     }
 
-    private int maxCountResetPoint;
-    private int countResetPoint;
-
-    private void resetPoint(int damageInjured) {
-        if (this.nPoint.hpg < MAX_HP && this.countResetPoint++ >= maxCountResetPoint) {
-            this.nPoint.hpg += damageInjured;
-            if (this.nPoint.hpg > MAX_HP) {
-                this.nPoint.hpg = MAX_HP;
-            }
-            switch (this.typeDame) {
-                case DAME_PERCENT_HP_HUND:
-                    this.nPoint.dameg = this.nPoint.hpg * this.percentDame / 100;
-                    break;
-                case DAME_PERCENT_MP_HUND:
-                    this.nPoint.dameg = this.nPoint.hpg * this.percentDame / 100;
-                    break;
-                case DAME_PERCENT_HP_THOU:
-                    this.nPoint.dameg = this.nPoint.hpg * this.percentDame / 1000;
-                    break;
-                case DAME_PERCENT_MP_THOU:
-                    this.nPoint.dameg = this.nPoint.mpg * this.percentDame / 1000;
-                    break;
-            }
-            maxCountResetPoint = Util.nextInt(3, 7);
-            countResetPoint = 0;
-        }
-    }
-
     protected boolean charge() {
         if (this.effectSkill.isCharging && Util.isTrue(15, 100)) {
             this.effectSkill.isCharging = false;
@@ -356,11 +300,7 @@ public class Broly extends Boss {
 
     @Override
     public void rewards(Player pl) {
-        if (true) {
-            BossFactory.createBoss(BossFactory.SUPER_BROLY);
-            return;
-        }
-        generalRewards(pl);
+        BossFactory.createBoss(BossFactory.SUPER_BROLY);
     }
 
     @Override

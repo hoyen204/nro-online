@@ -4,8 +4,8 @@
  */
 package com.nro.nro_online.models.boss.Yardart;
 
-import nro.models.boss.BossData;
-import nro.models.map.Zone;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.map.Zone;
 
 /**
  *

@@ -102,7 +102,7 @@ public class ServerManager {
         isRunning = true;
         activeCommandLine();
         activeGame();
-        new Thread(TopCoin.getInstance(), "Update Top Coin").start();
+        new Thread(TopCoin.getInstance(), "update Top Coin").start();
         activeLogin();
         autoTask();
         activeServerSocket();
@@ -204,7 +204,7 @@ public class ServerManager {
                     }
                 }
             }
-        }, "Update boss").start();
+        }, "update boss").start();
         new Thread(() -> {
             while (isRunning) {
                 long start = System.currentTimeMillis();
@@ -222,7 +222,7 @@ public class ServerManager {
                     }
                 }
             }
-        }, "Update pho ban").start();
+        }, "update pho ban").start();
         new Thread(() -> {
             while (isRunning) {
                 try {
@@ -241,7 +241,7 @@ public class ServerManager {
                     e.printStackTrace();
                 }
             }
-        }, "Update Attribute Server").start();
+        }, "update Attribute Server").start();
         dungeonManager = new DungeonManager();
         dungeonManager.start();
         new Thread(dungeonManager, "Phó bản").start();
@@ -258,12 +258,12 @@ public class ServerManager {
                     e.printStackTrace();
                 }
             }
-        }, "Update dai hoi vo thuat").start();
+        }, "update dai hoi vo thuat").start();
         new Thread(() -> {
             while (isRunning) {
                 try {
                     long start = System.currentTimeMillis();
-                    TopWhis.Update();
+                    TopWhis.update();
                     long timeUpdate = System.currentTimeMillis() - start;
                     if (timeUpdate < delay) {
                         Thread.sleep(delay - timeUpdate);
@@ -272,7 +272,7 @@ public class ServerManager {
                     e.printStackTrace();
                 }
             }
-        }, "Update top whis").start();
+        }, "update top whis").start();
         this.tranhNgocManager = new TranhNgocManager();
         new Thread(this.tranhNgocManager, "Tranh ngoc").start();
 
@@ -291,7 +291,7 @@ public class ServerManager {
                     e.printStackTrace();
                 }
             }
-        }, "Update giai sieu hang").start();
+        }, "update giai sieu hang").start();
 
         new Thread(() -> {
             while (isRunning) {
@@ -306,7 +306,7 @@ public class ServerManager {
                     e.printStackTrace();
                 }
             }
-        }, "Update giai sieu hang pending").start();
+        }, "update giai sieu hang pending").start();
     }
 
     public void close(long delay) {

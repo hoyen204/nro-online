@@ -1,18 +1,13 @@
 package com.nro.nro_online.models.mob;
 
-import nro.consts.Cmd;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.Service;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @Stole By Arriety
- *
- */
 public final class MobMe extends Mob {
 
     private Player player;
@@ -49,54 +44,43 @@ public final class MobMe extends Mob {
     }
 
     public void attack(Player pl, Mob mob) {
-        Message msg;
-        try {
-            if (pl != null) {
-                if (pl.nPoint.hp > this.point.dame) {
-                    int dameHit = pl.injured(null, this.point.dame, true, true);
-                    msg = new Message(Cmd.MOB_ME_UPDATE);
-                    msg.writer().writeByte(2);
-
-                    msg.writer().writeInt(this.id);
-                    msg.writer().writeInt((int) pl.id);
-                    msg.writer().writeInt(dameHit);
-                    msg.writer().writeInt(pl.nPoint.hp);
-
-                    Service.getInstance().sendMessAllPlayerInMap(this.zone, msg);
-                    msg.cleanup();
-                }
+        if (pl != null && pl.nPoint.hp > this.point.dame) {
+            try (Message msg = new Message(Cmd.MOB_ME_UPDATE)) {
+                int dameHit = pl.injured(null, this.point.dame, true, true);
+                msg.writer().writeByte(2);
+                msg.writer().writeInt(this.id);
+                msg.writer().writeInt((int) pl.id);
+                msg.writer().writeInt(dameHit);
+                msg.writer().writeInt(pl.nPoint.hp);
+                Service.getInstance().sendMessAllPlayerInMap(this.zone, msg);
+            } catch (Exception ignored) {
             }
+        }
 
-            if (mob != null) {
-                if (mob.point.getHP() > this.point.dame) {
-                    long tnsm = mob.getTiemNangForPlayer(this.player, this.point.dame);
-                    msg = new Message(Cmd.MOB_ME_UPDATE);
-                    msg.writer().writeByte(3);
-                    msg.writer().writeInt(this.id);
-                    msg.writer().writeInt((int) mob.id);
-                    mob.point.setHP(mob.point.getHP() - this.point.dame);
-                    msg.writer().writeInt(mob.point.getHP());
-                    msg.writer().writeInt(this.point.dame);
-                    Service.getInstance().sendMessAllPlayerInMap(this.zone, msg);
-                    msg.cleanup();
-                    Service.getInstance().addSMTN(player, (byte) 2, tnsm, true);
-                }
+        if (mob != null && mob.point.getHP() > this.point.dame) {
+            try (Message msg = new Message(Cmd.MOB_ME_UPDATE)) {
+                long tnsm = mob.getTiemNangForPlayer(this.player, this.point.dame);
+                msg.writer().writeByte(3);
+                msg.writer().writeInt(this.id);
+                msg.writer().writeInt((int) mob.id);
+                mob.point.setHP(mob.point.getHP() - this.point.dame);
+                msg.writer().writeInt(mob.point.getHP());
+                msg.writer().writeInt(this.point.dame);
+                Service.getInstance().sendMessAllPlayerInMap(this.zone, msg);
+                Service.getInstance().addSMTN(player, (byte) 2, tnsm, true);
+            } catch (Exception ignored) {
             }
-        } catch (Exception e) {
         }
     }
 
     //tạo mobme
     public void spawn() {
-        Message msg;
-        try {
-            msg = new Message(Cmd.MOB_ME_UPDATE);
+        try (Message msg = new Message(Cmd.MOB_ME_UPDATE)) {
             msg.writer().writeByte(0);//type
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(this.tempId);
             msg.writer().writeInt(this.point.hp);// hp mob
             Service.getInstance().sendMessAllPlayerInMap(this.zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
 
         }
@@ -111,25 +95,19 @@ public final class MobMe extends Mob {
 
     //xóa mobme khỏi map
     private void removeMobInMap() {
-        Message msg;
-        try {
-            msg = new Message(Cmd.MOB_ME_UPDATE);
+        try (Message msg = new Message(Cmd.MOB_ME_UPDATE)) {
             msg.writer().writeByte(7);//type
             msg.writer().writeInt((int) player.id);
             Service.getInstance().sendMessAllPlayerInMap(this.zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
 
     public void mobMeDie() {
-        Message msg;
-        try {
-            msg = new Message(Cmd.MOB_ME_UPDATE);
+        try (Message msg = new Message(Cmd.MOB_ME_UPDATE)) {
             msg.writer().writeByte(6);//type
             msg.writer().writeInt((int) player.id);
             Service.getInstance().sendMessAllPlayerInMap(this.zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }

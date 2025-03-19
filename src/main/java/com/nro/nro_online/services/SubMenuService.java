@@ -1,10 +1,10 @@
 package com.nro.nro_online.services;
 
-import nro.consts.ConstNpc;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.server.io.Message;
-import nro.utils.Log;
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Log;
 
 /**
  * @Build Arriety
@@ -52,9 +52,7 @@ public class SubMenuService {
     }
 
     public void showSubMenu(Player player, SubMenu... subMenus) {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand((byte) 63);
+        try (Message msg = Service.getInstance().messageSubCommand((byte) 63)) {
             msg.writer().writeByte(subMenus.length);
             for (SubMenu subMenu : subMenus) {
                 msg.writer().writeUTF(subMenu.caption1);
@@ -62,7 +60,6 @@ public class SubMenuService {
                 msg.writer().writeShort((short) subMenu.id);
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             Log.error(SubMenuService.class, e);
         }

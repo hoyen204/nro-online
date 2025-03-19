@@ -1,17 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.nro.nro_online.models.minigames;
 
-import nro.consts.ConstMiniGame;
-import nro.consts.ConstNpc;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.services.InventoryService;
-import nro.services.NpcService;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstMiniGame;
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.NpcService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

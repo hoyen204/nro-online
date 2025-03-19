@@ -10,7 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import lombok.Getter;
-import nro.jdbc.DBService;
+import com.nro.nro_online.jdbc.DBService;
 
 /**
  * @build by arriety

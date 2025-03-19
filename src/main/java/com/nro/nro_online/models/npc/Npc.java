@@ -117,7 +117,8 @@ public abstract class Npc implements IAtionNpc {
             if (tempId == 13 && System.currentTimeMillis() - LastTimeAutoChat > 5000) {
                 LastTimeAutoChat = System.currentTimeMillis();
                 for (Player pl : Client.gI().getPlayers()) {
-                    if (pl != null && pl.zone != null && pl.zone.map != null && pl.zone.map.mapId == mapId && pl.isPl()) {
+                    if (pl != null && pl.zone != null && pl.zone.map != null && pl.zone.map.mapId == mapId
+                            && pl.isPl()) {
                         npcChat(pl, getText(tempId));
                     }
                 }
@@ -134,7 +135,7 @@ public abstract class Npc implements IAtionNpc {
         return "";
     }
 
-    private static final String[] textQuyLao = new String[]{
+    private static final String[] textQuyLao = new String[] {
             "Lá Là La...",
             "Ngày tươi đẹp nhất là ngày được may mắn nhìn thấy em",
             "Tình yêu không cần phải hoàn hảo, chỉ cần sự chân thật. ",
@@ -176,11 +177,13 @@ public abstract class Npc implements IAtionNpc {
     }
 
     public boolean canOpenNpc(Player player) {
+        int playerMapId = player.zone.map.mapId;
+        int playerX = player.location.x;
+        int playerY = player.location.y;
+
         if (this.tempId == ConstNpc.DAU_THAN) {
-            int playerMapId = player.zone.map.mapId;
             return playerMapId == 21 || playerMapId == 22 || playerMapId == 23;
         }
-        return player.zone.map.mapId == this.mapId
-                && Util.getDistance(this.cx, this.cy, player.location.x, player.location.y) <= 60;
+        return playerMapId == this.mapId && Util.getDistance(this.cx, this.cy, playerX, playerY) <= 60;
     }
 }

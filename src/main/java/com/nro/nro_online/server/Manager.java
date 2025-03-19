@@ -24,11 +24,14 @@ import com.nro.nro_online.lib.RandomCollection;
 import com.nro.nro_online.manager.NamekBallManager;
 import com.nro.nro_online.models.PartManager;
 import com.nro.nro_online.models.clan.Clan;
+import com.nro.nro_online.models.clan.ClanMember;
 import com.nro.nro_online.models.intrinsic.Intrinsic;
 import com.nro.nro_online.models.item.Costume;
 import com.nro.nro_online.models.item.FlagBag;
 import com.nro.nro_online.models.item.HeadAvatar;
 import com.nro.nro_online.models.item.ItemLuckyRound;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.item.ItemOptionLuckyRound;
 import com.nro.nro_online.models.item.ItemOptionTemplate;
 import com.nro.nro_online.models.item.ItemReward;
 import com.nro.nro_online.models.item.ItemTemplate;
@@ -48,7 +51,9 @@ import com.nro.nro_online.models.skill.NClass;
 import com.nro.nro_online.models.skill.Skill;
 import com.nro.nro_online.models.skill.SkillTemplate;
 import com.nro.nro_online.models.task.SideTaskTemplate;
+import com.nro.nro_online.models.task.SubTaskMain;
 import com.nro.nro_online.models.task.TaskMain;
+import com.nro.nro_online.services.ItemService;
 import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.utils.Log;
 import lombok.Getter;
@@ -192,7 +197,7 @@ public class Manager {
                 MAPS.add(map);
                 map.initMob(mapTemp.mobTemp, mapTemp.mobLevel, mapTemp.mobHp, mapTemp.mobX, mapTemp.mobY);
                 map.initNpc(mapTemp.npcId, mapTemp.npcX, mapTemp.npcY, mapTemp.npcAvatar);
-                new Thread(map, "Update map " + map.mapName).start();
+                new Thread(map, "update map " + map.mapName).start();
             }
         }
         Referee r = new Referee();
@@ -202,7 +207,6 @@ public class Manager {
 
     private void loadDatabase() {
         long st = System.currentTimeMillis();
-        JSONValue jv = new JSONValue();
         try (Connection con = DBService.gI().getConnectionForGame()) {
             // load part
             PartManager.getInstance().load();
@@ -224,7 +228,7 @@ public class Manager {
                             mapTemplate.id = mapId;
                             mapTemplate.name = mapName;
                             // load data
-                            JSONArray dataArray = (JSONArray) jv.parse(rsMap.getString("data"));
+                            JSONArray dataArray = (JSONArray) JSONValue.parse(rsMap.getString("data"));
                             mapTemplate.type = Byte.parseByte(String.valueOf(dataArray.get(0)));
                             mapTemplate.planetId = Byte.parseByte(String.valueOf(dataArray.get(1)));
                             mapTemplate.bgType = Byte.parseByte(String.valueOf(dataArray.get(2)));
@@ -234,13 +238,13 @@ public class Manager {
                             mapTemplate.zones = rsMap.getByte("zones");
                             mapTemplate.maxPlayerPerZone = rsMap.getByte("max_player");
                             // load waypoints
-                            dataArray = (JSONArray) jv.parse(rsMap.getString("waypoints")
+                            dataArray = (JSONArray) JSONValue.parse(rsMap.getString("waypoints")
                                     .replaceAll("\\[\"\\[", "[[")
                                     .replaceAll("\\]\"\\]", "]]")
                                     .replaceAll("\",\"", ","));
                             for (int j = 0; j < dataArray.size(); j++) {
                                 WayPoint wp = new WayPoint();
-                                JSONArray dtwp = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
+                                JSONArray dtwp = (JSONArray) JSONValue.parse(String.valueOf(dataArray.get(j)));
                                 wp.name = String.valueOf(dtwp.get(0));
                                 wp.minX = Short.parseShort(String.valueOf(dtwp.get(1)));
                                 wp.minY = Short.parseShort(String.valueOf(dtwp.get(2)));
@@ -256,14 +260,14 @@ public class Manager {
                             }
                             dataArray.clear();
                             // load mobs
-                            dataArray = (JSONArray) jv.parse(rsMap.getString("mobs").replaceAll("\\\"", ""));
+                            dataArray = (JSONArray) JSONValue.parse(rsMap.getString("mobs").replaceAll("\\\"", ""));
                             mapTemplate.mobTemp = new byte[dataArray.size()];
                             mapTemplate.mobLevel = new byte[dataArray.size()];
                             mapTemplate.mobHp = new int[dataArray.size()];
                             mapTemplate.mobX = new short[dataArray.size()];
                             mapTemplate.mobY = new short[dataArray.size()];
                             for (int j = 0; j < dataArray.size(); j++) {
-                                JSONArray dtm = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
+                                JSONArray dtm = (JSONArray) JSONValue.parse(String.valueOf(dataArray.get(j)));
                                 mapTemplate.mobTemp[j] = Byte.parseByte(String.valueOf(dtm.get(0)));
                                 mapTemplate.mobLevel[j] = Byte.parseByte(String.valueOf(dtm.get(1)));
                                 mapTemplate.mobHp[j] = Integer.parseInt(String.valueOf(dtm.get(2)));
@@ -273,13 +277,13 @@ public class Manager {
                             }
                             dataArray.clear();
                             // load npc
-                            dataArray = (JSONArray) jv.parse(rsMap.getString("npcs").replaceAll("\\\"", ""));
+                            dataArray = (JSONArray) JSONValue.parse(rsMap.getString("npcs").replaceAll("\\\"", ""));
                             mapTemplate.npcId = new byte[dataArray.size()];
                             mapTemplate.npcX = new short[dataArray.size()];
                             mapTemplate.npcY = new short[dataArray.size()];
                             mapTemplate.npcAvatar = new short[dataArray.size()];
                             for (int j = 0; j < dataArray.size(); j++) {
-                                JSONArray dtn = (JSONArray) jv.parse(String.valueOf(dataArray.get(j)));
+                                JSONArray dtn = (JSONArray) JSONValue.parse(String.valueOf(dataArray.get(j)));
                                 mapTemplate.npcId[j] = Byte.parseByte(String.valueOf(dtn.get(0)));
                                 mapTemplate.npcX[j] = Short.parseShort(String.valueOf(dtn.get(1)));
                                 mapTemplate.npcY[j] = Short.parseShort(String.valueOf(dtn.get(2)));
@@ -288,10 +292,10 @@ public class Manager {
                             }
                             dataArray.clear();
 
-                            dataArray = (JSONArray) jv.parse(rsMap.getString("effect"));
+                            dataArray = (JSONArray) JSONValue.parse(rsMap.getString("effect"));
                             for (int j = 0; j < dataArray.size(); j++) {
                                 EffectMap em = new EffectMap();
-                                JSONObject dataObject = (JSONObject) jv.parse(dataArray.get(j).toString());
+                                JSONObject dataObject = (JSONObject) JSONValue.parse(dataArray.get(j).toString());
                                 em.setKey(String.valueOf(dataObject.get("key")));
                                 em.setValue(String.valueOf(dataObject.get("value")));
                                 mapTemplate.effectMaps.add(em);
@@ -303,7 +307,6 @@ public class Manager {
                                 mapTemplate.effectMaps.add(em);
                             }
                             dataArray.clear();
-                            dataObject.clear();
 
                             MAP_TEMPLATES[i++] = mapTemplate;
                         }
@@ -341,7 +344,7 @@ public class Manager {
 
                     JSONArray dataArray = (JSONArray) JSONValue.parse(rs.getString("skills"));
                     for (int j = 0; j < dataArray.size(); j++) {
-                        JSONObject dts = (JSONObject) jv.parse(String.valueOf(dataArray.get(j)));
+                        JSONObject dts = (JSONObject) JSONValue.parse(String.valueOf(dataArray.get(j)));
                         Skill skill = new Skill();
                         skill.template = skillTemplate;
                         skill.skillId = Short.parseShort(String.valueOf(dts.get("id")));
@@ -395,9 +398,9 @@ public class Manager {
             try (PreparedStatement ps = con.prepareStatement("select * from cai_trang");
                     ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    CaiTrang caiTrang = new CaiTrang(rs.getInt("id_temp"),
+                    Costume costume = new Costume(rs.getInt("id_temp"),
                             rs.getInt("head"), rs.getInt("body"), rs.getInt("leg"), rs.getInt("bag"));
-                    CAI_TRANGS.add(caiTrang);
+                    CAI_TRANGS.add(costume);
                 }
                 Log.success("Load cải trang thành công (" + CAI_TRANGS.size() + ")");
             }
@@ -697,8 +700,6 @@ public class Manager {
                         clan.addClanMember(cm);
                     }
                     CLANS.add(clan);
-                    dataArray.clear();
-                    dataObject.clear();
                 }
                 Log.success("Load clan thành công (" + CLANS.size() + ")");
             }

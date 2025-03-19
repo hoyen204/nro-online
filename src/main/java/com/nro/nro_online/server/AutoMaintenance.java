@@ -20,8 +20,6 @@ import com.nro.nro_online.services.ClanService;
 import com.nro.nro_online.services.Service;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import nro.services.ClanService;
-import nro.services.Service;
 
 @AllArgsConstructor
 @NoArgsConstructor

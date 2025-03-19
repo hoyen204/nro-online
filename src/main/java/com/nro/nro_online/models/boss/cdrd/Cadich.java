@@ -1,22 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.nro.nro_online.models.boss.cdrd;
 
-import nro.consts.ConstPlayer;
-import nro.models.boss.BossData;
-import nro.models.map.dungeon.SnakeRoad;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.services.SkillService;
-import nro.services.func.ChangeMapService;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.map.dungeon.SnakeRoad;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.SkillService;
+import com.nro.nro_online.services.func.ChangeMapService;
 
-/**
- *
- * @Build by Arriety
- */
 public class Cadich extends CBoss {
 
     private boolean transformed;

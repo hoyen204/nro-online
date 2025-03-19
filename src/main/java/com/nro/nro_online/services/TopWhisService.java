@@ -4,13 +4,13 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import nro.consts.Cmd;
-import nro.manager.TopWhis;
-import nro.models.Part;
-import nro.models.PartManager;
-import nro.models.player.Player;
-import nro.models.top.whis.TopWhisModel;
-import nro.server.io.Message;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.manager.TopWhis;
+import com.nro.nro_online.models.Part;
+import com.nro.nro_online.models.PartManager;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.whis.TopWhisModel;
+import com.nro.nro_online.server.io.Message;
 
 /**
  *
@@ -19,9 +19,8 @@ import nro.server.io.Message;
 public class TopWhisService {
 
     public static void ShowTop(Player player) {
-        List<TopWhisModel> list = TopWhis.GetTop();
-        Message msg = new Message(Cmd.TOP);
-        try {
+        List<TopWhisModel> list = TopWhis.getTop();
+        try (Message msg = new Message(Cmd.TOP)) {
             msg.writer().writeByte(0);
             msg.writer().writeUTF("Top 100");
             msg.writer().writeByte(list.size());
@@ -48,7 +47,6 @@ public class TopWhisService {
                 msg.writer().writeUTF(hours + " giờ " + minutes + " phút " + seconds + " giây");
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             e.printStackTrace();
         }

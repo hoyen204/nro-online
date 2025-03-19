@@ -1,13 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.nro.nro_online.models.map.dungeon;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.nro.nro_online.consts.ConstItem;
 import com.nro.nro_online.consts.ConstMap;
@@ -19,136 +13,101 @@ import com.nro.nro_online.models.boss.cdrd.CBoss;
 import com.nro.nro_online.models.boss.cdrd.Cadich;
 import com.nro.nro_online.models.boss.cdrd.Nadic;
 import com.nro.nro_online.models.boss.cdrd.Saibamen;
-import com.nro.nro_online.models.map.Map;
+import com.nro.nro_online.models.map.ItemMap;
 import com.nro.nro_online.models.map.dungeon.zones.ZSnakeRoad;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.models.skill.Skill;
 import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
+
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * @stole Arriety
- */
 @Getter
 @Setter
 public class SnakeRoad extends Dungeon {
 
-    protected final List<CBoss> bosses = new ArrayList<>();
+    private final List<CBoss> bosses = new CopyOnWriteArrayList<>();
 
     public SnakeRoad(int level) {
         super(level);
         setType(Dungeon.SNAKE_ROAD);
         setName("Con đường rắn độc");
         setTitle("Con đường rắn độc");
-        setCountDown(30 * 60);// 30p
+        setCountDown(30 * 60);
         initBoss();
     }
 
     @Override
     protected void init() {
-        Map map = MapService.gI().getMapById(ConstMap.CON_DUONG_RAN_DOC);
-        addZone(new ZSnakeRoad(map, this));
-        map = MapService.gI().getMapById(ConstMap.CON_DUONG_RAN_DOC_142);
-        addZone(new ZSnakeRoad(map, this));
-        map = MapService.gI().getMapById(ConstMap.CON_DUONG_RAN_DOC_143);
-        addZone(new ZSnakeRoad(map, this));
-        map = MapService.gI().getMapById(ConstMap.THAN_DIEN);
-        addZone(new ZSnakeRoad(map, this));
-        map = MapService.gI().getMapById(ConstMap.THAP_KARIN);
-        addZone(new ZSnakeRoad(map, this));
-        map = MapService.gI().getMapById(ConstMap.RUNG_KARIN);
-        addZone(new ZSnakeRoad(map, this));
-        map = MapService.gI().getMapById(ConstMap.HOANG_MAC);
-        addZone(new ZSnakeRoad(map, this));
+        int[] maps = {
+                ConstMap.CON_DUONG_RAN_DOC, ConstMap.CON_DUONG_RAN_DOC_142,
+                ConstMap.CON_DUONG_RAN_DOC_143, ConstMap.THAN_DIEN,
+                ConstMap.THAP_KARIN, ConstMap.RUNG_KARIN, ConstMap.HOANG_MAC
+        };
+        for (int mapId : maps) {
+            addZone(new ZSnakeRoad(MapService.gI().getMapById(mapId), this));
+        }
     }
 
     public void addBoss(CBoss boss) {
-        synchronized (bosses) {
-            bosses.add(boss);
-        }
+        bosses.add(boss);
     }
 
     public void removeBoss(CBoss boss) {
-        synchronized (bosses) {
-            bosses.remove(boss);
-        }
+        bosses.remove(boss);
     }
 
     public CBoss getBoss(int index) {
-        synchronized (bosses) {
-            if (index < 0 || index >= bosses.size()) {
-                return null;
-            }
-            return bosses.get(index);
+        return (index >= 0 && index < bosses.size()) ? bosses.get(index) : null;
+    }
+
+    private void spawnBoss(int num, String name, short[] outfit, int[][] skills, int baseDame, int baseHp, int x, int y,
+            Class<? extends CBoss> bossClass) {
+        BossData data = BossData.builder()
+                .name(name)
+                .gender(ConstPlayer.XAYDA)
+                .typeDame(Boss.DAME_NORMAL)
+                .typeHp(Boss.HP_NORMAL)
+                .dame(baseDame * level * level)
+                .hp(new int[][] { { baseHp * level * level } })
+                .outfit(outfit)
+                .skillTemp(skills)
+                .secondsRest(BossData._0_GIAY)
+                .build();
+        data.joinMapIdle = true;
+        try {
+            CBoss boss = bossClass.getConstructor(int.class, short.class, short.class, Dungeon.class, BossData.class)
+                    .newInstance(num, (short) x, (short) y, this, data);
+            addBoss(boss);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void initBoss() {
         int num = -999;
         for (int i = 0; i < 5; i++) {
-            short x = (short) (400 + (24 * i));
-            short y = 336;
-            BossData data = BossData.builder()
-                    .name("Số " + (i + 1))
-                    .gender(ConstPlayer.XAYDA)
-                    .typeDame(Boss.DAME_NORMAL)
-                    .typeHp(Boss.HP_NORMAL)
-                    .dame(1000 * level)
-                    .hp(new int[][]{{20000 * level}})
-                    .outfit(new short[]{642, 643, 644})
-                    .skillTemp(new int[][]{{Skill.DRAGON, 1, 100}, { Skill.DRAGON, 2, 200}, {Skill.DRAGON, 3, 300}, {Skill.DRAGON, 7, 700}, {Skill.TU_SAT, 1, 100}})
-                    .secondsRest(BossData._0_GIAY)
-                    .build();
-            data.joinMapIdle = (i != 0);
-            Saibamen saibamen = new Saibamen(num++, x, y, this, data);
-            addBoss(saibamen);
+            spawnBoss(num++, "Số " + (i + 1), new short[] { 642, 643, 644 },
+                    new int[][] { { Skill.DRAGON, 1, 100 }, { Skill.DRAGON, 2, 200 }, { Skill.DRAGON, 3, 300 },
+                            { Skill.DRAGON, 7, 700 }, { Skill.TU_SAT, 1, 100 } },
+                    1000, 20000, 400 + (24 * i), 336, Saibamen.class);
         }
-        BossData nadic = BossData.builder()
-                .name("Nađíc")
-                .gender(ConstPlayer.XAYDA)
-                .typeDame(Boss.DAME_NORMAL)
-                .typeHp(Boss.HP_NORMAL)
-                .dame(100 * level * level)
-                .hp(new int[][]{{1000000 * level * level}})
-                .outfit(new short[]{648, 649, 650})
-                .skillTemp(new int[][]{{Skill.GALICK, 3, 300}, {Skill.GALICK, 7, 700}, {Skill.ANTOMIC, 5, 500}})
-                .secondsRest(BossData._0_GIAY)
-                .build();
-        nadic.joinMapIdle = true;
-        Nadic bNadic = new Nadic(num++, (short) 520, (short) 336, this, nadic);
-        addBoss(bNadic);
-
-        BossData cadic = BossData.builder()
-                .name("Cađích")
-                .gender(ConstPlayer.XAYDA)
-                .typeDame(Boss.DAME_NORMAL)
-                .typeHp(Boss.HP_NORMAL)
-                .dame(150 * level * level)
-                .hp(new int[][]{{1500000 * level * level}})
-                .outfit(new short[]{645, 646, 647})
-                .skillTemp(new int[][]{{Skill.GALICK, 7, 700}, {Skill.ANTOMIC, 7, 1000}, {Skill.TAI_TAO_NANG_LUONG, 1, 20000}, {Skill.BIEN_KHI, 7, 60000}})
-                .secondsRest(BossData._0_GIAY)
-                .build();
-        cadic.joinMapIdle = true;
-        Cadich bCadic = new Cadich(num++, (short) 532, (short) 336, this, cadic);
-        addBoss(bCadic);
+        spawnBoss(num++, "Nađíc", new short[] { 648, 649, 650 },
+                new int[][] { { Skill.GALICK, 3, 300 }, { Skill.GALICK, 7, 700 }, { Skill.ANTOMIC, 5, 500 } },
+                100, 1000000, 520, 336, Nadic.class);
+        spawnBoss(num++, "Cađích", new short[] { 645, 646, 647 },
+                new int[][] { { Skill.GALICK, 7, 700 }, { Skill.ANTOMIC, 7, 1000 },
+                        { Skill.TAI_TAO_NANG_LUONG, 1, 20000 }, { Skill.BIEN_KHI, 7, 60000 } },
+                150, 1500000, 532, 336, Cadich.class);
     }
 
     @Override
     public void update() {
-        synchronized (bosses) {
-            boolean isAllDead = true;
-            List<CBoss> list = bosses.stream().collect(Collectors.toList());
-            for (CBoss boss : list) {
-                boss.update();
-                if (!boss.isDie()) {
-                    isAllDead = false;
-                }
-            }
-            if (isAllDead) {
-                finish();
-            }
+        bosses.forEach(CBoss::update);
+        if (bosses.stream().allMatch(Boss::isDie)) {
+            finish();
         }
         super.update();
     }
@@ -156,8 +115,7 @@ public class SnakeRoad extends Dungeon {
     @Override
     public void join(Player player) {
         player.setInteractWithKarin(false);
-        ZSnakeRoad road = (ZSnakeRoad) find(ConstMap.CON_DUONG_RAN_DOC_143);
-        road.enter(player, 1110, 336);
+        ((ZSnakeRoad) find(ConstMap.CON_DUONG_RAN_DOC_143)).enter(player, 1110, 336);
     }
 
     @Override
@@ -166,42 +124,33 @@ public class SnakeRoad extends Dungeon {
             finish = true;
             setTime(60);
             sendNotification("Trận chiến với người Xayda sẽ kết thúc sau 60 giây nữa");
-            RandomCollection<Integer> rc = new RandomCollection<>();
-            rc.add(300, ConstItem.VANG);
-            rc.add(level * 2, ConstItem.HONG_NGOC);
-            int quantity = level / 10;
-            if (quantity < 3) {
-                quantity = 3;
-            }
-            ZSnakeRoad r = (ZSnakeRoad) find(ConstMap.HOANG_MAC);
-            for (int i = 0; i < quantity; i++) {
-                int itemID = rc.next();
-                int q = 1;
-                if (itemID == ConstItem.VANG_188) {
-                    q = 30000;
-                }
-                ItemMap itemMap = new ItemMap(r, itemID, q, 350 + (i * 10), 312, -1);
-                if (level < 80 && (itemID == 457 || itemID == 2029)) {
-//                    itemMap.options.add(new ItemOption(30, 0));
-                }
-                Service.getInstance().dropItemMap(r, itemMap);
-            }
-            if (level >= 80) {
-                int num = Util.nextInt(2, 6);
-                for (int i = 0; i < num; i++) {
-                    ItemMap itemMap = new ItemMap(r, ConstItem.NGOC_RONG_3_SAO, Util.nextInt(1, 5), 250 + (i * 20), 312, -1);
-                    Service.getInstance().dropItemMap(r, itemMap);
-                }
-            }
-            if (level >= 110) {
-                ItemMap da = new ItemMap(r, 2040, 1, 530, 312, -1);
-                ItemMap item = new ItemMap(r, 2012, 1, 531, 312, -1);
-                ItemMap gay = new ItemMap(r, 2040, 1, 532, 312, -1);
-                Service.getInstance().dropItemMap(r, da);
-                Service.getInstance().dropItemMap(r, gay);
-                Service.getInstance().dropItemMap(r, item);
-            }
+            dropRewards();
         }
     }
 
+    private void dropRewards() {
+        ZSnakeRoad r = (ZSnakeRoad) find(ConstMap.HOANG_MAC);
+        RandomCollection<Integer> rc = new RandomCollection<>();
+        rc.add(300, ConstItem.VANG);
+        rc.add(level * 2, ConstItem.HONG_NGOC);
+        int quantity = Math.max(level / 10, 3);
+
+        for (int i = 0; i < quantity; i++) {
+            Service.getInstance().dropItemMap(r, new ItemMap(r, rc.next(), 1, 350 + (i * 10), 312, -1));
+        }
+
+        if (level >= 80) {
+            for (int i = 0; i < Util.nextInt(2, 6); i++) {
+                Service.getInstance().dropItemMap(r,
+                        new ItemMap(r, ConstItem.NGOC_RONG_3_SAO, Util.nextInt(1, 5), 250 + (i * 20), 312, -1));
+            }
+        }
+
+        if (level >= 110) {
+            int[] specialItems = { 2040, 2012, 2040 };
+            for (int i = 0; i < specialItems.length; i++) {
+                Service.getInstance().dropItemMap(r, new ItemMap(r, specialItems[i], 1, 530 + i, 312, -1));
+            }
+        }
+    }
 }

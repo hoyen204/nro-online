@@ -1,8 +1,8 @@
 package com.nro.nro_online.models.boss;
 
 import lombok.Builder;
-import nro.consts.ConstPlayer;
-import nro.models.skill.Skill;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.models.skill.Skill;
 
 /**
  * @stole Arriety

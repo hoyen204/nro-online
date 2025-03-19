@@ -1,11 +1,8 @@
 package com.nro.nro_online.models.player;
 
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
 
-/**
- * @Stole By Arriety
- */
 public class SetClothes {
 
     private Player player;
@@ -103,7 +100,7 @@ public class SetClothes {
             Item item = this.player.inventory.itemsBody.get(i);
             if (item.isNotNullItem()) {
                 boolean isActSet = false;
-                if (item.isDHD()) {
+                if (item.isDestroy()) {
                     isActSet = true;
                     SetHuyDiet++;
                 }

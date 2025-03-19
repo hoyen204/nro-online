@@ -5,12 +5,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.consts.ConstPet;
+import com.nro.nro_online.lib.RandomCollection;
 import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.mob.ArrietyDrop;
 import com.nro.nro_online.models.npc.Npc;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.ServerNotify;
+import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.PetService;
 import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @Build Arriety
@@ -663,13 +672,13 @@ public class CombineServiceNew {
                     Item congthuc = null;
                     for (Item item : player.combineNew.itemsCombine) {
                         if (item.isNotNullItem()) {
-                            if (item.isManhTS()) {
+                            if (item.isAngelFrag()) {
                                 manhts = item;
-                            } else if (item.isdanangcapDoTs()) {
+                            } else if (item.isAngelUpgradeStone()) {
                                 danc = item;
-                            } else if (item.isDamayman()) {
+                            } else if (item.isLuckyStone()) {
                                 damayman = item;
-                            } else if (item.isCongthucNomal() || item.isCongthucVip()) {
+                            } else if (item.isFormula() || item.isVipFormula()) {
                                 congthuc = item;
                             }
                         }
@@ -1426,10 +1435,6 @@ public class CombineServiceNew {
      */
     public void startCombine(Player player) {
         if (Util.canDoWithTime(player.combineNew.lastTimeCombine, TIME_COMBINE)) {
-            if (false) {
-                Service.getInstance().sendThongBao(player, "Tính năng đang tạm khóa");
-                return;
-            }
             switch (player.combineNew.typeCombine) {
                 case NANG_CAP_BONG_TAI_CAP3:
                     nangCapBongTaiCap3(player);
@@ -1836,10 +1841,10 @@ public class CombineServiceNew {
                                 num = Util.nextInt(1, 10);
                             }
                             RandomCollection<Integer> rd = new RandomCollection<>();
-                            rd.add(50, 1 /*, "DDijt nhau au au"*/);
-                            rd.add(25, 2 /*, "DDijt nhau au au"*/);
-                            rd.add(10, 3 /*, "DDijt nhau au au"*/);
-                            rd.add(5, 4 /*, "DDijt nhau au au"*/);
+                            rd.add(50, 1);
+                            rd.add(25, 2);
+                            rd.add(10, 3);
+                            rd.add(5, 4);
                             int color = rd.next();
                             for (ItemOption io : angelClothes.itemOptions) {
                                 int optId = io.optionTemplate.id;
@@ -1907,7 +1912,7 @@ public class CombineServiceNew {
                         }
                     }
                     if (canBeExtend) {
-                        if (expiredDate.param > 0) {
+                        if (expiredDate != null && expiredDate.param > 0) {
                             player.inventory.subGold(COST_GIA_HAN_CAI_TRANG);
                             sendEffectSuccessCombine(player);
                             expiredDate.param++;
@@ -1946,13 +1951,13 @@ public class CombineServiceNew {
             Item congthuc = null;
             for (Item item : player.combineNew.itemsCombine) {
                 if (item.isNotNullItem()) {
-                    if (item.isManhTS()) {
+                    if (item.isAngelFrag()) {
                         manhts = item;
-                    } else if (item.isdanangcapDoTs()) {
+                    } else if (item.isAngelUpgradeStone()) {
                         danc = item;
-                    } else if (item.isDamayman()) {
+                    } else if (item.isLuckyStone()) {
                         damayman = item;
-                    } else if (item.isCongthucNomal() || item.isCongthucVip()) {
+                    } else if (item.isFormula() || item.isVipFormula()) {
                         congthuc = item;
                     }
                 }
@@ -1972,7 +1977,7 @@ public class CombineServiceNew {
                 int perSuccesslucky = Util.nextInt(0, 100);
                 if (Util.isTrue(tile, 100)) {
                     short[][] itemIds = {{1048, 1051, 1054, 1057, 1060}, {1049, 1052, 1055, 1058, 1061}, {1050, 1053, 1056, 1059, 1062}};
-                    Item itemTS = ItemService.gI().DoThienSu(itemIds[congthuc.template.gender][manhts.typeIdManh()], congthuc.template.gender, perSuccesslucky, perLucky);
+                    Item itemTS = ItemService.gI().angelClothes(itemIds[congthuc.template.gender][manhts.typeIdManh()], congthuc.template.gender, perSuccesslucky, perLucky);
                     sendEffectSuccessCombineDoTS(player, itemTS.template.iconID);
                     InventoryService.gI().addItemBag(player, itemTS, 0);
                     InventoryService.gI().subQuantityItemsBag(player, manhts, 999);
@@ -2044,7 +2049,7 @@ public class CombineServiceNew {
                     }
                 }
             }
-            if (GAYTD.quantity < 1) {
+            if (GAYTD != null && GAYTD.quantity < 1) {
                 Service.getInstance().sendThongBao(player, "cần x10 Đá nguyền cc");
                 return;
             }
@@ -2489,7 +2494,7 @@ public class CombineServiceNew {
                         break;
                     }
                 }
-                if (hoa != null || hoa.quantity < 99) {
+                if (hoa != null && hoa.quantity < 99) {
                     if (player.inventory.ruby < ruby) {
                         Service.getInstance().sendThongBao(player, "Không đủ ruby để thực hiện");
                         return false;
@@ -2893,48 +2898,28 @@ public class CombineServiceNew {
         }
     }
 
-    // --------------------------------------------------------------------------
-    /**
-     * Hiệu ứng mở item
-     *
-     * @param player
-     */
     public void sendEffectOpenItem(Player player, short icon1, short icon2) {
-        Message msg;
-        try {
-            msg = new Message(-81);
+        try (Message msg = new Message(-81)){
             msg.writer().writeByte(OPEN_ITEM);
             msg.writer().writeShort(icon1);
             msg.writer().writeShort(icon2);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
 
-    /**
-     * Hiệu ứng đập đồ thành công
-     *
-     * @param player
-     */
     private void sendEffectSuccessCombine(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-81);
+        try (Message msg = new Message(-81)){
             msg.writer().writeByte(COMBINE_SUCCESS);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
 
     private void sendEffectCombine(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-81);
+        try (Message msg = new Message(-81)){
             msg.writer().writeByte(8);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -2951,7 +2936,6 @@ public class CombineServiceNew {
             msg = new Message(-81);
             msg.writer().writeByte(COMBINE_FAIL);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -2962,7 +2946,6 @@ public class CombineServiceNew {
             msg = new Message(-81);
             msg.writer().writeByte(8);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2987,7 +2970,6 @@ public class CombineServiceNew {
                 }
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -3005,7 +2987,6 @@ public class CombineServiceNew {
             msg.writer().writeByte(COMBINE_DRAGON_BALL);
             msg.writer().writeShort(icon);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -3575,12 +3556,12 @@ public class CombineServiceNew {
 
     public int get_Tile_nang_Do_TS(Item danc, Item congthuc) {
         int tile = 0;
-        if (congthuc.isCongthucVip()) {
+        if (congthuc.isVipFormula()) {
             tile = 35;
-        } else if (congthuc.isCongthucNomal()) {
+        } else if (congthuc.isFormula()) {
             tile = 20;
         }
-        if (danc != null && danc.isdanangcapDoTs()) {
+        if (danc != null && danc.isAngelUpgradeStone()) {
             tile += (danc.template.id - 1073) * 10;
         }
         return tile;
@@ -3723,7 +3704,6 @@ public class CombineServiceNew {
             msg.writer().writeByte(7);
             msg.writer().writeShort(icon);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,12 +1,7 @@
 package com.nro.nro_online.models.mob;
 
-import nro.utils.Util;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
 public class MobPoint {
 
     public final Mob mob;

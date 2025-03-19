@@ -422,21 +422,20 @@ public class Controller {
                     break;
                 case -39:
                     if (player != null) {
-                        //finishLoadMap
                         ChangeMapService.gI().finishLoadMap(player);
                         if (player.zone.map.mapId == (21 + player.gender)) {
                             if (player.mabuEgg != null) {
-                                player.mabuEgg.sendMabuEgg();
+                                player.mabuEgg.sendEgg();
                             }
                         }
                         if (player.zone.map.mapId == 154) {
                             if (player.billEgg != null) {
-                                player.billEgg.sendBillEgg();
+                                player.billEgg.sendEgg();
                             }
                         }
                         if (player.zone.map.mapId == 104) {
                             if (player.egglinhthu != null) {
-                                player.egglinhthu.sendEggLinhThu();
+                                player.egglinhthu.sendEgg();
                             }
                         }
                         EffectMapService.gI().sendEffEvent(player);
@@ -708,7 +707,7 @@ public class Controller {
 
         // -50 thông tin bảng thông báo
         // -24 join map - map info
-        player.zone.load_Me_To_Another(player);
+        player.zone.loadMeToAnother(player);
         player.zone.mapInfo(player);
 
         // clear vật phẩm sự kiện

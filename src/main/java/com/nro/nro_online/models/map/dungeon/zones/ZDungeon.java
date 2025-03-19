@@ -14,6 +14,8 @@ import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Log;
+
 import lombok.Getter;
 
 @Getter
@@ -54,15 +56,13 @@ public abstract class ZDungeon extends Zone {
     public abstract void initMob(Mob mob);
 
     public void setTextTime() {
-        Message msg;
-        try {
-            msg = new Message(Cmd.MESSAGE_TIME);
+        try (Message msg = new Message(Cmd.MESSAGE_TIME)) {
             msg.writer().writeByte(dungeon.getType());
             msg.writer().writeUTF(dungeon.getTitle());
             msg.writer().writeShort(dungeon.getCountDown());
             Service.getInstance().sendMessAllPlayerInMap(this, msg);
-            msg.cleanup();
         } catch (Exception e) {
+            Log.error(ZDungeon.class, e);
         }
     }
 

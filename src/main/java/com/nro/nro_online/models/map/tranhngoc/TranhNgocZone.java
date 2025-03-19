@@ -2,7 +2,7 @@ package com.nro.nro_online.models.map.tranhngoc;
 
 import com.nro.nro_online.consts.ConstItem;
 import com.nro.nro_online.consts.ConstTranhNgocNamek;
-import com.nro.nro_online.models.DragonNamecWar.TranhNgocService;
+import com.nro.nro_online.models.dragon_namec_war.TranhNgocService;
 import com.nro.nro_online.models.map.ItemMap;
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.Zone;

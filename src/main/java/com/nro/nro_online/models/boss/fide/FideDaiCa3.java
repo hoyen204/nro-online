@@ -2,16 +2,16 @@ package com.nro.nro_online.models.boss.fide;
 
 import java.util.Calendar;
 
-import nro.models.boss.*;
-import nro.models.map.ItemMap;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.server.ServerNotify;
-import nro.services.RewardService;
-import nro.services.Service;
-import nro.services.TaskService;
-import nro.services.func.ChangeMapService;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.*;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.server.ServerNotify;
+import com.nro.nro_online.services.RewardService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.TaskService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

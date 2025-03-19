@@ -1,6 +1,6 @@
 package com.nro.nro_online.server;
 
-import nro.services.Service;
+import com.nro.nro_online.services.Service;
 
 /**
  *

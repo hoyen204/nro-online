@@ -8,9 +8,9 @@ package com.nro.nro_online.models.map;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.models.player.Player;
-import nro.services.ItemMapService;
-import nro.utils.Util;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.ItemMapService;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

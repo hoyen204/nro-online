@@ -11,24 +11,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import nro.consts.ConstPlayer;
-import nro.consts.ConstRatio;
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.boss.BossManager;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.services.SkillService;
-import nro.utils.Log;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.consts.ConstRatio;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.boss.BossManager;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.SkillService;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 
-/**
- * @author by Arriety
- */
 public class NoelBossTwo extends NoelBoss {
 
     private LocalDateTime last_time_attack;
@@ -176,7 +173,7 @@ public class NoelBossTwo extends NoelBoss {
 
     private static void BossXuatHien(Player play, NoelBossBall ball, Player pl) {
         ball.zone.loadAnotherToMe(play);
-        ball.zone.load_Me_To_Another(play);
+        ball.zone.loadMeToAnother(play);
         new Thread(() -> {
             try {
                 Thread.sleep(50);

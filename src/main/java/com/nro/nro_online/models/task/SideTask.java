@@ -1,6 +1,6 @@
 package com.nro.nro_online.models.task;
 
-import nro.consts.ConstTask;
+import com.nro.nro_online.consts.ConstTask;
 
 /**
  *

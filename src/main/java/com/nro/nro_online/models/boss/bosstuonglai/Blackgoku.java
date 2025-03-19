@@ -5,41 +5,38 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import nro.consts.ConstMap;
-import nro.consts.ConstRatio;
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.item.ItemOption;
-import nro.models.map.ItemMap;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.server.ServerNotify;
-import nro.services.EffectSkillService;
-import nro.services.Service;
-import nro.services.SkillService;
-import nro.services.func.ChangeMapService;
-import nro.utils.Log;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.consts.ConstRatio;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.ServerNotify;
+import com.nro.nro_online.services.EffectSkillService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.SkillService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 
-/**
- * @stole Arriety
- */
 public class Blackgoku extends Boss {
 
-    private final Map angryPlayers;
+    private final Map<Player, Integer> angryPlayers;
     private final List<Player> playersAttack;
 
     public Blackgoku() {
         super(BossFactory.BLACKGOKU, BossData.BLACKGOKU);
-        this.angryPlayers = new HashMap();
+        this.angryPlayers = new HashMap<>();
         this.playersAttack = new LinkedList<>();
     }
 
     protected Blackgoku(byte id, BossData bossData) {
         super(id, bossData);
-        this.angryPlayers = new HashMap();
+        this.angryPlayers = new HashMap<>();
         this.playersAttack = new LinkedList<>();
     }
 
@@ -128,16 +125,6 @@ public class Blackgoku extends Boss {
     public void goToXY(int x, int y, boolean isTeleport) {
         EffectSkillService.gI().stopCharge(this);
         super.goToXY(x, y, isTeleport);
-    }
-
-
-    private boolean isInListPlayersAttack(Player player) {
-        for (Player pl : playersAttack) {
-            if (player.equals(pl)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

@@ -11,20 +11,7 @@ import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.services.PlayerService;
 import com.nro.nro_online.services.Service;
 import lombok.Getter;
-import nro.consts.ConstItem;
-import nro.consts.ConstPlayer;
-import nro.manager.NamekBallManager;
-import nro.models.clan.Clan;
-import nro.models.dragon.Poruga;
-import nro.models.map.NamekBall;
-import nro.models.npc.Npc;
-import nro.models.player.Player;
-import nro.services.PlayerService;
-import nro.services.Service;
 
-/**
- * @build by arriety
- */
 public class NamekBallWar {
 
     private static final NamekBallWar INSTANCE = new NamekBallWar();

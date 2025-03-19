@@ -5,11 +5,13 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nro.nro_online.models.boss.list_boss.WhisTop;
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.WayPoint;
 import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.Util;
 import nro.models.boss.list_boss.WhisTop;
@@ -330,7 +332,7 @@ public class MapService {
                     try {
                         msg = new Message(-6);
                         msg.writer().writeInt((int) player.id);
-                        Service.getInstance().sendMessToPlayer(player, msg, (Long) Util.GetPropertyByName(player, "player_id"));
+                        Service.getInstance().sendMessToPlayer(player, msg, (Long) Util.getPropertyByName(player, "player_id"));
                         msg.cleanup();
                         player.zone = null;
                     } catch (Exception e) {

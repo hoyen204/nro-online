@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.consts.Cmd;
-import nro.models.item.Item;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.InventoryService;
-import nro.services.Service;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.Service;
 
 /**
  *
@@ -65,8 +65,7 @@ public abstract class AbsLuckyRound {
     public abstract List<Item> reward(Player player, byte quantity);
 
     public void openUI(Player player, byte type) {
-        try {
-            Message ms = new Message(Cmd.LUCKY_ROUND);
+        try (Message ms = new Message(Cmd.LUCKY_ROUND)) {
             DataOutputStream ds = ms.writer();
             ds.writeByte(0);
             ds.writeByte(icons.size());
@@ -77,15 +76,13 @@ public abstract class AbsLuckyRound {
             ds.writeInt(price); //price
             ds.writeShort(ticket); //id ticket
             player.sendMessage(ms);
-            ms.cleanup();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     protected void result(Player player, List<Item> items) {
-        try {
-            Message ms = new Message(Cmd.LUCKY_ROUND);
+        try (Message ms = new Message(Cmd.LUCKY_ROUND)) {
             DataOutputStream ds = ms.writer();
             ds.writeByte(1);
             ds.writeByte(items.size());
@@ -93,7 +90,6 @@ public abstract class AbsLuckyRound {
                 ds.writeShort(item.template.iconID);
             }
             player.sendMessage(ms);
-            ms.cleanup();
         } catch (IOException e) {
             e.printStackTrace();
         }

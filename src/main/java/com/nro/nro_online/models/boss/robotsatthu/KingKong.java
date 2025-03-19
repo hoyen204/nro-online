@@ -1,10 +1,10 @@
 package com.nro.nro_online.models.boss.robotsatthu;
 
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.player.Player;
-import nro.services.TaskService;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.TaskService;
 
 /**
  *

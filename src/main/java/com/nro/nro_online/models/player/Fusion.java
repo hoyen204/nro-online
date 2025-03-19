@@ -1,13 +1,8 @@
 package com.nro.nro_online.models.player;
 
-import nro.consts.ConstPlayer;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
 public class Fusion {
 
     public static final int TIME_FUSION = 600000;

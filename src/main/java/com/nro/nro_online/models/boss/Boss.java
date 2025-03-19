@@ -683,7 +683,7 @@ public abstract class Boss extends Player implements BossInterface {
             int x = this.location.x;
             int y = this.zone.map.yPhysicInTop(x, this.location.y - 24);
             RandomCollection<Integer> rd = new RandomCollection<>();
-            rd.add(1, ConstItem.NGOC_RONG_4_SAO/*, "DDijt nhau au au " + this.name */);
+            rd.add(1, ConstItem.NGOC_RONG_4_SAO);
             int rwID = rd.next();
             itemMap = new ItemMap(this.zone, rwID, Util.nextInt(1, 5), x, y, player.id);
             RewardService.gI().initBaseOptionClothes(itemMap.itemTemplate.id, itemMap.itemTemplate.type, itemMap.options);

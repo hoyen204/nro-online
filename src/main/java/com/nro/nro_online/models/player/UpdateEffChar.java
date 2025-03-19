@@ -1,25 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.nro.nro_online.models.player;
 
-import nro.manager.TopWhis;
-import nro.services.Service;
+import com.nro.nro_online.manager.TopWhis;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
 
-/**
- *
- * @author Arrriety
- */
 public class UpdateEffChar {
 
-    private static UpdateEffChar i;
+    private static final UpdateEffChar instance = new UpdateEffChar();
 
-    public static UpdateEffChar getInstance() {
-        if (i == null) {
-            i = new UpdateEffChar();
-        }
-        return i;
+    public static UpdateEffChar gI() {
+        return instance;
     }
 
     public void updateEff(Player player) {
@@ -28,26 +18,19 @@ public class UpdateEffChar {
                 int playerIdInt = (int) player.id;
                 if (TopWhis.TOP_ONE == player.id) {
                     Service.getInstance().addEffectChar(player, 58, 1, -1, -1, -1);
-//                    System.out.println(player.id);
                 }
                 if (TopWhis.TOP_THREE == player.id) {
                     Service.getInstance().addEffectChar(player, 57, 1, -1, -1, -1);
-//                    System.out.println(player.id);
                 }
                 if (TopWhis.TOP_TWO == player.id) {
                     Service.getInstance().addEffectChar(player, 56, 1, -1, -1, -1);
-//                    System.out.println(player.id);
                 }
-                switch (playerIdInt) {
-                    case 16803:
-                        Service.getInstance().addEffectChar(player, 80, 1, -1, -1, 1);
-                        break;
-                    default:
-                        break;
+                if (playerIdInt == 16803) {
+                    Service.getInstance().addEffectChar(player, 80, 1, -1, -1, 1);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(UpdateEffChar.class, e);
         }
     }
 }

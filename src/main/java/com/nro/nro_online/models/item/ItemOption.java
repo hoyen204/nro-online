@@ -36,7 +36,7 @@ public class ItemOption {
 
     public String getOptionString() {
         String key = this.optionTemplate.name + "#" + this.param + "#";
-        return optionStringMap.computeIfAbsent(key, k -> Util.replace(this.optionTemplate.name, "#", String.valueOf(this.param)));
+        return optionStringMap.computeIfAbsent(key, _ -> Util.replace(this.optionTemplate.name, "#", String.valueOf(this.param)));
     }
 
     public ItemOption format() {

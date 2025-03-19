@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.nro.nro_online.login.LoginSession;
-import com.nro.nro_online.models.DragonNamecWar.TranhNgoc;
+import com.nro.nro_online.models.dragon_namec_war.TranhNgoc;
 import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.map.war.NamekBallWar;
 import com.nro.nro_online.models.player.Player;
@@ -23,22 +23,6 @@ import com.nro.nro_online.services.func.SummonDragon;
 import com.nro.nro_online.services.func.TransactionService;
 import com.nro.nro_online.utils.Log;
 import lombok.Getter;
-import nro.login.LoginSession;
-import nro.models.item.Item;
-import nro.models.map.war.NamekBallWar;
-import nro.models.phuban.DragonNamecWar.TranhNgoc;
-import nro.models.player.Player;
-import nro.models.pvp.PVP;
-import nro.server.io.Session;
-import nro.services.InventoryService;
-import nro.services.ItemTimeService;
-import nro.services.MapService;
-import nro.services.PlayerService;
-import nro.services.Service;
-import nro.services.func.PVPServcice;
-import nro.services.func.SummonDragon;
-import nro.services.func.TransactionService;
-import nro.utils.Log;
 
 /**
  *
@@ -163,9 +147,9 @@ public class Client implements Runnable {
                     ItemTimeService.gI().turnOffTDLT(player, tdlt);
                 }
             }
-            if (SummonDragon.gI().playerSummonShenron != null
-                    && SummonDragon.gI().playerSummonShenron.id == player.id) {
-                SummonDragon.gI().isPlayerDisconnect = true;
+            if (SummonDragon.gI().summoner != null
+                    && SummonDragon.gI().summoner.id == player.id) {
+                SummonDragon.gI().isPlayerDisconnected = true;
             }
             if (player.mobMe != null) {
                 player.mobMe.mobMeDie();

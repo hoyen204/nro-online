@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import nro.consts.Cmd;
-import nro.models.Part;
-import nro.models.PartManager;
-import nro.models.player.Player;
-import nro.server.Client;
-import nro.server.io.Message;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.models.Part;
+import com.nro.nro_online.models.PartManager;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 
 /**
  *
@@ -99,8 +99,7 @@ public class ChatGlobalService implements Runnable {
         List<Player> list = Client.gI().getPlayers();
         for (Player pl : list) {
             if (pl != null) {
-                try {
-                    Message ms = new Message(Cmd.CHAT_THEGIOI_SERVER);
+                try (Message ms = new Message(Cmd.CHAT_THEGIOI_SERVER)) {
                     ms.writer().writeUTF(chat.playerName);
                     ms.writer().writeUTF("|5|" + chat.text);
                     ms.writer().writeInt((int) chat.playerId);
@@ -114,7 +113,6 @@ public class ChatGlobalService implements Runnable {
                     ms.writer().writeShort(chat.leg);
                     ms.writer().writeByte(0);
                     pl.sendMessage(ms);
-                    ms.cleanup();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

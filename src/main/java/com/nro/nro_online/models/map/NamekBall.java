@@ -2,8 +2,8 @@ package com.nro.nro_online.models.map;
 
 import lombok.Getter;
 import lombok.Setter;
-import nro.services.ItemMapService;
-import nro.services.Service;
+import com.nro.nro_online.services.ItemMapService;
+import com.nro.nro_online.services.Service;
 
 /**
  * @build by arriety

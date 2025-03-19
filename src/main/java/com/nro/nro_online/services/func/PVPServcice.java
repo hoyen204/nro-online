@@ -1,253 +1,232 @@
 package com.nro.nro_online.services.func;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.consts.ConstTranhNgocNamek;
+import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.pvp.ChallengePVP;
 import com.nro.nro_online.models.pvp.PVP;
-import nro.consts.ConstNpc;
-import nro.consts.ConstTranhNgocNamek;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.models.pvp.ChallengePVP;
-import nro.models.pvp.PVP;
-import nro.models.pvp.RevengePVP;
-import nro.server.io.Message;
-import nro.services.NpcService;
-import nro.services.PlayerService;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.models.pvp.RevengePVP;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.NpcService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @Build Arriety
- *
- */
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class PVPServcice implements Runnable {
 
-    private static final int[] GOLD_CHALLENGE = {1000000, 10000000, 100000000};
-    private String[] optionsGoldChallenge;
-
-    //cmd controller
+    private static final Logger LOGGER = Logger.getLogger(PVPServcice.class.getName());
+    private static final int[] GOLD_CHALLENGE = { 1_000_000, 10_000_000, 100_000_000 };
     private static final byte OPEN_GOLD_SELECT = 0;
     private static final byte ACCEPT_PVP = 1;
+    private static final long MIN_POWER = 40_000_000_000L;
+    private static final int REVENGE_RUBY_COST = 10;
 
-    private static PVPServcice i;
+    private final String[] optionsGoldChallenge;
+    private final List<PVP> pvps = Collections.synchronizedList(new ArrayList<>());
+    private final Map<Player, Player> playerVsPlayer = new ConcurrentHashMap<>();
+    private final Map<Player, PVP> playerPvp = new ConcurrentHashMap<>();
+    private final Map<Player, Integer> playerGold = new ConcurrentHashMap<>();
 
-    private static List<PVP> PVPS = new ArrayList<>();
-    private static Map<Player, Player> PLAYER_VS_PLAYER = new HashMap<Player, Player>();
-    private static Map<Player, PVP> PLAYER_PVP = new HashMap<Player, PVP>();
-    private static Map<Player, Integer> PLAYER_GOLD = new HashMap<Player, Integer>();
+    private static final PVPServcice INSTANCE = new PVPServcice();
 
     private PVPServcice() {
-        this.optionsGoldChallenge = new String[GOLD_CHALLENGE.length];
-        for (int i = 0; i < GOLD_CHALLENGE.length; i++) {
-            this.optionsGoldChallenge[i] = Util.numberToMoney(GOLD_CHALLENGE[i]) + " vàng";
-        }
+        optionsGoldChallenge = Arrays.stream(GOLD_CHALLENGE)
+                .mapToObj(Util::numberToMoney)
+                .map(gold -> gold + " vàng")
+                .toArray(String[]::new);
     }
 
     public static PVPServcice gI() {
-        if (i == null) {
-            i = new PVPServcice();
-            new Thread(i).start();
-        }
-        return i;
+        return INSTANCE;
     }
 
     public void controller(Player player, Message message) {
-        try {
-            byte action = message.reader().readByte();
-            byte type = message.reader().readByte();
-            int playerId = message.reader().readInt();
-            Player plMap = player.zone.getPlayerInMap(playerId);
-            if (plMap != null) {
-                PLAYER_VS_PLAYER.put(player, plMap);
-                PLAYER_VS_PLAYER.put(plMap, player);
-                switch (action) {
-                    case OPEN_GOLD_SELECT:
-                        openSelectGold(player, plMap);
-                        break;
-                    case ACCEPT_PVP:
-                        acceptPVP(player);
-                        break;
-                }
-            }
-        } catch (IOException ex) {
+        try (var reader = message.reader()) {
+            byte action = reader.readByte();
+            byte type = reader.readByte();
+            int playerId = reader.readInt();
+            Player opponent = player.zone.getPlayerInMap(playerId);
+            if (opponent == null)
+                return;
 
+            playerVsPlayer.put(player, opponent);
+            playerVsPlayer.put(opponent, player);
+
+            if (action == OPEN_GOLD_SELECT)
+                openSelectGold(player, opponent);
+            else if (action == ACCEPT_PVP)
+                acceptPVP(player);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error processing PVP controller", e);
         }
     }
 
-    private void openSelectGold(Player pl, Player plMap) {
-        PVP pvp1 = PLAYER_PVP.get(pl);
-        PVP pvp2 = PLAYER_PVP.get(plMap);
-        if (pvp1 == null && pvp2 == null) {
-            PLAYER_VS_PLAYER.put(pl, plMap);
-            NpcService.gI().createMenuConMeo(pl, ConstNpc.MAKE_MATCH_PVP,
-                    -1, plMap.name + " (sức mạnh " + Util.numberToMoney(plMap.nPoint.power) + ")\nBạn muốn cược bao nhiêu vàng?",
-                    this.optionsGoldChallenge);
-        } else {
-            Service.getInstance().hideWaitDialog(pl);
-            Service.getInstance().sendThongBao(pl, "Không thể thực hiện");
+    private void openSelectGold(Player player, Player opponent) {
+        if (isPlayerInPvp(player) || isPlayerInPvp(opponent)) {
+            Service.getInstance().hideWaitDialog(player);
+            Service.getInstance().sendThongBao(player, "Không thể thực hiện");
+            return;
         }
+        NpcService.gI().createMenuConMeo(player, ConstNpc.MAKE_MATCH_PVP, -1,
+                opponent.name + " (sức mạnh " + Util.numberToMoney(opponent.nPoint.power)
+                        + ")\nBạn muốn cược bao nhiêu vàng?",
+                optionsGoldChallenge);
     }
 
-    public void sendInvitePVP(Player pl, byte selectGold) {
-        if (pl.nPoint.power >= 40_000_000_000L) {
-//        if (pl.getSession().actived) {
-            Player plReceive = PLAYER_VS_PLAYER.get(pl);
-            if (plReceive != null) {
-                if (plReceive.nPoint.power >= 40_000_000_000L) {
-                    int gold = GOLD_CHALLENGE[selectGold];
-                    if (pl.inventory.gold >= gold) {
-                        if (plReceive.inventory.gold < gold) {
-                            Service.getInstance().sendThongBao(pl, "Đối thủ chỉ có " + plReceive.inventory.gold + " vàng, không đủ tiền cược");
-                        } else {
-                            PLAYER_GOLD.put(pl, gold);
-                            Message msg = null;
-                            try {
-                                msg = new Message(-59);
-                                msg.writer().writeByte(3);
-                                msg.writer().writeInt((int) pl.id);
-                                msg.writer().writeInt(gold);
-                                msg.writer().writeUTF(pl.name + " (sức mạnh " + Util.numberToMoney(pl.nPoint.power) + ") muốn thách đấu bạn với mức cược " + gold);
-                                plReceive.sendMessage(msg);
-                                msg.cleanup();
-                            } catch (Exception e) {
-                            }
-                        }
-                    } else {
-                        Service.getInstance().sendThongBao(pl, "Bạn chỉ có " + pl.inventory.gold + " vàng, không đủ tiền cược");
-                    }
-                } else {
-                    Service.getInstance().sendThongBao(pl, "Đối thủ chưa đủ sức mạnh!");
-                }
-            }
-        } else {
-            Service.getInstance().sendThongBaoFromAdmin(pl,
-                    "|5|Bạn chưa đủ 40 tỷ để có thể sửa dụng chức năng thách đấu");
-        }
-    }
-
-    private void acceptPVP(Player pl) {
-        Player pl2 = PLAYER_VS_PLAYER.get(pl);
-        if (pl2 != null) {
-            PVP pvp1 = PLAYER_PVP.get(pl);
-            PVP pvp2 = PLAYER_PVP.get(pl2);
-            if (pvp1 == null && pvp2 == null) {
-                if (pl.zone.equals(pl2.zone)) {
-                    int gold = PLAYER_GOLD.get(pl2);
-                    if (pl.inventory.gold >= gold && pl2.inventory.gold >= gold) {
-                        ChallengePVP pvp = new ChallengePVP(pl, pl2);
-                        pvp.gold = gold;
-                        PVPS.add(pvp);
-                        PLAYER_PVP.put(pl, pvp);
-                        PLAYER_PVP.put(pl2, pvp);
-                        pvp.start();
-                    }
-                } else {
-                    Service.getInstance().sendThongBao(pl, "Đối thủ đã rời khỏi map");
-                }
-            } else {
-                Service.getInstance().sendThongBao(pl, "Không thể thực hiện");
-            }
-        }
-    }
-
-    public PVP findPvp(Player pl) {
-        return PLAYER_PVP.get(pl);
-    }
-
-    public void removePVP(PVP pvp) {
-        if (pvp != null) {
-            Player pl1 = pvp.player1;
-            Player pl2 = pvp.player2;
-            if (pl1 != null) {
-                PLAYER_VS_PLAYER.remove(pl1);
-                PLAYER_GOLD.remove(pl1);
-                PLAYER_PVP.remove(pl1);
-            }
-            if (pl2 != null) {
-                PLAYER_VS_PLAYER.remove(pl2);
-                PLAYER_GOLD.remove(pl2);
-                PLAYER_PVP.remove(pl2);
-            }
-            PVPS.remove(pvp);
-        }
-    }
-
-    public void finishPVP(Player plLose, byte typeLose) {
-        PVP pvp = findPvp(plLose);
-        if (pvp != null) {
-            pvp.finishPVP(plLose, typeLose);
-        }
-    }
-
-    public void openSelectRevenge(Player pl, Player enemy) {
-        PVP pvp1 = findPvp(pl);
-        PVP pvp2 = findPvp(enemy);
-        if (pvp1 == null && pvp2 == null) {
-            PLAYER_VS_PLAYER.put(pl, enemy);
-            NpcService.gI().createMenuConMeo(pl, ConstNpc.REVENGE,
-                    -1, "Bạn muốn đến ngay chỗ hắn, phí là 10 hồng ngọc và được tìm thoải mái trong 5 phút nhé", "Ok", "Từ chối");
-        } else {
-            Service.getInstance().hideWaitDialog(pl);
-            Service.getInstance().sendThongBao(pl, "Không thể thực hiện");
-        }
-    }
-
-    public void acceptRevenge(Player pl) {
-        if (pl.zone.map.mapId == ConstTranhNgocNamek.MAP_ID) {
-            Service.getInstance().sendPopUpMultiLine(pl, 0, 7184, "Không thể thực hiện");
+    public void sendInvitePVP(Player player, byte selectGold) {
+        if (player.nPoint.power < MIN_POWER) {
+            Service.getInstance().sendThongBaoFromAdmin(player,
+                    "|5|Bạn chưa đủ 40 tỷ để có thể sử dụng chức năng thách đấu");
             return;
         }
 
-        if (pl.inventory.getRuby() > 10) {
-            PlayerService.gI().sendInfoHpMpMoney(pl);
-            Player enemy = PLAYER_VS_PLAYER.get(pl);
-            if (enemy != null) {
-                Zone mapGo = enemy.zone;
-                if (enemy.zone.map.mapId == ConstTranhNgocNamek.MAP_ID) {
-                    Service.getInstance().sendPopUpMultiLine(enemy, 0, 7184, "Không thể thực hiện");
-                    return;
-                }
-//                int mapId = enemy.zone.map.mapId;
-//                if (MapService.gI().isMapHTTV(mapId)) {
-//                    Service.getInstance().sendThongBaoFromAdmin(enemy, "Tele cái con cặc");
-//                    return;
-//                }
-                if ((mapGo = ChangeMapService.gI().checkMapCanJoin(pl, mapGo)) != null && !mapGo.isFullPlayer()) {
-                    pl.inventory.subRuby(10);
-                    RevengePVP pvp = new RevengePVP(pl, enemy);
-                    PLAYER_PVP.put(pl, pvp);
-                    PLAYER_PVP.put(enemy, pvp);
-                    PVPS.add(pvp);
-                    ChangeMapService.gI().changeMap(pl, mapGo,
-                            enemy.location.x + Util.nextInt(-5, 5), enemy.location.y);
-                    pvp.lastTimeGoToMapEnemy = System.currentTimeMillis();
-                    pvp.start();
-                } else {
-                    Service.getInstance().sendThongBao(pl, "Không thể tới khu vực này, vui lòng đợi sau ít phút");
-                }
-            }
-        } else {
-            Service.getInstance().sendThongBao(pl, "Bạn không đủ ngọc, còn thiếu 10 hồng ngọc nữa");
+        Player opponent = playerVsPlayer.get(player);
+        if (opponent == null || opponent.nPoint.power < MIN_POWER) {
+            Service.getInstance().sendThongBao(player,
+                    opponent == null ? "Đối thủ không tồn tại" : "Đối thủ chưa đủ sức mạnh!");
+            return;
         }
+
+        int gold = GOLD_CHALLENGE[selectGold];
+        if (player.inventory.gold < gold) {
+            Service.getInstance().sendThongBao(player,
+                    "Bạn chỉ có " + Util.numberToMoney(player.inventory.gold) + " vàng, không đủ tiền cược");
+            return;
+        }
+        if (opponent.inventory.gold < gold) {
+            Service.getInstance().sendThongBao(player,
+                    "Đối thủ chỉ có " + Util.numberToMoney(opponent.inventory.gold) + " vàng, không đủ tiền cược");
+            return;
+        }
+
+        playerGold.put(player, gold);
+        try (Message msg = new Message(-59)) {
+            msg.writer().writeByte(3);
+            msg.writer().writeInt((int) player.id);
+            msg.writer().writeInt(gold);
+            msg.writer().writeUTF(player.name + " (sức mạnh " + Util.numberToMoney(player.nPoint.power)
+                    + ") muốn thách đấu bạn với mức cược " + gold);
+            opponent.sendMessage(msg);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error sending PVP invite", e);
+        }
+    }
+
+    private void acceptPVP(Player player) {
+        Player opponent = playerVsPlayer.get(player);
+        if (opponent == null || !player.zone.equals(opponent.zone)) {
+            Service.getInstance().sendThongBao(player,
+                    opponent == null ? "Đối thủ không tồn tại" : "Đối thủ đã rời khỏi map");
+            return;
+        }
+        if (isPlayerInPvp(player) || isPlayerInPvp(opponent)) {
+            Service.getInstance().sendThongBao(player, "Không thể thực hiện");
+            return;
+        }
+
+        int gold = playerGold.getOrDefault(opponent, 0);
+        if (player.inventory.gold < gold || opponent.inventory.gold < gold)
+            return;
+
+        ChallengePVP pvp = new ChallengePVP(player, opponent);
+        pvp.gold = gold;
+        pvps.add(pvp);
+        playerPvp.put(player, pvp);
+        playerPvp.put(opponent, pvp);
+        pvp.start();
+    }
+
+    public PVP findPvp(Player player) {
+        return playerPvp.get(player);
+    }
+
+    public void removePVP(PVP pvp) {
+        if (pvp == null)
+            return;
+        Optional.ofNullable(pvp.player1).ifPresent(p -> removePlayerData(p));
+        Optional.ofNullable(pvp.player2).ifPresent(p -> removePlayerData(p));
+        pvps.remove(pvp);
+    }
+
+    private void removePlayerData(Player player) {
+        playerVsPlayer.remove(player);
+        playerGold.remove(player);
+        playerPvp.remove(player);
+    }
+
+    public void finishPVP(Player loser, byte typeLose) {
+        PVP pvp = findPvp(loser);
+        if (pvp != null)
+            pvp.finishPVP(loser, typeLose);
+    }
+
+    public void openSelectRevenge(Player player, Player enemy) {
+        if (isPlayerInPvp(player) || isPlayerInPvp(enemy)) {
+            Service.getInstance().hideWaitDialog(player);
+            Service.getInstance().sendThongBao(player, "Không thể thực hiện");
+            return;
+        }
+        playerVsPlayer.put(player, enemy);
+        NpcService.gI().createMenuConMeo(player, ConstNpc.REVENGE, -1,
+                "Bạn muốn đến ngay chỗ hắn, phí là 10 hồng ngọc và được tìm thoải mái trong 5 phút nhé", "Ok",
+                "Từ chối");
+    }
+
+    public void acceptRevenge(Player player) {
+        if (player.zone.map.mapId == ConstTranhNgocNamek.MAP_ID) {
+            Service.getInstance().sendPopUpMultiLine(player, 0, 7184, "Không thể thực hiện");
+            return;
+        }
+        if (player.inventory.getRuby() < REVENGE_RUBY_COST) {
+            Service.getInstance().sendThongBao(player, "Bạn không đủ ngọc, còn thiếu 10 hồng ngọc nữa");
+            return;
+        }
+
+        Player enemy = playerVsPlayer.get(player);
+        if (enemy == null || enemy.zone.map.mapId == ConstTranhNgocNamek.MAP_ID) {
+            Service.getInstance().sendPopUpMultiLine(player, 0, 7184, "Không thể thực hiện");
+            return;
+        }
+
+        Zone targetZone = ChangeMapService.gI().checkMapCanJoin(player, enemy.zone);
+        if (targetZone == null || targetZone.isFullPlayer()) {
+            Service.getInstance().sendThongBao(player, "Không thể tới khu vực này, vui lòng đợi sau ít phút");
+            return;
+        }
+
+        player.inventory.subRuby(REVENGE_RUBY_COST);
+        RevengePVP pvp = new RevengePVP(player, enemy);
+        playerPvp.put(player, pvp);
+        playerPvp.put(enemy, pvp);
+        pvps.add(pvp);
+        ChangeMapService.gI().changeMap(player, targetZone, enemy.location.x + Util.nextInt(-5, 5), enemy.location.y);
+        pvp.lastTimeGoToMapEnemy = System.currentTimeMillis();
+        pvp.start();
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                long st = System.currentTimeMillis();
-                for (PVP pvp : PVPS) {
-                    pvp.update();
-                }
-                Thread.sleep(1000 - (System.currentTimeMillis() - st));
-            } catch (Exception e) {
+                long start = System.currentTimeMillis();
+                pvps.forEach(PVP::update);
+                Thread.sleep(Math.max(0, 1000 - (System.currentTimeMillis() - start)));
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.SEVERE, "PVP service thread interrupted", e);
+                Thread.currentThread().interrupt();
+                break;
             }
         }
+    }
+
+    private boolean isPlayerInPvp(Player player) {
+        return playerPvp.containsKey(player);
     }
 }

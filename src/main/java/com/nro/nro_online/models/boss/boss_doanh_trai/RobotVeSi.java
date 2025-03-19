@@ -1,18 +1,13 @@
 package com.nro.nro_online.models.boss.boss_doanh_trai;
 
-import nro.consts.ConstRatio;
-import nro.models.boss.BossData;
-import nro.models.map.phoban.DoanhTrai;
-import nro.models.player.Player;
-import nro.services.SkillService;
-import nro.services.func.ChangeMapService;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstRatio;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.map.phoban.DoanhTrai;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.SkillService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * Arriety
- *
- */
 public class RobotVeSi extends BossDoanhTrai {
 
     public RobotVeSi(byte id, DoanhTrai doanhTrai) {

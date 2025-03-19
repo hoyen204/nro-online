@@ -3,12 +3,12 @@ package com.nro.nro_online.models.npc;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.consts.ConstNpc;
-import nro.consts.ConstTask;
-import nro.models.player.Player;
-import nro.server.Manager;
-import nro.services.TaskService;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.consts.ConstTask;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.services.TaskService;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

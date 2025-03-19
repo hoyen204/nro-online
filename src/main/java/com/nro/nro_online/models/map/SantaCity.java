@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.nro.nro_online.models.map;
 
 import java.time.Duration;
@@ -17,18 +12,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
-import nro.models.mob.Mob;
-import nro.models.player.Player;
-import nro.services.MapService;
-import nro.services.MobService;
-import nro.services.Service;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.models.mob.Mob;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.MobService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 
-/**
- *
- * @Build by Arriety
- */
 @Getter
 public class SantaCity extends Map {
 
@@ -71,7 +62,7 @@ public class SantaCity extends Map {
             Service.getInstance().clearMap(player);
             zone.mapInfo(player);
             player.zone.loadAnotherToMe(player);
-            player.zone.load_Me_To_Another(player);
+            player.zone.loadMeToAnother(player);
         }
     }
 
@@ -84,7 +75,7 @@ public class SantaCity extends Map {
             Service.getInstance().clearMap(player);
             zone.mapInfo(player);
             player.zone.loadAnotherToMe(player);
-            player.zone.load_Me_To_Another(player);
+            player.zone.loadMeToAnother(player);
         }
     }
 

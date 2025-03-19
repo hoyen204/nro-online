@@ -1,14 +1,30 @@
 package com.nro.nro_online.services.func;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.List;
 
+import com.nro.nro_online.consts.Cmd;
 import com.nro.nro_online.consts.ConstAchive;
 import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.consts.ConstTask;
+import com.nro.nro_online.models.boss.event.EscortedBoss;
+import com.nro.nro_online.models.dragon_namec_war.TranhNgocService;
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.Zone;
 import com.nro.nro_online.models.map.dungeon.zones.ZDungeon;
+import com.nro.nro_online.models.map.mabu.MabuWar;
+import com.nro.nro_online.models.map.phoban.BanDoKhoBau;
+import com.nro.nro_online.models.map.phoban.DoanhTrai;
+import com.nro.nro_online.models.map.war.BlackBallWar;
+import com.nro.nro_online.models.map.war.NamekBallWar;
+import com.nro.nro_online.models.mob.Mob;
+import com.nro.nro_online.models.mob.MobMe;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.pvp.PVP;
 import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.EffectSkillService;
 import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.services.PlayerService;
 import com.nro.nro_online.services.Service;
@@ -48,9 +64,7 @@ public class ChangeMapService {
         List<Zone> list = null;
         switch (pl.iDMark.getTypeChangeMap()) {
         }
-        Message msg;
-        try {
-            msg = new Message(-91);
+        try (Message msg = new Message(-91)) {
             switch (pl.iDMark.getTypeChangeMap()) {
                 case ConstMap.CHANGE_CAPSULE:
                     list = (pl.mapCapsule = MapService.gI().getMapCapsule(pl));
@@ -78,7 +92,6 @@ public class ChangeMapService {
                     break;
             }
             pl.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             Log.error(UseItem.class, e);
         }
@@ -277,7 +290,7 @@ public class ChangeMapService {
             }
             Service.getInstance().clearMap(pl);
             zoneJoin.mapInfo(pl); // -24
-            pl.zone.load_Me_To_Another(pl);
+            pl.zone.loadMeToAnother(pl);
             if (!pl.isBoss && !pl.isPet) {
                 pl.zone.loadAnotherToMe(pl);
             }
@@ -318,7 +331,7 @@ public class ChangeMapService {
             if (pl.pet != null) {
                 pl.pet.joinMapMaster();
             }
-            pl.zone.load_Me_To_Another(pl);
+            pl.zone.loadMeToAnother(pl);
             if (!pl.isBoss && !pl.isPet) {
                 pl.zone.loadAnotherToMe(pl);
             }
@@ -340,48 +353,60 @@ public class ChangeMapService {
     }
 
     private void sendEffectMeToMap(Player player) {
-        Message msg;
-        try {
-            if (player.effectSkill.isShielding) {
-                msg = new Message(-124);
-                msg.writer().writeByte(1);
-                msg.writer().writeByte(0);
-                msg.writer().writeByte(33);
-                msg.writer().writeInt((int) player.id);
-                Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
-                msg.cleanup();
-            }
-
-            if (player.effectSkill.isHoldMabu) {
-                msg = new Message(52);
-                msg.writer().writeByte(1);
-                msg.writer().writeInt((int) player.id);
-                msg.writer().writeShort(player.location.x);
-                msg.writer().writeShort(player.location.y);
-                Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
-                msg.cleanup();
-            }
-
-            if (player.mobMe != null) {
-                msg = new Message(Cmd.MOB_ME_UPDATE);
-                msg.writer().writeByte(0);// type
-                msg.writer().writeInt((int) player.id);
-                msg.writer().writeShort(player.mobMe.tempId);
-                msg.writer().writeInt(player.mobMe.point.getHP());// hp mob
-                Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
-                msg.cleanup();
-            }
-            if (player.pet != null && player.pet.mobMe != null) {
-                msg = new Message(Cmd.MOB_ME_UPDATE);
-                msg.writer().writeByte(0);// type
-                msg.writer().writeInt((int) player.pet.mobMe.id);
-                msg.writer().writeShort(player.pet.mobMe.tempId);
-                msg.writer().writeInt(player.pet.mobMe.point.getHP());// hp mob
-                Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
-                msg.cleanup();
-            }
-        } catch (Exception e) {
+        sendShieldEffect(player);
+        sendMabuHoldEffect(player);
+        sendMobMeEffect(player, player.mobMe, (int) player.id);
+        if (player.pet != null) {
+            sendMobMeEffect(player, player.pet.mobMe, (int) player.pet.mobMe.id);
         }
+    }
+
+    private void sendShieldEffect(Player player) {
+        if (!player.effectSkill.isShielding)
+            return;
+        sendMessage(player, -124, msg -> {
+            msg.writeByte(1);
+            msg.writeByte(0);
+            msg.writeByte(33);
+            msg.writeInt((int) player.id);
+        });
+    }
+
+    private void sendMabuHoldEffect(Player player) {
+        if (!player.effectSkill.isHoldMabu)
+            return;
+        sendMessage(player, 52, msg -> {
+            msg.writeByte(1);
+            msg.writeInt((int) player.id);
+            msg.writeShort(player.location.x);
+            msg.writeShort(player.location.y);
+        });
+    }
+
+    private void sendMobMeEffect(Player player, MobMe mobMe, int id) {
+        if (mobMe == null)
+            return;
+        sendMessage(player, Cmd.MOB_ME_UPDATE, msg -> {
+            msg.writeByte(0); // type
+            msg.writeInt(id);
+            msg.writeShort(mobMe.tempId);
+            msg.writeInt(mobMe.point.getHP()); // hp mob
+        });
+    }
+
+    private void sendMessage(Player player, int cmd, MessageWriter writer) {
+        try (Message msg = new Message(cmd)) {
+            writer.write(msg.writer());
+            msg.writer().flush();
+            Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
+        } catch (IOException e) {
+            Log.error(ChangeMapService.class, e);
+        }
+    }
+
+    @FunctionalInterface
+    private interface MessageWriter {
+        void write(DataOutputStream ds) throws IOException;
     }
 
     private void sendEffectMapToMe(Player player) {
@@ -392,7 +417,6 @@ public class ChangeMapService {
                     msg = new Message(-12);
                     msg.writer().writeByte(mob.id);
                     player.sendMessage(msg);
-                    msg.cleanup();
                 }
                 if (mob.effectSkill.isThoiMien) {
                     msg = new Message(-124);
@@ -401,7 +425,6 @@ public class ChangeMapService {
                     msg.writer().writeByte(41); // num6
                     msg.writer().writeByte(mob.id); // b7
                     player.sendMessage(msg);
-                    msg.cleanup();
                 }
                 if (mob.effectSkill.isSocola) {
                     msg = new Message(-112);
@@ -409,7 +432,6 @@ public class ChangeMapService {
                     msg.writer().writeByte(mob.id); // b4
                     msg.writer().writeShort(4133);// b5
                     player.sendMessage(msg);
-                    msg.cleanup();
                 }
                 if (mob.effectSkill.isStun || mob.effectSkill.isBlindDCTT) {
                     msg = new Message(-124);
@@ -418,7 +440,6 @@ public class ChangeMapService {
                     msg.writer().writeByte(40);
                     msg.writer().writeByte(mob.id);
                     player.sendMessage(msg);
-                    msg.cleanup();
                 }
             }
         } catch (Exception e) {
@@ -437,7 +458,6 @@ public class ChangeMapService {
                             msg.writer().writeByte(33);
                             msg.writer().writeInt((int) pl.id);
                             player.sendMessage(msg);
-                            msg.cleanup();
                         }
 
                         if (pl.effectSkill.isHoldMabu) {
@@ -447,7 +467,6 @@ public class ChangeMapService {
                             msg.writer().writeShort(pl.location.x);
                             msg.writer().writeShort(pl.location.y);
                             player.sendMessage(msg);
-                            msg.cleanup();
                         }
                         if (pl.effectSkill.isThoiMien) {
                             msg = new Message(-124);
@@ -456,7 +475,6 @@ public class ChangeMapService {
                             msg.writer().writeByte(41); // num3
                             msg.writer().writeInt((int) pl.id); // num4
                             player.sendMessage(msg);
-                            msg.cleanup();
                         }
                         if (pl.effectSkill.isBlindDCTT || pl.effectSkill.isStun) {
                             msg = new Message(-124);
@@ -467,7 +485,6 @@ public class ChangeMapService {
                             msg.writer().writeByte(0);
                             msg.writer().writeByte(32);
                             player.sendMessage(msg);
-                            msg.cleanup();
                         }
 
                         if (pl.effectSkill.useTroi) {
@@ -479,7 +496,6 @@ public class ChangeMapService {
                                 msg.writer().writeInt((int) pl.effectSkill.plAnTroi.id);// num4
                                 msg.writer().writeInt((int) pl.id);// num9
                                 player.sendMessage(msg);
-                                msg.cleanup();
                             }
                             if (pl.effectSkill.mobAnTroi != null) {
                                 msg = new Message(-124);
@@ -489,7 +505,6 @@ public class ChangeMapService {
                                 msg.writer().writeByte(pl.effectSkill.mobAnTroi.id);// b6
                                 msg.writer().writeInt((int) pl.id);// num9
                                 player.sendMessage(msg);
-                                msg.cleanup();
                             }
                         }
                         if (pl.mobMe != null) {
@@ -499,7 +514,6 @@ public class ChangeMapService {
                             msg.writer().writeShort(pl.mobMe.tempId);
                             msg.writer().writeInt(pl.mobMe.point.getHP());// hp mob
                             player.sendMessage(msg);
-                            msg.cleanup();
                         }
                     }
                 }
@@ -526,7 +540,6 @@ public class ChangeMapService {
                     msg = new Message(-6);
                     msg.writer().writeInt((int) player.id);
                     Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
-                    msg.cleanup();
                     player.zone = null;
                 } catch (Exception e) {
                 }
@@ -551,7 +564,6 @@ public class ChangeMapService {
                     Service.getInstance().sendMessAllPlayerIgnoreMe(player, msg);
                     break;
             }
-            msg.cleanup();
         } catch (Exception e) {
 
         }
@@ -598,8 +610,7 @@ public class ChangeMapService {
             msg.writer().writeShort(seconds);
             msg.writer().writeByte(type);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+            } catch (Exception e) {
         }
     }
 

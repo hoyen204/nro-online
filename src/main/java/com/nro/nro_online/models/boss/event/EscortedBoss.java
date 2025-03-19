@@ -58,7 +58,7 @@ public abstract class EscortedBoss extends Boss {
             this.location.x = escort.location.x + Util.nextInt(-10, 10);
             this.location.y = escort.location.y;
             MapService.gI().goToMap(this, escort.zone);
-            escort.zone.load_Me_To_Another(this);
+            escort.zone.loadMeToAnother(this);
         } else {
             stopEscorting();
             Service.getInstance().sendThongBao(escort, "Boss không thích map VS, bye bye! 😛");

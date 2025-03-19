@@ -7,7 +7,7 @@ package com.nro.nro_online.models.map;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.consts.ConstMap;
+import com.nro.nro_online.consts.ConstMap;
 
 /**
  *

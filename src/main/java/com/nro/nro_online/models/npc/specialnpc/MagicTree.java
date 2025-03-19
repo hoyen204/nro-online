@@ -15,12 +15,6 @@ public class MagicTree {
     // Constants
     public static final byte MAX_LEVEL = 10;
     public static final byte MIN_LEVEL = 1;
-    
-    // Menu constants
-    private static final byte MENU_HARVEST = 0;
-    private static final byte MENU_UPGRADE = 1;
-    private static final byte MENU_FAST_PEA = 2;
-    private static final byte MENU_CANCEL_UPGRADE = 3;
 
     // Item templates and parameters
     public static final short[] PEA_TEMP = {13, 60, 61, 62, 63, 64, 65, 352, 523, 595};
@@ -56,13 +50,13 @@ public class MagicTree {
     private static final short[][] POS_MAGIC_TREE = {{348, 336}, {372, 336}, {348, 336}};
 
     // Instance variables
-    private final Player player;
-    private boolean loadedMagicTreeToPlayer;
-    private boolean isUpgrade;
-    private byte level;
-    private int currPeas;
-    private long lastTimeHarvest;
-    private long lastTimeUpgrade;
+    public final Player player;
+    public boolean loadedMagicTreeToPlayer;
+    public boolean isUpgrade;
+    public byte level;
+    public int currPeas;
+    public long lastTimeHarvest;
+    public long lastTimeUpgrade;
 
     public MagicTree(Player player, byte level, byte currPeas, long lastTimeHarvest, boolean isUpgrade, long lastTimeUpgrade) {
         this.player = player;

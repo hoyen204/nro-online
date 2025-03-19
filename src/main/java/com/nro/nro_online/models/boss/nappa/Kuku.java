@@ -2,17 +2,17 @@ package com.nro.nro_online.models.boss.nappa;
 
 import java.util.Calendar;
 
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.boss.FutureBoss;
-import nro.models.map.ItemMap;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.services.RewardService;
-import nro.services.Service;
-import nro.services.TaskService;
-import nro.services.func.ChangeMapService;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.boss.FutureBoss;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.services.RewardService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.TaskService;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

@@ -16,23 +16,7 @@ import com.nro.nro_online.services.SkillService;
 import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.SkillUtil;
 import com.nro.nro_online.utils.Util;
-import nro.consts.ConstRatio;
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.item.ItemTime;
-import nro.models.player.Player;
-import nro.services.ItemTimeService;
-import nro.services.Service;
-import nro.services.SkillService;
-import nro.utils.Log;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
 
-/**
- *
- * @author Administrator
- */
 public class BoXuong extends Boss {
 
     public BoXuong() {

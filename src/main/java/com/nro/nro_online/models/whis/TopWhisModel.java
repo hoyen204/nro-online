@@ -2,16 +2,8 @@ package com.nro.nro_online.models.whis;
 
 import java.time.LocalDateTime;
 
-import lombok.Getter;
-import lombok.Setter;
-import nro.models.player.Player;
+import com.nro.nro_online.models.player.Player;
 
-/**
- *
- * @author by Arriety
- */
-@Getter
-@Setter
 public class TopWhisModel {
 
     public long player_id;
@@ -19,5 +11,5 @@ public class TopWhisModel {
     public int level;
     public int rank;
     public LocalDateTime last_time_attack;
-    public Player player = new Player();
+    public Player player;
 }

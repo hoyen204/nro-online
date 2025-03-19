@@ -1,13 +1,13 @@
 package com.nro.nro_online.models.player;
 
 import lombok.Setter;
-import nro.manager.MiniPetManager;
-import nro.models.item.MinipetTemplate;
-import nro.services.MapService;
-import nro.services.PlayerService;
-import nro.services.Service;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.manager.MiniPetManager;
+import com.nro.nro_online.models.item.MiniPetTemplate;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @stole Arriety
@@ -37,7 +37,7 @@ public class MiniPet extends Player {
     }
 
     public void setPart(int id) {
-        MinipetTemplate temp = MiniPetManager.gI().findByID(id);
+        MiniPetTemplate temp = MiniPetManager.gI().findById(id);
         setHead(temp.getHead());
         setBody(temp.getBody());
         setLeg(temp.getLeg());
@@ -85,7 +85,7 @@ public class MiniPet extends Player {
 
     public void reCall() {
         MapService.gI().goToMap(this, MapService.gI().getMapCanJoin(this, master.gender + 21));
-        this.zone.load_Me_To_Another(this);
+        this.zone.loadMeToAnother(this);
     }
 
     public void joinMapMaster() {
@@ -94,7 +94,7 @@ public class MiniPet extends Player {
                 this.location.x = master.location.x + Util.nextInt(-10, 10);
                 this.location.y = master.location.y;
                 MapService.gI().goToMap(this, master.zone);
-                this.zone.load_Me_To_Another(this);
+                this.zone.loadMeToAnother(this);
             }
         }
     }

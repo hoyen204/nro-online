@@ -7,10 +7,10 @@ package com.nro.nro_online.services.func.lr;
 
 import java.util.List;
 
-import nro.models.item.Item;
-import nro.models.player.Player;
-import nro.services.RewardService;
-import nro.services.Service;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.RewardService;
+import com.nro.nro_online.services.Service;
 
 /**
  *

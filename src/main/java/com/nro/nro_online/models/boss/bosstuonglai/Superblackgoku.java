@@ -26,18 +26,18 @@ import com.nro.nro_online.utils.Util;
  */
 public class Superblackgoku extends Boss {
 
-    private final Map angryPlayers;
+    private final Map<Player, Integer> angryPlayers;
     private final List<Player> playersAttack;
 
     public Superblackgoku() {
         super(BossFactory.SUPERBLACKGOKU, BossData.SUPERBLACKGOKU);
-        this.angryPlayers = new HashMap();
+        this.angryPlayers = new HashMap<>();
         this.playersAttack = new LinkedList<>();
     }
 
     protected Superblackgoku(byte id, BossData bossData) {
         super(id, bossData);
-        this.angryPlayers = new HashMap();
+        this.angryPlayers = new HashMap<>();
         this.playersAttack = new LinkedList<>();
     }
 
@@ -100,21 +100,6 @@ public class Superblackgoku extends Boss {
             plAttack = this.zone.getRandomPlayerInMap();
         }
         return plAttack;
-    }
-
-    private void addPlayerAttack(Player plAtt) {
-        boolean haveInList = false;
-        for (Player pl : playersAttack) {
-            if (pl.equals(plAtt)) {
-                haveInList = true;
-                break;
-            }
-        }
-        if (!haveInList) {
-            playersAttack.add(plAtt);
-            Service.getInstance().chat(this, "Mi làm ta nổi giận rồi "
-                    + plAtt.name.replaceAll("$", "").replaceAll("#", ""));
-        }
     }
 
     @Override

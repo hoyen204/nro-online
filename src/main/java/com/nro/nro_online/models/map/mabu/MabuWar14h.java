@@ -19,10 +19,9 @@ public class MabuWar14h {
     private static LocalDateTime TIME_CLOSE;
     private static final byte HOUR_OPEN = 2;   // 2h sáng, giờ ma quỷ bắt đầu 😜
     private static final byte MIN_OPEN = 0;
-    private static final byte SECOND_OPEN = 0;
     private static final byte HOUR_CLOSE = 3;  // 3h sáng, hết giờ chơi!
     private static final byte MIN_CLOSE = 0;
-    private static final byte SECOND_CLOSE = 0;
+
 
     private int day = -1; // Ngày hiện tại, -1 là chưa set
     private boolean initBoss = false; // Đã spawn boss chưa?

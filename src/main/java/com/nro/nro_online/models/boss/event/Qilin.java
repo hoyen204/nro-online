@@ -1,12 +1,12 @@
 package com.nro.nro_online.models.boss.event;
 
-import nro.lib.RandomCollection;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.player.Player;
-import nro.services.Service;
-import nro.services.func.ChangeMapService;
-import nro.utils.Util;
+import com.nro.nro_online.lib.RandomCollection;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.ChangeMapService;
+import com.nro.nro_online.utils.Util;
 
 public class Qilin extends EscortedBoss {
 

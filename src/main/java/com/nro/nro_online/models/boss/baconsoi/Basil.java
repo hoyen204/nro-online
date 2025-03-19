@@ -6,6 +6,7 @@ package com.nro.nro_online.models.boss.baconsoi;
 
 import java.util.Random;
 
+import com.nro.nro_online.models.boss.Boss;
 import com.nro.nro_online.models.boss.BossData;
 import com.nro.nro_online.models.boss.BossFactory;
 import com.nro.nro_online.models.boss.FutureBoss;

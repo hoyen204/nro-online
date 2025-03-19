@@ -1,8 +1,8 @@
 package com.nro.nro_online.models.mob;
 
-import nro.server.io.Message;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 /**
  *
@@ -52,15 +52,12 @@ public class MobEffectSkill {
 
     private void removeStun() {
         isStun = false;
-        Message msg;
-        try {
-            msg = new Message(-124);
+        try (Message msg = new Message(-124)) {
             msg.writer().writeByte(0);
             msg.writer().writeByte(1);
             msg.writer().writeByte(40);
             msg.writer().writeByte(mob.id);
             Service.getInstance().sendMessAllPlayerInMap(mob.zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -76,15 +73,12 @@ public class MobEffectSkill {
 
     public void removeThoiMien() {
         this.isThoiMien = false;
-        Message msg;
-        try {
-            msg = new Message(-124);
+        try (Message msg = new Message(-124)) {
             msg.writer().writeByte(0); //b5
             msg.writer().writeByte(1); //b6
             msg.writer().writeByte(41); //num6
             msg.writer().writeByte(mob.id); //b7
             Service.getInstance().sendMessAllPlayerInMap(mob.zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -101,15 +95,12 @@ public class MobEffectSkill {
 
     public void removeBlindDCTT() {
         this.isBlindDCTT = false;
-        Message msg;
-        try {
-            msg = new Message(-124);
+        try (Message msg = new Message(-124)) {
             msg.writer().writeByte(0);
             msg.writer().writeByte(1);
             msg.writer().writeByte(40);
             msg.writer().writeByte(mob.id);
             Service.getInstance().sendMessAllPlayerInMap(mob.zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -126,15 +117,12 @@ public class MobEffectSkill {
 
     public void removeAnTroi() {
         isAnTroi = false;
-        Message msg;
-        try {
-            msg = new Message(-124);
+        try (Message msg = new Message(-124)) {
             msg.writer().writeByte(0); //b4
             msg.writer().writeByte(1);//b5
             msg.writer().writeByte(32);//num8
             msg.writer().writeByte(mob.id);//b6
             Service.getInstance().sendMessAllPlayerInMap(mob.zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
 
         }
@@ -145,14 +133,11 @@ public class MobEffectSkill {
     private int timeSocola;
 
     public void removeSocola() {
-        Message msg;
         this.isSocola = false;
-        try {
-            msg = new Message(-112);
+        try (Message msg = new Message(-112)) {
             msg.writer().writeByte(0);
             msg.writer().writeByte(mob.id);
             Service.getInstance().sendMessAllPlayerInMap(mob.zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
 
         }

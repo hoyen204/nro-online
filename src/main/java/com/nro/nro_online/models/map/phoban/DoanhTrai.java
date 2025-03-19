@@ -67,7 +67,7 @@ public class DoanhTrai {
         this.clan.playerOpenDoanhTrai = plOpen;
         this.clan.doanhTrai = this;
         resetDoanhTrai();
-        List<Player> plJoinDT = new ArrayList();
+        List<Player> plJoinDT = new ArrayList<>();
 
         List<Player> players = plOpen.zone.getPlayers();
         synchronized (players) {
@@ -90,7 +90,7 @@ public class DoanhTrai {
 
     //kết thúc doanh trại
     private void finish() {
-        List<Player> plOutDT = new ArrayList();
+        List<Player> plOutDT = new ArrayList<>();
         for (Zone zone : zones) {
             List<Player> players = zone.getPlayers();
             synchronized (players) {

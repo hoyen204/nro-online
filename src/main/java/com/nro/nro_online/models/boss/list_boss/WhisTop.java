@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.nro.nro_online.models.boss.list_boss;
 
 import com.nro.nro_online.consts.ConstPlayer;
@@ -16,22 +12,7 @@ import com.nro.nro_online.services.MapService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.utils.Util;
 import lombok.Getter;
-import nro.consts.ConstPlayer;
-import nro.manager.TopWhis;
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.boss.BossManager;
-import nro.models.player.Player;
-import nro.models.skill.Skill;
-import nro.services.MapService;
-import nro.services.Service;
-import nro.utils.Util;
 
-/**
- *
- * @author by Arriety
- */
 public class WhisTop extends Boss {
 
     public static final int _15_PHUT = 900;
@@ -105,7 +86,7 @@ public class WhisTop extends Boss {
             plAtt.location.y = 312;
             plAtt.zone.mapInfo(plAtt);
             plAtt.zone.loadAnotherToMe(plAtt);
-            plAtt.zone.load_Me_To_Another(plAtt);
+            plAtt.zone.loadMeToAnother(plAtt);
         }
     }
 

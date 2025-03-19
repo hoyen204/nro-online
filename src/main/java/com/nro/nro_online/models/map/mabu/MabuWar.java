@@ -23,7 +23,7 @@ import java.util.List;
 
 public class MabuWar {
     private static volatile MabuWar instance;
-    private final List<Boss> bosses = Collections.synchronizedList(new ArrayList<>());
+    public final List<Boss> bosses = Collections.synchronizedList(new ArrayList<>());
     private static LocalDateTime TIME_OPEN;
     private static LocalDateTime TIME_CLOSE;
     private static final byte HOUR_OPEN = 12;

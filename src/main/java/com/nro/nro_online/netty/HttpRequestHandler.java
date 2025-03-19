@@ -11,6 +11,17 @@ import java.util.Map;
 import com.nro.nro_online.consts.ConstAdminCommand;
 import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.AutoMaintenance;
+import com.nro.nro_online.server.Client;
+import com.nro.nro_online.server.Maintenance;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.RewardService;
+import com.nro.nro_online.services.Service;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -182,7 +193,6 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
         } catch (Exception e) {
             return createMessage("error", e.getMessage());
         }
-        return createMessage("error", "hmm");
     }
 
     private JsonObject ban(int playerID) {
@@ -257,7 +267,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
     }
 
     public JsonObject sendNoti(String text) {
-        Service.getInstance().sendBigMessAllPlayer是非(1139, "|7|Thông Báo :\n" + text.replaceAll(";", "\n"));
+        Service.getInstance().sendBigMessAllPlayer(1139, "|7|Thông Báo :\n" + text.replaceAll(";", "\n"));
         return createMessage("success", "Thành công!");
     }
 

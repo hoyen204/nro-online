@@ -7,20 +7,16 @@ import com.nro.nro_online.consts.ConstMap;
 import com.nro.nro_online.models.map.phoban.DoanhTrai;
 import com.nro.nro_online.models.map.war.BlackBallWar;
 import com.nro.nro_online.models.npc.Npc;
-import nro.consts.ConstMap;
-import nro.models.map.phoban.BanDoKhoBau;
-import nro.models.map.phoban.DoanhTrai;
-import nro.models.map.war.BlackBallWar;
-import nro.models.map.zones.Barrack;
-import nro.models.mob.Mob;
-import nro.models.mob.MobFactory;
-import nro.models.mob.MobTemplate;
-import nro.models.npc.Npc;
-import nro.models.npc.NpcFactory;
-import nro.models.player.Player;
-import nro.server.Manager;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.models.map.phoban.BanDoKhoBau;
+import com.nro.nro_online.models.map.zones.Barrack;
+import com.nro.nro_online.models.mob.Mob;
+import com.nro.nro_online.models.mob.MobFactory;
+import com.nro.nro_online.models.mob.MobTemplate;
+import com.nro.nro_online.models.npc.NpcFactory;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Manager;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 /**
  *
@@ -208,47 +204,27 @@ public class Map implements Runnable {
 
     private void initItem() {
         for (Zone zone : zones) {
-            ItemMap itemMap = null;
             switch (this.mapId) {
-                case 21:
-                    itemMap = new ItemMap(zone, 74, 1, 633, 315, -1);
-                    break;
-                case 22:
-                    itemMap = new ItemMap(zone, 74, 1, 56, 315, -1);
-                    break;
-                case 23:
-                    itemMap = new ItemMap(zone, 74, 1, 633, 320, -1);
-                    break;
-                case 42:
-                    itemMap = new ItemMap(zone, 78, 1, 70, 288, -1);
-                    break;
-                case 43:
-                    itemMap = new ItemMap(zone, 78, 1, 70, 264, -1);
-                    break;
-                case 44:
-                    itemMap = new ItemMap(zone, 78, 1, 70, 288, -1);
-                    break;
-                case 85: //1 sao đen
-                    itemMap = new ItemMap(zone, 372, 1, 0, 0, -1);
-                    break;
-                case 86: //2 sao đen
-                    itemMap = new ItemMap(zone, 373, 1, 0, 0, -1);
-                    break;
-                case 87: //3 sao đen
-                    itemMap = new ItemMap(zone, 374, 1, 0, 0, -1);
-                    break;
-                case 88: //4 sao đen
-                    itemMap = new ItemMap(zone, 375, 1, 0, 0, -1);
-                    break;
-                case 89: //5 sao đen
-                    itemMap = new ItemMap(zone, 376, 1, 0, 0, -1);
-                    break;
-                case 90: //6 sao đen
-                    itemMap = new ItemMap(zone, 377, 1, 0, 0, -1);
-                    break;
-                case 91: //7 sao đen
-                    itemMap = new ItemMap(zone, 378, 1, 0, 0, -1);
-                    break;
+            case 21 -> new ItemMap(zone, 74, 1, 633, 315, -1);
+            case 22 -> new ItemMap(zone, 74, 1, 56, 315, -1);
+            case 23 -> new ItemMap(zone, 74, 1, 633, 320, -1);
+            case 42 -> new ItemMap(zone, 78, 1, 70, 288, -1);
+            case 43 -> new ItemMap(zone, 78, 1, 70, 264, -1);
+            case 44 -> new ItemMap(zone, 78, 1, 70, 288, -1);
+            case 85 -> //1 sao đen
+                    new ItemMap(zone, 372, 1, 0, 0, -1);
+            case 86 -> //2 sao đen
+                    new ItemMap(zone, 373, 1, 0, 0, -1);
+            case 87 -> //3 sao đen
+                    new ItemMap(zone, 374, 1, 0, 0, -1);
+            case 88 -> //4 sao đen
+                    new ItemMap(zone, 375, 1, 0, 0, -1);
+            case 89 -> //5 sao đen
+                    new ItemMap(zone, 376, 1, 0, 0, -1);
+            case 90 -> //6 sao đen
+                    new ItemMap(zone, 377, 1, 0, 0, -1);
+            case 91 -> //7 sao đen
+                    new ItemMap(zone, 378, 1, 0, 0, -1);
             }
         }
 
@@ -265,7 +241,7 @@ public class Map implements Runnable {
 
     //--------------------------------------------------------------------------
     public int yPhysicInTop(int x, int y) {
-        int rX = (int) x / SIZE;
+        int rX = x / SIZE;
         if (rX < 0 || rX >= tileMap[0].length || y / SIZE < 0 || y / SIZE >= tileMap.length) {
             return 0;
         }

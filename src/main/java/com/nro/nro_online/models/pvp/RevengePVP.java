@@ -1,12 +1,12 @@
 package com.nro.nro_online.models.pvp;
 
-import nro.consts.ConstPlayer;
-import nro.models.player.Player;
-import nro.services.FriendAndEnemyService;
-import nro.services.PlayerService;
-import nro.services.Service;
-import nro.services.func.PVPServcice;
-import nro.utils.Util;
+import com.nro.nro_online.consts.ConstPlayer;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.FriendAndEnemyService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.func.PVPServcice;
+import com.nro.nro_online.utils.Util;
 
 /**
  *

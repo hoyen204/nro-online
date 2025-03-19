@@ -1,10 +1,10 @@
 package com.nro.nro_online.models.boss.cold;
 
-import nro.models.boss.*;
-import nro.models.map.ItemMap;
-import nro.models.player.Player;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.*;
+import com.nro.nro_online.models.map.ItemMap;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 /**
  * Arriety

@@ -7,7 +7,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.Future;
-import nro.server.Manager;
+import com.nro.nro_online.server.Manager;
 
 public class NettyServer extends Thread {
 

@@ -1,14 +1,14 @@
 package com.nro.nro_online.models.boss.hell;
 
-import nro.models.boss.Boss;
-import nro.models.boss.BossData;
-import nro.models.boss.BossFactory;
-import nro.models.item.Item;
-import nro.models.player.Player;
-import nro.services.InventoryService;
-import nro.services.ItemService;
-import nro.services.Service;
-import nro.utils.Util;
+import com.nro.nro_online.models.boss.Boss;
+import com.nro.nro_online.models.boss.BossData;
+import com.nro.nro_online.models.boss.BossFactory;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.services.InventoryService;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Util;
 
 public class DraculaHutMau extends Boss {
 

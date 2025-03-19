@@ -5,11 +5,16 @@ import java.util.List;
 
 import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.mob.Mob;
+import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.services.EffSkinService;
 import com.nro.nro_online.services.InventoryService;
 import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.ItemTimeService;
 import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.PlayerService;
 import com.nro.nro_online.services.Service;
+import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.Util;
 
 public class EffectSkin {
@@ -556,16 +561,12 @@ public class EffectSkin {
     }
 
     public void sendPlayerPrepareBom(Player player, int affterMiliseconds) {
-        Message msg;
-        try {
-            msg = new Message(-45);
+        try (Message msg = new Message(-45)) {
             msg.writer().writeByte(7);
             msg.writer().writeInt((int) player.id);
-//            msg.writer().writeShort(player.playerSkill.skillSelect.skillId);
             msg.writer().writeShort(104);
             msg.writer().writeShort(affterMiliseconds);
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
