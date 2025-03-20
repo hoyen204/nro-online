@@ -1,5 +1,12 @@
 package com.nro.nro_online.manager;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.nro.nro_online.consts.ConstItem;
 import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.models.map.Map;
@@ -22,13 +29,17 @@ public class NamekBallManager extends AbsManager<NamekBall> {
     }
 
     public void initBall() {
-        int id = -9999;
+        Set<Map> usedMaps = HashSet.newHashSet(7);
+        List<Integer> mapIds = new ArrayList<>(Arrays.asList(7, 8, 9, 10, 11, 12, 13));
+        Collections.shuffle(mapIds); // Random thứ tự
         for (int i = 0; i < 7; i++) {
-            Map m = MapService.gI().getMapById(Util.nextInt(7, 13));
-            Zone z = m.zones.get(Util.nextInt(0, m.zones.size() - 1));
-            int y = m.yPhysicInTop(m.mapWidth / 2, m.mapHeight / 2);
-            NamekBall ball = new NamekBall(z, ConstItem.NGOC_RONG_NAMEK_1_SAO + i, 1, m.mapWidth / 2, y, -1);
-            ball.itemMapId = id++;
+            Map map = MapService.gI().getMapById(mapIds.get(i));
+            usedMaps.add(map);
+
+            Zone zone = map.zones.get(Util.nextInt(0, map.zones.size() - 1));
+            int y = map.yPhysicInTop(map.mapWidth / 2, map.mapHeight / 2);
+            NamekBall ball = new NamekBall(zone, ConstItem.NGOC_RONG_NAMEK_1_SAO + i, 1, map.mapWidth / 2, y, -1);
+            ball.itemMapId = -9999 + i;
             ball.setIndex(i);
             add(ball);
         }

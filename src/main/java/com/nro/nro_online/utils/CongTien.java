@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 import com.nro.nro_online.jdbc.DBService;
-import nro.jdbc.DBService;
 
 public class CongTien {
 

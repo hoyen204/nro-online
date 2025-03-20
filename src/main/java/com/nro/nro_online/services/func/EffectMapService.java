@@ -8,18 +8,7 @@ import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.services.Service;
-import nro.consts.Cmd;
-import nro.models.map.EffectEventManager;
-import nro.models.map.EffectEventTemplate;
-import nro.models.map.Zone;
-import nro.models.player.Player;
-import nro.server.Manager;
-import nro.server.io.Message;
-import nro.services.Service;
 
-/**
- * @Build Arriety
- */
 public class EffectMapService {
 
     private static EffectMapService i;
@@ -48,9 +37,7 @@ public class EffectMapService {
     }
 
     public void sendEffectMapToPlayer(Player player, int id, int layer, int loop, int x, int y, int delay) {
-        Message msg;
-        try {
-            msg = new Message(113);
+        try (Message msg = new Message(113)) {
             msg.writer().writeByte(loop);
             msg.writer().writeByte(layer);
             msg.writer().writeByte(id);
@@ -58,15 +45,12 @@ public class EffectMapService {
             msg.writer().writeShort(y);
             msg.writer().writeShort(delay);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
 
     public void sendCharEffect(Player player, byte type, short id, byte layer, byte loop, short delay, boolean isStand) {
-        Message msg;
-        try {
-            msg = new Message(Cmd.CHAR_EFFECT);
+        try (Message msg = new Message(Cmd.CHAR_EFFECT)) {
             msg.writer().writeByte(type);
             msg.writer().writeInt((int) player.id);
             if (type == 0) {
@@ -79,15 +63,12 @@ public class EffectMapService {
                 msg.writer().writeShort(id);
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
 
     public void sendEffectMapToAllInMap(Zone zone, int id, int layer, int loop, int x, int y, int delay) {
-        Message msg;
-        try {
-            msg = new Message(113);
+        try (Message msg = new Message(113)) {
             msg.writer().writeByte(loop);
             msg.writer().writeByte(layer);
             msg.writer().writeByte(id);
@@ -95,7 +76,6 @@ public class EffectMapService {
             msg.writer().writeShort(y);
             msg.writer().writeShort(delay);
             Service.getInstance().sendMessAllPlayerInMap(zone, msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }

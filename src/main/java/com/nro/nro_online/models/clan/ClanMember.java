@@ -29,11 +29,12 @@ public class ClanMember {
     @SerializedName("last_request")
     public int lastRequest;
     @SerializedName("join_time")
-    public long joinTime;
+    public int joinTime;
     @SerializedName("ask_pea_time")
     public long timeAskPea;
 
-    public ClanMember() {}
+    public ClanMember() {
+    }
 
     public ClanMember(Player player, Clan clan, byte role) {
         this.clan = clan;
@@ -49,7 +50,7 @@ public class ClanMember {
         this.memberPoint = 0;
         this.clanPoint = 0;
         this.lastRequest = 0;
-        this.joinTime = System.currentTimeMillis() / 1000;
+        this.joinTime = (int) System.currentTimeMillis() / 1000;
     }
 
     public int getNumDateFromJoinTimeToToday() {

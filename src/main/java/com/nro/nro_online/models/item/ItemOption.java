@@ -30,8 +30,8 @@ public class ItemOption {
     }
 
     public ItemOption(ResultSet rs) throws SQLException {
-        this.optionTemplate = ItemService.gI().getItemOptionTemplate(rs.getInt(2));
-        this.param = rs.getInt(3);
+        this.optionTemplate = ItemService.gI().getItemOptionTemplate(rs.getInt(1));
+        this.param = rs.getInt(2);
     }
 
     public String getOptionString() {

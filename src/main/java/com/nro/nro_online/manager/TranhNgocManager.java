@@ -8,8 +8,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.nro.nro_online.models.dragon_namec_war.TranhNgoc;
 import com.nro.nro_online.models.player.Player;
-import nro.models.phuban.DragonNamecWar.TranhNgoc;
-import nro.models.player.Player;
 
 /**
  *

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.nro.nro_online.art.ServerLog;
 import com.nro.nro_online.consts.ConstNpc;
 import com.nro.nro_online.consts.ConstPet;
 import com.nro.nro_online.lib.RandomCollection;
@@ -12,6 +13,7 @@ import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.mob.ArrietyDrop;
 import com.nro.nro_online.models.npc.Npc;
+import com.nro.nro_online.models.npc.NpcManager;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.ServerNotify;
 import com.nro.nro_online.server.io.Message;
@@ -21,9 +23,6 @@ import com.nro.nro_online.services.PetService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.utils.Util;
 
-/**
- * @Build Arriety
- */
 public class CombineServiceNew {
 
     private static final int COST_DOI_VE_DOI_DO_HUY_DIET = 500000000;
@@ -129,7 +128,7 @@ public class CombineServiceNew {
             msg.writer().writeUTF(getTextInfoTabCombine(type));
             msg.writer().writeUTF(getTextTopTabCombine(type));
             player.sendMessage(msg);
-            msg.cleanup();
+            msg.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2125,7 +2124,7 @@ public class CombineServiceNew {
                     // lew lew Chính béo <33
                     if (Util.isTrue(tile, 100)) {
                         int typeOption = 0;
-                        int check = dokh.checkSet(dokh);
+                        int check = dokh.checkGodClothes(dokh);
                         for (ItemOption io : dokh.itemOptions) {
                             switch (io.optionTemplate.id) {
                                 case 129:
@@ -2464,6 +2463,7 @@ public class CombineServiceNew {
     public boolean isItemPhaLeHoa(Item it) {
         return it.template.id == 2053;
     }
+
 
     public boolean isItemCaiTrang(Item it) {
         return it.template.type == 5;

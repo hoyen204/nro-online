@@ -1,5 +1,21 @@
 package com.nro.nro_online.jdbc.daos;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.util.CollectionUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.nro.nro_online.card.Card;
@@ -18,7 +34,13 @@ import com.nro.nro_online.models.npc.specialnpc.BillEgg;
 import com.nro.nro_online.models.npc.specialnpc.EggLinhThu;
 import com.nro.nro_online.models.npc.specialnpc.MabuEgg;
 import com.nro.nro_online.models.npc.specialnpc.MagicTree;
-import com.nro.nro_online.models.player.*;
+import com.nro.nro_online.models.player.Enemy;
+import com.nro.nro_online.models.player.Friend;
+import com.nro.nro_online.models.player.Fusion;
+import com.nro.nro_online.models.player.MiniPet;
+import com.nro.nro_online.models.player.Pet;
+import com.nro.nro_online.models.player.PetFollow;
+import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.models.skill.Skill;
 import com.nro.nro_online.models.task.Achievement;
 import com.nro.nro_online.models.task.AchievementTemplate;
@@ -27,29 +49,23 @@ import com.nro.nro_online.server.Client;
 import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.AntiLogin;
 import com.nro.nro_online.server.io.Session;
-import com.nro.nro_online.services.*;
+import com.nro.nro_online.services.ClanService;
+import com.nro.nro_online.services.IntrinsicService;
+import com.nro.nro_online.services.ItemService;
+import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.services.PlayerService;
+import com.nro.nro_online.services.Service;
+import com.nro.nro_online.services.TaskService;
 import com.nro.nro_online.utils.SkillUtil;
 import com.nro.nro_online.utils.TimeUtil;
-
-import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.springframework.util.CollectionUtils;
 
 public class GodGK {
     private static final Gson GSON = new Gson();
 
     public static boolean login(Session session, AntiLogin al) {
         try (Connection conn = DBService.gI().getConnectionForLogin();
-                PreparedStatement ps = conn.prepareStatement("SELECT * FROM account WHERE username = ? AND password = ? LIMIT 1")) {
+                PreparedStatement ps = conn
+                        .prepareStatement("SELECT * FROM account WHERE username = ? AND password = ? LIMIT 1")) {
             ps.setString(1, session.uu);
             ps.setString(2, session.pp);
             try (ResultSet rs = ps.executeQuery()) {
@@ -86,7 +102,8 @@ public class GodGK {
                         long lastTimeLogout = rs.getTimestamp("last_time_logout").getTime();
                         int secondsPass = (int) ((System.currentTimeMillis() - lastTimeLogout) / 1000);
                         if (secondsPass < Manager.SECOND_WAIT_LOGIN && !session.isAdmin) {
-                            Service.getInstance().sendThongBaoOK(session, "Vui lòng chờ " + (Manager.SECOND_WAIT_LOGIN - secondsPass) + " giây để đăng nhập lại.");
+                            Service.getInstance().sendThongBaoOK(session, "Vui lòng chờ "
+                                    + (Manager.SECOND_WAIT_LOGIN - secondsPass) + " giây để đăng nhập lại.");
                             return false;
                         }
                     }
@@ -216,7 +233,8 @@ public class GodGK {
         int mapId = locationData[2];
         if (MapService.gI().isMapDoanhTrai(mapId) || MapService.gI().isMapBlackBallWar(mapId) ||
                 MapService.gI().isMapBanDoKhoBau(mapId) || mapId == 126 || mapId == ConstMap.CON_DUONG_RAN_DOC ||
-                mapId == ConstMap.CON_DUONG_RAN_DOC_142 || mapId == ConstMap.CON_DUONG_RAN_DOC_143 || mapId == ConstMap.HOANG_MAC) {
+                mapId == ConstMap.CON_DUONG_RAN_DOC_142 || mapId == ConstMap.CON_DUONG_RAN_DOC_143
+                || mapId == ConstMap.HOANG_MAC) {
             mapId = player.gender + 21;
             player.location.x = 300;
             player.location.y = 336;
@@ -253,13 +271,22 @@ public class GodGK {
     }
 
     private static void loadItems(Player player, ResultSet rs, String column, List<Item> itemList) throws SQLException {
-        List<HashMap<String, Object>> items = GSON.fromJson(rs.getString(column), new TypeToken<List<HashMap<String, Object>>>() {}.getType());
+        List<HashMap<String, Object>> items = GSON.fromJson(rs.getString(column),
+                new TypeToken<List<HashMap<String, Object>>>() {
+                }.getType());
         for (HashMap<String, Object> data : items) {
             short tempId = ((Number) data.get("temp_id")).shortValue();
-            Item item = tempId != -1 ? ItemService.gI().createNewItem(tempId, ((Number) data.get("quantity")).intValue()) :
-                    ItemService.gI().createNullItem();
+            Item item = tempId != -1
+                    ? ItemService.gI().createNewItem(tempId, ((Number) data.get("quantity")).intValue())
+                    : ItemService.gI().createNullItem();
             if (tempId != -1) {
-                List<int[]> options = (List<int[]>) data.get("option");
+                Object rawOptions = data.get("option");
+                List<int[]> options = null;
+                if (rawOptions instanceof List<?>) {
+                    options = (List<int[]>) rawOptions;
+                } else {
+                    options = new ArrayList<>();
+                }
                 for (int[] opt : options) {
                     item.itemOptions.add(new ItemOption(opt[0], opt[1]));
                 }
@@ -273,13 +300,17 @@ public class GodGK {
     }
 
     private static void loadFriends(Player player, ResultSet rs) throws SQLException {
-        List<Friend> friends = GSON.fromJson(rs.getString("friends"), new TypeToken<List<Friend>>() {}.getType());
-        if (friends != null) player.friends.addAll(friends);
+        List<Friend> friends = GSON.fromJson(rs.getString("friends"), new TypeToken<List<Friend>>() {
+        }.getType());
+        if (friends != null)
+            player.friends.addAll(friends);
     }
 
     private static void loadEnemies(Player player, ResultSet rs) throws SQLException {
-        List<Enemy> enemies = GSON.fromJson(rs.getString("enemies"), new TypeToken<List<Enemy>>() {}.getType());
-        if (enemies != null) player.enemies.addAll(enemies);
+        List<Enemy> enemies = GSON.fromJson(rs.getString("enemies"), new TypeToken<List<Enemy>>() {
+        }.getType());
+        if (enemies != null)
+            player.enemies.addAll(enemies);
     }
 
     private static void loadIntrinsic(Player player, ResultSet rs) throws SQLException {
@@ -383,7 +414,8 @@ public class GodGK {
     }
 
     private static void loadAchievements(Player player, ResultSet rs) throws SQLException {
-        List<Achievement> achievements = GSON.fromJson(rs.getString("achivements"), new TypeToken<List<Achievement>>() {}.getType());
+        List<Achievement> achievements = GSON.fromJson(rs.getString("achivements"), new TypeToken<List<Achievement>>() {
+        }.getType());
         if (achievements != null) {
             player.playerTask.achievements.addAll(achievements);
             List<AchievementTemplate> templates = AchieveManager.getInstance().getList();
@@ -406,17 +438,23 @@ public class GodGK {
     }
 
     private static void loadEggs(Player player, ResultSet rs) throws SQLException {
-        HashMap<String, Long> mabuEgg = GSON.fromJson(rs.getString("data_mabu_egg"), new TypeToken<HashMap<String, Long>>() {}.getType());
+        HashMap<String, Long> mabuEgg = GSON.fromJson(rs.getString("data_mabu_egg"),
+                new TypeToken<HashMap<String, Long>>() {
+                }.getType());
         if (mabuEgg != null && mabuEgg.get("create_time") != null) {
             player.mabuEgg = new MabuEgg(player, mabuEgg.get("create_time"), mabuEgg.get("time_done"));
         }
 
-        HashMap<String, Long> linhThuEgg = GSON.fromJson(rs.getString("data_egg_linhthu"), new TypeToken<HashMap<String, Long>>() {}.getType());
+        HashMap<String, Long> linhThuEgg = GSON.fromJson(rs.getString("data_egg_linhthu"),
+                new TypeToken<HashMap<String, Long>>() {
+                }.getType());
         if (linhThuEgg != null && linhThuEgg.get("create_time") != null) {
             player.egglinhthu = new EggLinhThu(player, linhThuEgg.get("create_time"), linhThuEgg.get("time_done"));
         }
 
-        HashMap<String, Long> billEgg = GSON.fromJson(rs.getString("data_bill_egg"), new TypeToken<HashMap<String, Long>>() {}.getType());
+        HashMap<String, Long> billEgg = GSON.fromJson(rs.getString("data_bill_egg"),
+                new TypeToken<HashMap<String, Long>>() {
+                }.getType());
         if (billEgg != null && billEgg.get("create_time") != null) {
             player.billEgg = new BillEgg(player, billEgg.get("create_time"), billEgg.get("time_done"));
         }
@@ -440,10 +478,11 @@ public class GodGK {
     }
 
     private static void loadSkills(Player player, ResultSet rs) throws SQLException {
-        List<long[]> skills = GSON.fromJson(rs.getString("skills"), new TypeToken<List<long[]>>() {}.getType());
+        List<long[]> skills = GSON.fromJson(rs.getString("skills"), new TypeToken<List<long[]>>() {
+        }.getType());
         for (long[] skillData : skills) {
-            Skill skill = skillData[2] != 0 ? SkillUtil.createSkill((int) skillData[0], (byte) skillData[2]) :
-                    SkillUtil.createSkillLevel0((int) skillData[0]);
+            Skill skill = skillData[2] != 0 ? SkillUtil.createSkill((int) skillData[0], (byte) skillData[2])
+                    : SkillUtil.createSkillLevel0((int) skillData[0]);
             skill.lastTimeUseThisSkill = skillData[1];
             player.playerSkill.skills.add(skill);
         }
@@ -461,19 +500,16 @@ public class GodGK {
         }
         if (player.playerSkill.skillSelect == null) {
             player.playerSkill.skillSelect = player.playerSkill.getSkillbyId(
-                    player.gender == ConstPlayer.TRAI_DAT ? Skill.DRAGON :
-                            (player.gender == ConstPlayer.NAMEC ? Skill.DEMON : Skill.GALICK));
+                    player.gender == ConstPlayer.TRAI_DAT ? Skill.DRAGON
+                            : (player.gender == ConstPlayer.NAMEC ? Skill.DEMON : Skill.GALICK));
         }
     }
 
     private static void loadCollectionBook(Player player, ResultSet rs) throws SQLException {
-        List<Card> cards = GSON.fromJson(rs.getString("collection_book"), new TypeToken<List<Card>>() {}.getType());
+        List<Card> cards = GSON.fromJson(rs.getString("collection_book"), new TypeToken<List<Card>>() {
+        }.getType());
         CollectionBook book = new CollectionBook(player);
-        Map<Integer, Card> cardMap = new HashMap<>();
-        if (!CollectionUtils.isEmpty(cards)) {
-            cardMap = cards.stream().collect(Collectors.toMap(Card::getId, Function.identity()));
-        }
-        book.setCards(cardMap);
+        book.setCards(cards);
         book.init();
         player.setCollectionBook(book);
     }
@@ -515,7 +551,9 @@ public class GodGK {
     }
 
     private static void loadPet(Player player, ResultSet rs) throws SQLException {
-        HashMap<String, Object> petInfo = GSON.fromJson(rs.getString("pet_info"), new TypeToken<HashMap<String, Object>>() {}.getType());
+        HashMap<String, Object> petInfo = GSON.fromJson(rs.getString("pet_info"),
+                new TypeToken<HashMap<String, Object>>() {
+                }.getType());
         if (petInfo != null && !petInfo.isEmpty()) {
             Pet pet = new Pet(player);
             pet.id = -player.id;
@@ -523,11 +561,14 @@ public class GodGK {
             pet.typePet = ((Number) petInfo.get("is_mabu")).byteValue();
             pet.name = (String) petInfo.get("name");
             player.fusion.typeFusion = ((Number) petInfo.get("type_fusion")).byteValue();
-            player.fusion.lastTimeFusion = System.currentTimeMillis() - (Fusion.TIME_FUSION - ((Number) petInfo.get("left_fusion")).intValue());
+            player.fusion.lastTimeFusion = System.currentTimeMillis()
+                    - (Fusion.TIME_FUSION - ((Number) petInfo.get("left_fusion")).intValue());
             pet.status = ((Number) petInfo.get("status")).byteValue();
             pet.setLever(petInfo.containsKey("level") ? ((Number) petInfo.get("level")).intValue() : 0);
 
-            HashMap<String, Long> petPoint = GSON.fromJson(rs.getString("pet_point"), new TypeToken<HashMap<String, Long>>() {}.getType());
+            HashMap<String, Long> petPoint = GSON.fromJson(rs.getString("pet_point"),
+                    new TypeToken<HashMap<String, Long>>() {
+                    }.getType());
             pet.nPoint.stamina = petPoint.get("stamina").shortValue();
             pet.nPoint.maxStamina = petPoint.get("max_stamina").shortValue();
             pet.nPoint.hpg = petPoint.get("hpg").intValue();
@@ -546,16 +587,17 @@ public class GodGK {
                 pet.inventory.itemsBody.add(ItemService.gI().createNullItem());
             }
 
-            List<int[]> petSkills = GSON.fromJson(rs.getString("pet_skill"), new TypeToken<List<int[]>>() {}.getType());
+            List<int[]> petSkills = GSON.fromJson(rs.getString("pet_skill"), new TypeToken<List<int[]>>() {
+            }.getType());
             for (int[] skillData : petSkills) {
-                Skill skill = skillData[1] != 0 ? SkillUtil.createSkill(skillData[0], (byte) skillData[1]) :
-                        SkillUtil.createSkillLevel0(skillData[0]);
+                Skill skill = skillData[1] != 0 ? SkillUtil.createSkill(skillData[0], (byte) skillData[1])
+                        : SkillUtil.createSkillLevel0(skillData[0]);
                 switch (skill.template.id) {
-                case Skill.KAMEJOKO:
-                case Skill.MASENKO:
-                case Skill.ANTOMIC:
-                    skill.coolDown = 1000;
-                    break;
+                    case Skill.KAMEJOKO:
+                    case Skill.MASENKO:
+                    case Skill.ANTOMIC:
+                        skill.coolDown = 1000;
+                        break;
                 }
                 pet.playerSkill.skills.add(skill);
             }
@@ -568,7 +610,8 @@ public class GodGK {
     }
 
     private static void updateAccountLogin(Connection conn, Session session) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("UPDATE account SET last_time_login = ?, ip_address = ? WHERE id = ?")) {
+        try (PreparedStatement ps = conn
+                .prepareStatement("UPDATE account SET last_time_login = ?, ip_address = ? WHERE id = ?")) {
             ps.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
             ps.setString(2, session.ipAddress);
             ps.setInt(3, session.userId);

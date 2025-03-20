@@ -1,6 +1,7 @@
 package com.nro.nro_online.services.func;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,6 +21,7 @@ import com.nro.nro_online.services.ItemService;
 import com.nro.nro_online.services.PlayerService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.Util;
 
 public class Trade {
 
@@ -64,23 +66,22 @@ public class Trade {
     public void openTabTrade() {
         this.lastTimeStart = System.currentTimeMillis();
         this.start = true;
-        Message msg;
-        try {
-            msg = new Message(-86);
-            msg.writer().writeByte(1);
-            msg.writer().writeInt((int) player1.id);
-            player2.sendMessage(msg);
-            msg.cleanup();
-
-            msg = new Message(-86);
-            msg.writer().writeByte(1);
-            msg.writer().writeInt((int) player2.id);
-            player1.sendMessage(msg);
-            msg.cleanup();
-            Service.getInstance().hideWaitDialog(player1);
-            Service.getInstance().hideWaitDialog(player2);
-        } catch (Exception e) {
+        try (Message msg1 = new Message(-86)) {
+            msg1.writer().writeByte(1);
+            msg1.writer().writeInt((int) player1.id);
+            player2.sendMessage(msg1);
+        } catch (IOException e) {
         }
+
+        try (Message msg2 = new Message(-86)) {
+            msg2.writer().writeByte(1);
+            msg2.writer().writeInt((int) player2.id);
+            player1.sendMessage(msg2);
+        } catch (IOException e) {
+        }
+
+        Service.getInstance().hideWaitDialog(player1);
+        Service.getInstance().hideWaitDialog(player2);
     }
 
     public void addItemTrade(Player pl, byte index, int quantity) {
@@ -153,17 +154,16 @@ public class Trade {
     }
 
     private void removeItemTrade(Player pl, byte index) {
-        Message msg;
-        try {
-            msg = new Message(-86);
+        try (Message msg = new Message(-86)) {
             msg.writer().writeByte(2);
             msg.writer().write(index);
             pl.sendMessage(msg);
-            msg.cleanup();
             Service.getInstance().sendThongBao(pl, "Không thể giao dịch vật phẩm này");
-        } catch (Exception e) {
+        } catch (IOException e) {
+            // Lỗi thì kệ, player2 chịu trận 😅
         }
     }
+
 
     private boolean isItemCannotTran(Item item) {
         if (item.template.id == 2039
@@ -230,14 +230,11 @@ public class Trade {
     }
 
     private void closeTab() {
-        Message msg;
-        try {
-            msg = new Message(-86);
+        try (Message msg = new Message(-86)) {
             msg.writer().writeByte(7);
             player1.sendMessage(msg);
             player2.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
         }
     }
 
@@ -255,9 +252,7 @@ public class Trade {
     }
 
     public void lockTran(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(-86);
+        try (Message msg = new Message(-86)) {
             DataOutputStream ds = msg.writer();
             ds.writeByte(6);
             if (pl.equals(player1)) {
@@ -299,8 +294,7 @@ public class Trade {
                 ds.flush();
                 player1.sendMessage(msg);
             }
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
             Log.error(Trade.class, e);
         }
     }

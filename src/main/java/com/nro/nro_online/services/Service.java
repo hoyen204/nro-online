@@ -7,12 +7,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import static nro.manager.TopPlayerManager.GetTopNap;
-import static nro.manager.TopPlayerManager.GetTopPower;
-
+import com.nro.nro_online.art.ServerLog;
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.consts.ConstNpc;
+import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.data.DataGame;
+import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.jdbc.daos.AccountDAO;
+import com.nro.nro_online.manager.TopManager;
+import com.nro.nro_online.manager.TopToTask;
+import com.nro.nro_online.models.Part;
+import com.nro.nro_online.models.PartManager;
+import com.nro.nro_online.models.TopPlayer;
 import com.nro.nro_online.models.boss.Boss;
 import com.nro.nro_online.models.boss.BossManager;
 import com.nro.nro_online.models.boss.list_boss.WhisTop;
@@ -20,24 +29,27 @@ import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.map.ItemMap;
 import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.map.dungeon.zones.ZDungeon;
+import com.nro.nro_online.models.mob.Mob;
 import com.nro.nro_online.models.npc.specialnpc.BillEgg;
 import com.nro.nro_online.models.npc.specialnpc.EggLinhThu;
 import com.nro.nro_online.models.npc.specialnpc.MabuEgg;
 import com.nro.nro_online.models.player.Pet;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.models.skill.Skill;
 import com.nro.nro_online.power.Caption;
 import com.nro.nro_online.power.CaptionManager;
 import com.nro.nro_online.server.Client;
+import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.server.io.Session;
 import com.nro.nro_online.services.func.ChangeMapService;
 import com.nro.nro_online.services.func.Input;
+import com.nro.nro_online.utils.FileIO;
+import com.nro.nro_online.utils.Log;
+import com.nro.nro_online.utils.TimeUtil;
 import com.nro.nro_online.utils.Util;
 
-/**
- * @Build Arriety
- * @author Administrator
- */
 public class Service {
 
     private static Service instance;
@@ -53,8 +65,7 @@ public class Service {
         if (!pl.idEffChar.contains(id)) {
             pl.idEffChar.add(id);
         }
-        try {
-            Message msg = new Message(-128);
+        try (Message msg = new Message(-128)) {
             msg.writer().writeByte(0);
             msg.writer().writeInt((int) pl.id);
             msg.writer().writeShort(id);
@@ -64,32 +75,27 @@ public class Service {
             msg.writer().writeByte(stand);
             sendMessAllPlayerInMap(pl.zone, msg);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(Service.class, e, "Lỗi add effect char " + pl.id);
         }
     }
 
     public void switchToRegisterScr(Session session) {
-        Message message;
-        try {
-            message = new Message(42);
+        try (Message message = new Message(42)) {
             message.writer().writeByte(0);
             session.sendMessage(message);
-            message.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi switch to register scr " + session.player.id);
         }
     }
 
     public void sendTextTime(Player pl, byte id, String name, short time) {
-        Message msg;
-        try {
-            msg = new Message(Cmd.MESSAGE_TIME);
+        try (Message msg = new Message(Cmd.MESSAGE_TIME)) {
             msg.writer().writeByte(id);
             msg.writer().writeUTF(name);
             msg.writer().writeShort(time);
             sendMessAllPlayerInMap(pl.zone, msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send text time " + pl.id);
         }
     }
 
@@ -104,10 +110,8 @@ public class Service {
     }
 
     public void sendPetFollow(Player player, short smallId) {
-        Message msg;
-        try {
+        try (Message msg = new Message(31)) {
             if (player != null) {
-                msg = new Message(31);
                 msg.writer().writeInt((int) player.id);
                 if (smallId == 0) {
                     msg.writer().writeByte(0);// type 0
@@ -115,7 +119,7 @@ public class Service {
                     msg.writer().writeByte(1);// type 1
                     msg.writer().writeShort(smallId);
                     msg.writer().writeByte(1);
-                    int[] fr = new int[]{0, 1, 2, 3, 4, 5, 6, 7};
+                    int[] fr = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
                     msg.writer().writeByte(fr.length);
                     for (int i = 0; i < fr.length; i++) {
                         msg.writer().writeByte(fr[i]);
@@ -124,26 +128,22 @@ public class Service {
                     msg.writer().writeShort(smallId == 15067 ? 65 : 75);
                 }
                 sendMessAllPlayerInMap(player, msg);
-                msg.cleanup();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send pet follow " + player.id);
         }
     }
 
     public void LinkService(Player player, int iconId, String text, String p2, String caption) {
-        try {
-            Message msg;
-            msg = new Message(-70);
+        try (Message msg = new Message(-70)) {
             msg.writer().writeShort(iconId);
             msg.writer().writeUTF(text);
             msg.writer().writeByte(1);
             msg.writer().writeUTF(p2); // link sex
             msg.writer().writeUTF(caption);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(Service.class, e, "Lỗi link service " + player.id);
         }
     }
 
@@ -153,14 +153,12 @@ public class Service {
             return;
         }
         short smallId = (short) (linhThu.template.iconID - 1);
-        Message msg;
-        try {
-            msg = new Message(31);
+        try (Message msg = new Message(31)) {
             msg.writer().writeInt((int) pl.id);
             msg.writer().writeByte(1);
             msg.writer().writeShort(smallId);
             msg.writer().writeByte(1);
-            int[] fr = new int[]{0, 1, 2, 3, 4, 5, 6, 7};
+            int[] fr = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
             msg.writer().writeByte(fr.length);
             for (int i = 0; i < fr.length; i++) {
                 msg.writer().writeByte(fr[i]);
@@ -168,24 +166,23 @@ public class Service {
             msg.writer().writeShort(smallId == 15067 ? 65 : 75);
             msg.writer().writeShort(smallId == 15067 ? 65 : 75);
             me.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send pet follow to me " + pl.id);
         }
     }
 
     public void Mabu14hAttack(Boss mabu, Player plAttack, int x, int y, byte skillId) {
         mabu.isUseSpeacialSkill = true;
         mabu.lastTimeUseSpeacialSkill = System.currentTimeMillis();
-        try {
-            Message msg = new Message(51);
+        try (Message msg = new Message(51)) {
             msg.writer().writeInt((int) mabu.id);
             msg.writer().writeByte(skillId);
             msg.writer().writeShort(x);
             msg.writer().writeShort(y);
             if (skillId == 1) {
                 msg.writer().writeByte(1);
-                int dame = plAttack.injured(mabu, (int) (mabu.nPoint.getDameAttack(false) * (skillId == 1 ? 1.5 : 1)), false, false);
+                int dame = plAttack.injured(mabu, (int) (mabu.nPoint.getDameAttack(false) * (skillId == 1 ? 1.5 : 1)),
+                        false, false);
                 msg.writer().writeInt((int) plAttack.id);
                 msg.writer().writeInt(dame);
             } else if (skillId == 0) {
@@ -201,15 +198,13 @@ public class Service {
             }
             sendMessAllPlayerInMap(mabu.zone, msg);
             mabu.isUseSpeacialSkill = false;
-            msg.cleanup();
         } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi mabu 14h attack " + mabu.id);
         }
     }
 
     public void sendMabuEat(Player plHold, short... point) {
-        Message msg;
-        try {
-            msg = new Message(52);
+        try (Message msg = new Message(52)) {
             msg.writer().writeByte(1);
             msg.writer().writeInt((int) plHold.id);
             msg.writer().writeShort(point[0]);
@@ -218,8 +213,8 @@ public class Service {
             plHold.location.x = point[0];
             plHold.location.y = point[1];
             MapService.gI().sendPlayerMove(plHold);
-            msg.cleanup();
         } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send mabu eat " + plHold.id);
         }
     }
 
@@ -227,14 +222,12 @@ public class Service {
         PlayerService.gI().changeAndSendTypePK(plHold, ConstPlayer.NON_PK);
         plHold.effectSkill.isHoldMabu = false;
         plHold.effectSkill.isTaskHoldMabu = -1;
-        Message msg;
-        try {
-            msg = new Message(52);
+        try (Message msg = new Message(52)) {
             msg.writer().writeByte(0);
             msg.writer().writeInt((int) plHold.id);
             sendMessAllPlayerInMap(plHold.zone, msg);
-            msg.cleanup();
         } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi remove mabu eat " + plHold.id);
         }
     }
 
@@ -243,34 +236,25 @@ public class Service {
         mabu.lastTimeUseSpeacialSkill = System.currentTimeMillis();
         plHold.effectSkill.isTaskHoldMabu = 1;
         plHold.effectSkill.lastTimeHoldMabu = System.currentTimeMillis();
-        try {
-            Message msg = new Message(52);
+        try (Message msg = new Message(52)) {
             msg.writer().writeByte(2);
             msg.writer().writeInt((int) mabu.id);
             msg.writer().writeInt((int) plHold.id);
             sendMessAllPlayerInMap(mabu.zone, msg);
             mabu.isUseSpeacialSkill = false;
-            msg.cleanup();
         } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi eat player " + mabu.id);
         }
     }
 
     public void sendPopUpMultiLine(Player pl, int tempID, int avt, String text) {
-        Message msg = null;
-        try {
-            msg = new Message(-218);
+        try (Message msg = new Message(-218)) {
             msg.writer().writeShort(tempID);
             msg.writer().writeUTF(text);
             msg.writer().writeShort(avt);
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-//            e.printStackTrace();
-        } finally {
-            if (msg != null) {
-                msg.cleanup();
-                msg = null;
-            }
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send pop up multi line " + pl.id);
         }
     }
 
@@ -285,45 +269,33 @@ public class Service {
                     }
                 }
             }
-            msg.cleanup();
         }
     }
 
     public void sendMessAllPlayerInMap(Player player, Message msg) {
         msg.transformData();
-        if (player.zone != null) {
+        if (player.zone == null)
+            return;
+
+        List<Player> players = player.zone.getPlayers();
+        synchronized (players) {
             if (player.zone.map.isMapOffline) {
                 if (player.isPet) {
                     ((Pet) player).master.sendMessage(msg);
-                } else {
-                    if (player instanceof WhisTop) {
-                        List<Player> players = player.zone.getPlayers();
-                        synchronized (players) {
-                            for (Player pl : players) {
-                                try {
-                                    if (pl != null && pl.id == (long) Util.getPropertyByName(player, "player_id")) {
-                                        pl.sendMessage(msg);
-                                    }
-                                } catch (IllegalAccessException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    } else {
-                        player.sendMessage(msg);
-                    }
-                }
-            } else {
-                List<Player> players = player.zone.getPlayers();
-                synchronized (players) {
+                } else if (player instanceof WhisTop) {
                     for (Player pl : players) {
-                        if (pl != null) {
+                        if (pl != null && pl.id == (long) Util.getPropertyByName(player, "player_id")) {
                             pl.sendMessage(msg);
                         }
                     }
+                } else {
+                    player.sendMessage(msg);
                 }
-
-                msg.cleanup();
+            } else {
+                for (Player pl : players) {
+                    if (pl != null)
+                        pl.sendMessage(msg);
+                }
             }
         }
     }
@@ -338,8 +310,7 @@ public class Service {
                     }
                 }
             }
-
-            msg.cleanup();
+            msg.close();
         }
     }
 
@@ -353,77 +324,62 @@ public class Service {
                     }
                 }
             }
-
-            msg.cleanup();
+            msg.close();
         }
     }
 
     public void Send_Info_NV(Player pl) {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand((byte) 14);//Cập nhật máu
+        try (Message msg = Service.getInstance().messageSubCommand((byte) 14)) {
             msg.writer().writeInt((int) pl.id);
             msg.writer().writeInt(pl.nPoint.hp);
-            msg.writer().writeByte(0);//Hiệu ứng Ăn Đậu
+            msg.writer().writeByte(0);// Hiệu ứng Ăn Đậu
             msg.writer().writeInt(pl.nPoint.hpMax);
             sendMessAnotherNotMeInMap(pl, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send info nv " + pl.id);
         }
     }
 
     public void sendInfoPlayerEatPea(Player pl) {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand((byte) 14);
+        try (Message msg = Service.getInstance().messageSubCommand((byte) 14)) {
             msg.writer().writeInt((int) pl.id);
             msg.writer().writeInt(pl.nPoint.hp);
             msg.writer().writeByte(1);
             msg.writer().writeInt(pl.nPoint.hpMax);
             sendMessAnotherNotMeInMap(pl, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send info player eat pea " + pl.id);
         }
     }
 
     public void loginDe(Session session, short second) {
-        Message msg;
-        try {
-            msg = new Message(122);
+        try (Message msg = new Message(122)) {
             msg.writer().writeShort(second);
             session.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi login de " + session.player.id);
         }
     }
 
     public void resetPoint(Player player, int x, int y) {
-        Message msg;
-        try {
+        try (Message msg = new Message(46)) {
             player.location.x = x;
             player.location.y = y;
-            msg = new Message(46);
             msg.writer().writeShort(x);
             msg.writer().writeShort(y);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi reset point " + player.id);
         }
     }
 
     public void clearMap(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-22);
+        try (Message msg = new Message(-22)) {
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
         }
     }
 
-//    int test = 0;
+    // int test = 0;
     public void chat(Player player, String text) {
         if (player.getSession() != null && player.isAdmin()) {
             if (text.equals("tele")) {
@@ -492,7 +448,8 @@ public class Service {
                     Item item = ItemService.gI().createNewItem(id, quantity);
                     InventoryService.gI().addItemBag(player, item, quantity);
                     InventoryService.gI().sendItemBags(player);
-                    Service.getInstance().sendThongBao(player, "Bạn nhận được " + item.template.name + " số lượng: " + quantity);
+                    Service.getInstance().sendThongBao(player,
+                            "Bạn nhận được " + item.template.name + " số lượng: " + quantity);
                     return;
                 } else {
                     Service.getInstance().sendThongBao(player, "Lỗi");
@@ -515,12 +472,13 @@ public class Service {
             if (text.equals("adm")) {
                 NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, -1,
                         "Quản trị admin Kimkan \n"
-                        + "|1|Online: " + Client.gI().getPlayers().size() + "\n"
-                        + "|4|Thread: " + Thread.activeCount() + "\n",
+                                + "|1|Online: " + Client.gI().getPlayers().size() + "\n"
+                                + "|4|Thread: " + Thread.activeCount() + "\n",
                         "Ngọc rồng", "Log check", "Bảo trì", "Tìm kiếm\nngười chơi", "Call\nBoss", "Đóng");
                 return;
             } else if (text.equals("toado")) {
-                NpcService.gI().createMenuConMeo(player, ConstNpc.COORDINATES, 11525, "Tọa độ: " + player.location.x + " - " + player.location.y + "\nMap: " + player.zone.map.mapId + " - " + player.zone.zoneId);
+                NpcService.gI().createMenuConMeo(player, ConstNpc.COORDINATES, 11525, "Tọa độ: " + player.location.x
+                        + " - " + player.location.y + "\nMap: " + player.zone.map.mapId + " - " + player.zone.zoneId);
                 return;
             } else if (text.equals("tn")) {
                 Input.gI().createFormTangRuby(player);
@@ -559,7 +517,7 @@ public class Service {
                     }
                     return;
                 } catch (Exception e) {
-//                    e.printStackTrace();;
+                    // e.printStackTrace();;
                 }
             }
         }
@@ -591,22 +549,18 @@ public class Service {
     }
 
     public void chatMap(Player player, String text) {
-        Message msg;
-        try {
-            msg = new Message(44);
+        try (Message msg = new Message(44)) {
             msg.writer().writeInt((int) player.id);
             msg.writer().writeUTF(text);
             sendMessAllPlayerInMap(player, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(Service.class, e);
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi chat map " + player.id);
         }
     }
 
     public void regisAccount(Session session, Message _msg) {
         try {
             PreparedStatement ps = null;
-            int key = -1;
             int sl = 0;
             String day = _msg.reader().readUTF();
             String month = _msg.reader().readUTF();
@@ -639,13 +593,13 @@ public class Service {
                     if (ps.executeQuery().next()) {
                         sendThongBaoOK(session, "Tạo thất bại do tài khoản đã tồn tại");
                     } else {
-                        ps = con.prepareStatement("insert into account(username,password) values (?,?)", Statement.RETURN_GENERATED_KEYS);
+                        ps = con.prepareStatement("insert into account(username,password) values (?,?)",
+                                Statement.RETURN_GENERATED_KEYS);
                         ps.setString(1, user);
                         ps.setString(2, pass);
                         ps.executeUpdate();
                         ResultSet rs = ps.getGeneratedKeys();
                         rs.next();
-                        key = rs.getInt(1);
                         sendThongBaoOK(session, "Tạo tài khoản thành công!");
                     }
                 }
@@ -664,14 +618,12 @@ public class Service {
     }
 
     public void chatJustForMe(Player me, Player plChat, String text) {
-        Message msg;
-        try {
-            msg = new Message(44);
+        try (Message msg = new Message(44)) {
             msg.writer().writeInt((int) plChat.id);
             msg.writer().writeUTF(text);
             me.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi chat just for me " + plChat.id);
         }
     }
 
@@ -679,9 +631,7 @@ public class Service {
         player.nPoint.calPoint();
         Send_Info_NV(player);
         if (!player.isPet && !player.isBoss) {
-            Message msg;
-            try {
-                msg = new Message(-42);
+            try (Message msg = new Message(-42)) {
                 msg.writer().writeInt(player.nPoint.hpg);
                 msg.writer().writeInt(player.nPoint.mpg);
                 msg.writer().writeInt(player.nPoint.dameg);
@@ -701,9 +651,8 @@ public class Service {
                 msg.writer().writeShort(player.nPoint.defg);
                 msg.writer().writeByte(player.nPoint.critg);
                 player.sendMessage(msg);
-                msg.cleanup();
-            } catch (Exception e) {
-                Log.error(Service.class, e);
+            } catch (IOException e) {
+                Log.error(Service.class, e, "Lỗi point " + player.id);
             }
         }
     }
@@ -712,21 +661,19 @@ public class Service {
         if (pl == null) {
             return;
         }
-        Message msg;
-        try {
-            msg = messageSubCommand((byte) 0);
+        try (Message msg = messageSubCommand((byte) 0)) {
             msg.writer().writeInt((int) pl.id);
             msg.writer().writeByte(pl.playerTask.taskMain.id);
             msg.writer().writeByte(pl.gender);
             msg.writer().writeShort(pl.head);
-            msg.writer().writeUTF(pl.name /*+ "[" + pl.id + "]"*/);
-            msg.writer().writeByte(0); //cPK
+            msg.writer().writeUTF(pl.name /* + "[" + pl.id + "]" */);
+            msg.writer().writeByte(0); // cPK
             msg.writer().writeByte(pl.typePk);
             msg.writer().writeLong(pl.nPoint.power);
             msg.writer().writeShort(0);
             msg.writer().writeShort(0);
             msg.writer().writeByte(pl.gender);
-            //--------skill---------
+            // --------skill---------
 
             ArrayList<Skill> skills = (ArrayList<Skill>) pl.playerSkill.skills;
 
@@ -738,7 +685,7 @@ public class Service {
                 }
             }
 
-            //---vang---luong--luongKhoa
+            // ---vang---luong--luongKhoa
             long gold = pl.inventory.getGoldDisplay();
             if (pl.isVersionAbove(214)) {
                 msg.writer().writeLong(gold);
@@ -748,7 +695,7 @@ public class Service {
             msg.writer().writeInt(pl.inventory.ruby);
             msg.writer().writeInt(pl.inventory.gem);
 
-            //--------itemBody---------
+            // --------itemBody---------
             ArrayList<Item> itemsBody = (ArrayList<Item>) pl.inventory.itemsBody;
             msg.writer().writeByte(itemsBody.size());
             for (Item item : itemsBody) {
@@ -769,7 +716,7 @@ public class Service {
 
             }
 
-            //--------itemBag---------
+            // --------itemBag---------
             ArrayList<Item> itemsBag = (ArrayList<Item>) pl.inventory.itemsBag;
             msg.writer().writeByte(itemsBag.size());
             for (int i = 0; i < itemsBag.size(); i++) {
@@ -791,7 +738,7 @@ public class Service {
 
             }
 
-            //--------itemBox---------
+            // --------itemBox---------
             ArrayList<Item> itemsBox = (ArrayList<Item>) pl.inventory.itemsBox;
             msg.writer().writeByte(itemsBox.size());
             for (int i = 0; i < itemsBox.size(); i++) {
@@ -811,22 +758,21 @@ public class Service {
                     }
                 }
             }
-            //-----------------
+            // -----------------
             DataGame.sendHeadAvatar(msg);
-            //-----------------
-            msg.writer().writeShort(514); //char info id - con chim thông báo
-            msg.writer().writeShort(515); //char info id
-            msg.writer().writeShort(537); //char info id
-            msg.writer().writeByte(pl.fusion.typeFusion != ConstPlayer.NON_FUSION ? 1 : 0); //nhập thể
-            msg.writer().writeInt(333); //deltatime
-            msg.writer().writeByte(pl.isNewMember ? 1 : 0); //is new member
+            // -----------------
+            msg.writer().writeShort(514); // char info id - con chim thông báo
+            msg.writer().writeShort(515); // char info id
+            msg.writer().writeShort(537); // char info id
+            msg.writer().writeByte(pl.fusion.typeFusion != ConstPlayer.NON_FUSION ? 1 : 0); // nhập thể
+            msg.writer().writeInt(333); // deltatime
+            msg.writer().writeByte(pl.isNewMember ? 1 : 0); // is new member
 
-            msg.writer().writeShort(pl.getAura()); //idauraeff
+            msg.writer().writeShort(pl.getAura()); // idauraeff
             msg.writer().writeByte(pl.getEffFront());
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(Service.class, e);
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi player " + pl.id);
         }
     }
 
@@ -888,36 +834,36 @@ public class Service {
         }
     }
 
-    //    public void congTiemNang(Player pl, byte type, int tiemnang) {
-//        Message msg;
-//        try {
-//            msg = new Message(-3);
-//            msg.writer().writeByte(type);// 0 là cộng sm, 1 cộng tn, 2 là cộng cả 2
-//            msg.writer().writeInt(tiemnang);// số tn cần cộng
-//            if (!pl.isPet) {
-//                pl.sendMessage(msg);
-//            } else {
-//                ((Pet) pl).master.nPoint.powerUp(tiemnang);
-//                ((Pet) pl).master.nPoint.tiemNangUp(tiemnang);
-//                ((Pet) pl).master.sendMessage(msg);
-//            }
-//            msg.cleanup();
-//            switch (type) {
-//                case 1:
-//                    pl.nPoint.tiemNangUp(tiemnang);
-//                    break;
-//                case 2:
-//                    pl.nPoint.powerUp(tiemnang);
-//                    pl.nPoint.tiemNangUp(tiemnang);
-//                    break;
-//                default:
-//                    pl.nPoint.powerUp(tiemnang);
-//                    break;
-//            }
-//        } catch (Exception e) {
-//
-//        }
-//    }
+    // public void congTiemNang(Player pl, byte type, int tiemnang) {
+    // Message msg;
+    // try {
+    // msg = new Message(-3);
+    // msg.writer().writeByte(type);// 0 là cộng sm, 1 cộng tn, 2 là cộng cả 2
+    // msg.writer().writeInt(tiemnang);// số tn cần cộng
+    // if (!pl.isPet) {
+    // pl.sendMessage(msg);
+    // } else {
+    // ((Pet) pl).master.nPoint.powerUp(tiemnang);
+    // ((Pet) pl).master.nPoint.tiemNangUp(tiemnang);
+    // ((Pet) pl).master.sendMessage(msg);
+    // }
+    // msg.cleanup();
+    // switch (type) {
+    // case 1:
+    // pl.nPoint.tiemNangUp(tiemnang);
+    // break;
+    // case 2:
+    // pl.nPoint.powerUp(tiemnang);
+    // pl.nPoint.tiemNangUp(tiemnang);
+    // break;
+    // default:
+    // pl.nPoint.powerUp(tiemnang);
+    // break;
+    // }
+    // } catch (Exception e) {
+    //
+    // }
+    // }
     public String get_HanhTinh(int hanhtinh) {
         switch (hanhtinh) {
             case 0:
@@ -978,57 +924,64 @@ public class Service {
     }
 
     public void hsChar(Player pl, int hp, int mp) {
-        Message msg;
+        if (pl == null) {
+            return;
+        }
         try {
             pl.setJustRevivaled();
             pl.nPoint.setHp(hp);
             pl.nPoint.setMp(mp);
+
             if (!pl.isPet) {
-                msg = new Message(-16);
-                pl.sendMessage(msg);
-                msg.cleanup();
-                PlayerService.gI().sendInfoHpMpMoney(pl);
+                try (Message msg = new Message(-16)) {
+                    pl.sendMessage(msg);
+                    PlayerService.gI().sendInfoHpMpMoney(pl);
+                }
             }
-            msg = messageSubCommand((byte) 15);
-            msg.writer().writeInt((int) pl.id);
-            msg.writer().writeInt(hp);
-            msg.writer().writeInt(mp);
-            msg.writer().writeShort(pl.location.x);
-            msg.writer().writeShort(pl.location.y);
-            sendMessAllPlayerInMap(pl, msg);
-            msg.cleanup();
+
+            try (Message msg = messageSubCommand((byte) 15)) {
+                msg.writer().writeInt((int) pl.id);
+                msg.writer().writeInt(hp);
+                msg.writer().writeInt(mp);
+                msg.writer().writeShort(pl.location.x);
+                msg.writer().writeShort(pl.location.y);
+                sendMessAllPlayerInMap(pl, msg);
+            }
+
             Send_Info_NV(pl);
             PlayerService.gI().sendInfoHpMp(pl);
         } catch (Exception e) {
-            Log.error(Service.class, e);
+            Log.error(Service.class, e, "Error in hsChar for player " + pl.id);
         }
     }
 
     public void charDie(Player pl) {
-        Message msg;
+        if (pl == null) {
+            return;
+        }
         try {
             if (!pl.isPet) {
-                msg = new Message(-17);
-                msg.writer().writeByte((int) pl.id);
-                msg.writer().writeShort(pl.location.x);
-                msg.writer().writeShort(pl.location.y);
-                pl.sendMessage(msg);
-                msg.cleanup();
+                try (Message msg = new Message(-17)) {
+                    msg.writer().writeByte((int) pl.id);
+                    msg.writer().writeShort(pl.location.x);
+                    msg.writer().writeShort(pl.location.y);
+                    pl.sendMessage(msg);
+                }
             } else {
                 ((Pet) pl).lastTimeDie = System.currentTimeMillis();
             }
 
-            msg = new Message(-8);
-            msg.writer().writeShort((int) pl.id);
-            msg.writer().writeByte(0); //cpk
-            msg.writer().writeShort(pl.location.x);
-            msg.writer().writeShort(pl.location.y);
-            sendMessAnotherNotMeInMap(pl, msg);
-            msg.cleanup();
+            try (Message msg = new Message(-8)) {
+                msg.writer().writeShort((int) pl.id);
+                msg.writer().writeByte(0); // cpk
+                msg.writer().writeShort(pl.location.x);
+                msg.writer().writeShort(pl.location.y);
+                sendMessAnotherNotMeInMap(pl, msg);
+            }
 
-//            Send_Info_NV(pl);
+            // Send_Info_NV(pl);
         } catch (Exception e) {
-            Log.error(Service.class, e);
+            Log.error(Service.class, e, "Error in charDie for player " + pl.id);
         }
     }
 
@@ -1044,77 +997,74 @@ public class Service {
     }
 
     public void sendEffectHideNPC(Player pl, byte npcID, byte status) {
-        Message msg;
-        try {
-            msg = new Message(-73);
+        if (pl == null) {
+            return;
+        }
+        try (Message msg = new Message(-73)) {
             msg.writer().writeByte(npcID);
             msg.writer().writeByte(status); // 0 = hide
             Service.getInstance().sendMessAllPlayerInMap(pl, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send effect hide npc " + pl.id);
         }
     }
 
     public void sendEffectHideNPCPlayer(Player pl, byte npcID, byte status) {
-        Message msg;
-        try {
-            msg = new Message(-73);
+        if (pl == null) {
+            return;
+        }
+        try (Message msg = new Message(-73)) {
             msg.writer().writeByte(npcID);
             msg.writer().writeByte(status); // 0 = hide
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send effect hide npc player " + pl.id);
         }
     }
 
     public void Send_Caitrang(Player player) {
         if (player != null) {
-            Message msg;
-            try {
-                msg = new Message(-90);
+            try (Message msg = new Message(-90)) {
                 msg.writer().writeByte(1);// check type
-                msg.writer().writeInt((int) player.id); //id player
+                msg.writer().writeInt((int) player.id); // id player
                 short head = player.getHead();
                 short body = player.getBody();
                 short leg = player.getLeg();
 
-                msg.writer().writeShort(head);//set head
-                msg.writer().writeShort(body);//setbody
-                msg.writer().writeShort(leg);//set leg
-                msg.writer().writeByte(player.effectSkill.isMonkey ? 1 : 0);//set khỉ
+                msg.writer().writeShort(head);// set head
+                msg.writer().writeShort(body);// setbody
+                msg.writer().writeShort(leg);// set leg
+                msg.writer().writeByte(player.effectSkill.isMonkey ? 1 : 0);// set khỉ
                 sendMessAllPlayerInMap(player, msg);
-                msg.cleanup();
-            } catch (Exception e) {
-                Log.error(Service.class, e);
+            } catch (IOException e) {
+                Log.error(Service.class, e, "Lỗi send caitrang " + player.id);
             }
         }
     }
 
     public void setNotMonkey(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-90);
+        if (player == null) {
+            return;
+        }
+        try (Message msg = new Message(-90)) {
             msg.writer().writeByte(-1);
             msg.writer().writeInt((int) player.id);
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(Service.class, e);
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi set not monkey " + player.id);
         }
     }
 
     public void sendFlagBag(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(-64);
+        if (pl == null) {
+            return;
+        }
+        try (Message msg = new Message(-64)) {
             msg.writer().writeInt((int) pl.id);
             msg.writer().writeByte(pl.getFlagBag());
             sendMessAllPlayerInMap(pl, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send flag bag " + pl.id);
         }
     }
 
@@ -1122,49 +1072,43 @@ public class Service {
         if (pl.isPet) {
             return;
         }
-        Message msg;
-        try {
-            msg = new Message(-26);
+        try (Message msg = new Message(-26)) {
             msg.writer().writeUTF(text);
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(Service.class, e);
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send thong bao ok " + pl.id);
         }
     }
 
     public void sendThongBaoOK(Session session, String text) {
-        Message msg;
-        try {
-            msg = new Message(-26);
+        if (session == null) {
+            return;
+        }
+        try (Message msg = new Message(-26)) {
             msg.writer().writeUTF(text);
             session.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send thong bao ok " + session.player.id);
         }
     }
 
     public void sendThongBaoAllPlayer(String thongBao) {
-        Message msg;
-        try {
-            msg = new Message(-25);
+        try (Message msg = new Message(-25)) {
             msg.writer().writeUTF(thongBao);
             this.sendMessAllPlayer(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send thong bao all player " + thongBao);
         }
     }
 
     public void sendBigMessage(Player player, int iconId, String text) {
-        try {
-            Message msg;
-            msg = new Message(-70);
+        try (Message msg = new Message(-70)) {
             msg.writer().writeShort(iconId);
             msg.writer().writeUTF(text);
             msg.writer().writeByte(0);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send big message " + player.id);
         }
     }
 
@@ -1173,33 +1117,27 @@ public class Service {
     }
 
     public void sendBigMessAllPlayer(int iconId, String text) {
-        try {
-            Message msg;
-            msg = new Message(-70);
+        try (Message msg = new Message(-70)) {
             msg.writer().writeShort(iconId);
             msg.writer().writeUTF(text);
             msg.writer().writeByte(0);
             this.sendMessAllPlayer(msg);
-            msg.cleanup();
         } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send big mess all player " + iconId + " " + text);
         }
     }
 
     public void sendThongBao(Player pl, String thongBao) {
-        Message msg;
-        try {
-            msg = new Message(-25);
+        try (Message msg = new Message(-25)) {
             msg.writer().writeUTF(thongBao);
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send thong bao " + pl.id);
         }
     }
 
     public void sendMoney(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(6);
+        try (Message msg = new Message(6)) {
             long gold = pl.inventory.getGoldDisplay();
             if (pl.isVersionAbove(214)) {
                 msg.writer().writeLong(gold);
@@ -1210,22 +1148,18 @@ public class Service {
             msg.writer().writeInt(pl.inventory.ruby);
             ServerLog.logSubRuby(pl.name, pl.inventory.ruby);
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send money " + pl.id);
         }
     }
 
     public void sendToAntherMePickItem(Player player, int itemMapId) {
-        Message msg;
-        try {
-            msg = new Message(-19);
+        try (Message msg = new Message(-19)) {
             msg.writer().writeShort(itemMapId);
             msg.writer().writeInt((int) player.id);
             sendMessAllPlayerIgnoreMe(player, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send to another me pick item " + player.id);
         }
     }
 
@@ -1255,26 +1189,25 @@ public class Service {
                     pl.inventory.subGem(5);
                     sendMoney(pl);
                     pl.lastTimeChatGlobal = System.currentTimeMillis();
-                    Message msg;
-                    try {
-                        msg = new Message(92);
+                    try (Message msg = new Message(92)) {
                         msg.writer().writeUTF(pl.name);
                         msg.writer().writeUTF("|5|" + text);
                         msg.writer().writeInt((int) pl.id);
                         msg.writer().writeShort(pl.getHead());
                         msg.writer().writeShort(pl.getBody());
-                        msg.writer().writeShort(pl.getFlagBag()); //bag
+                        msg.writer().writeShort(pl.getFlagBag()); // bag
                         msg.writer().writeShort(pl.getLeg());
                         msg.writer().writeByte(0);
                         sendMessAllPlayer(msg);
-                        msg.cleanup();
-                    } catch (Exception e) {
+                    } catch (IOException e) {
+                        Log.error(Service.class, e, "Lỗi chat global " + pl.id);
                     }
                 } else {
                     sendThongBao(pl, "Sức mạnh phải ít nhất 2tỷ mới có thể chat thế giới");
                 }
             } else {
-                sendThongBao(pl, "Không thể chat thế giới lúc này, vui lòng đợi " + TimeUtil.getTimeLeft(pl.lastTimeChatGlobal, 120));
+                sendThongBao(pl, "Không thể chat thế giới lúc này, vui lòng đợi "
+                        + TimeUtil.getTimeLeft(pl.lastTimeChatGlobal, 120));
             }
         } else {
             sendThongBao(pl, "Không đủ ngọc chat thế giới");
@@ -1291,13 +1224,11 @@ public class Service {
         return (int) n / tiLeXanhDo;
     }
 
-    public static final int[] flagTempId = {363, 364, 365, 366, 367, 368, 369, 370, 371, 519, 520, 747};
-    public static final int[] flagIconId = {2761, 2330, 2323, 2327, 2326, 2324, 2329, 2328, 2331, 4386, 4385, 2325};
+    public static final int[] flagTempId = { 363, 364, 365, 366, 367, 368, 369, 370, 371, 519, 520, 747 };
+    public static final int[] flagIconId = { 2761, 2330, 2323, 2327, 2326, 2324, 2329, 2328, 2331, 4386, 4385, 2325 };
 
     public void openFlagUI(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(-103);
+        try (Message msg = new Message(-103)) {
             msg.writer().writeByte(0);
             msg.writer().writeByte(flagTempId.length);
             for (int i = 0; i < flagTempId.length; i++) {
@@ -1319,69 +1250,59 @@ public class Service {
                 }
             }
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi open flag ui " + pl.id);
         }
     }
 
     public void changeFlag(Player pl, int index) {
-
-        Message msg;
         try {
             pl.cFlag = (byte) index;
-            msg = new Message(-103);
-            msg.writer().writeByte(1);
-            msg.writer().writeInt((int) pl.id);
-            msg.writer().writeByte(index);
-            Service.getInstance().sendMessAllPlayerInMap(pl, msg);
-            msg.cleanup();
+            pl.lastTimeChangeFlag = System.currentTimeMillis();
 
-            msg = new Message(-103);
-            msg.writer().writeByte(2);
-            msg.writer().writeByte(index);
-            msg.writer().writeShort(flagIconId[index]);
-            Service.getInstance().sendMessAllPlayerInMap(pl, msg);
-            msg.cleanup();
-
+            sendFlagMessage(pl, index);
             if (pl.pet != null) {
                 pl.pet.cFlag = (byte) index;
-                msg = new Message(-103);
-                msg.writer().writeByte(1);
-                msg.writer().writeInt((int) pl.pet.id);
-                msg.writer().writeByte(index);
-                Service.getInstance().sendMessAllPlayerInMap(pl.pet, msg);
-                msg.cleanup();
-
-                msg = new Message(-103);
-                msg.writer().writeByte(2);
-                msg.writer().writeByte(index);
-                msg.writer().writeShort(flagIconId[index]);
-                Service.getInstance().sendMessAllPlayerInMap(pl.pet, msg);
-                msg.cleanup();
+                sendFlagMessage(pl.pet, index);
             }
-            pl.lastTimeChangeFlag = System.currentTimeMillis();
         } catch (Exception e) {
             Log.error(Service.class, e);
         }
     }
 
+    private void sendFlagMessage(Player player, int index) throws IOException {
+        Service service = Service.getInstance();
+
+        Message msg1 = new Message(-103);
+        msg1.writer().writeByte(1);
+        msg1.writer().writeInt((int) player.id);
+        msg1.writer().writeByte(index);
+        service.sendMessAllPlayerInMap(player, msg1);
+        msg1.close();
+
+        Message msg2 = new Message(-103);
+        msg2.writer().writeByte(2);
+        msg2.writer().writeByte(index);
+        msg2.writer().writeShort(flagIconId[index]);
+        service.sendMessAllPlayerInMap(player, msg2);
+        msg2.close();
+    }
+
     public void sendFlagPlayerToMe(Player me, Player pl) {
-        Message msg;
-        try {
-            msg = new Message(-103);
+        try (Message msg = new Message(-103)) {
             msg.writer().writeByte(2);
             msg.writer().writeByte(pl.cFlag);
             msg.writer().writeShort(flagIconId[pl.cFlag]);
             me.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send flag player to me " + me.id);
         }
     }
 
     public void chooseFlag(Player pl, int index) {
         if (Util.canDoWithTime(pl.lastTimeChangeFlag, 60000)) {
-            if (!MapService.gI().isMapBlackBallWar(pl.zone.map.mapId) && !MapService.gI().isMapMabuWar(pl.zone.map.mapId) && !pl.isHoldBlackBall) {
+            if (!MapService.gI().isMapBlackBallWar(pl.zone.map.mapId)
+                    && !MapService.gI().isMapMabuWar(pl.zone.map.mapId) && !pl.isHoldBlackBall) {
                 if (index < 0 || index >= 12) {
                     Service.getInstance().sendThongBao(pl, "Không thể thao tác");
                     return;
@@ -1391,7 +1312,8 @@ public class Service {
                 sendThongBao(pl, "Không thể đổi cờ ở khu vực này");
             }
         } else {
-            sendThongBao(pl, "Không thể đổi cờ lúc này! Vui lòng đợi " + TimeUtil.getTimeLeft(pl.lastTimeChangeFlag, 60) + " nữa!");
+            sendThongBao(pl, "Không thể đổi cờ lúc này! Vui lòng đợi " + TimeUtil.getTimeLeft(pl.lastTimeChangeFlag, 60)
+                    + " nữa!");
         }
     }
 
@@ -1405,13 +1327,12 @@ public class Service {
             return;
         }
         int mapid = pl.zone.map.mapId;
-        if (!pl.isAdmin() && (MapService.gI().isMapDoanhTrai(mapid) || MapService.gI().isMapBanDoKhoBau(mapid) || mapid == 120 || MapService.gI().isMapVS(mapid) || mapid == 126 || pl.zone instanceof ZDungeon)) {
+        if (!pl.isAdmin() && (MapService.gI().isMapDoanhTrai(mapid) || MapService.gI().isMapBanDoKhoBau(mapid)
+                || mapid == 120 || MapService.gI().isMapVS(mapid) || mapid == 126 || pl.zone instanceof ZDungeon)) {
             sendThongBaoOK(pl, "Không thể đổi khu vực trong map này");
             return;
         }
-        Message msg;
-        try {
-            msg = new Message(29);
+        try (Message msg = new Message(29)) {
             msg.writer().writeByte(pl.zone.map.zones.size());
             for (Zone zone : pl.zone.map.zones) {
                 msg.writer().writeByte(zone.zoneId);
@@ -1422,15 +1343,13 @@ public class Service {
                 msg.writer().writeByte(0);
             }
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi open zone ui " + pl.id);
         }
     }
 
     public void releaseCooldownSkill(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(-94);
+        try (Message msg = new Message(-94)) {
             for (Skill skill : pl.playerSkill.skills) {
                 skill.coolDown = 0;
                 msg.writer().writeShort(skill.skillId);
@@ -1443,16 +1362,13 @@ public class Service {
             pl.sendMessage(msg);
             pl.nPoint.setMp(pl.nPoint.mpMax);
             PlayerService.gI().sendInfoHpMpMoney(pl);
-            msg.cleanup();
-
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi release cooldown skill " + pl.id);
         }
     }
 
     public void sendTimeSkill(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(-94);
+        try (Message msg = new Message(-94)) {
             for (Skill skill : pl.playerSkill.skills) {
                 msg.writer().writeShort(skill.skillId);
 
@@ -1463,15 +1379,13 @@ public class Service {
                 msg.writer().writeInt(timeLeft);
             }
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send time skill " + pl.id);
         }
     }
 
     public void dropItemMap(Zone zone, ItemMap item) {
-        Message msg;
-        try {
-            msg = new Message(68);
+        try (Message msg = new Message(68)) {
             msg.writer().writeShort(item.itemMapId);
             msg.writer().writeShort(item.itemTemplate.id);
             msg.writer().writeShort(item.x);
@@ -1481,16 +1395,13 @@ public class Service {
                 msg.writer().writeShort(item.range);
             }
             sendMessAllPlayerInMap(zone, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi drop item map " + zone.zoneId);
         }
     }
 
     public void dropItemMapForMe(Player player, ItemMap item) {
-        Message msg;
-        try {
-            msg = new Message(68);
+        try (Message msg = new Message(68)) {
             msg.writer().writeShort(item.itemMapId);
             msg.writer().writeShort(item.itemTemplate.id);
             msg.writer().writeShort(item.x);
@@ -1500,17 +1411,14 @@ public class Service {
                 msg.writer().writeShort(item.range);
             }
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(Service.class, e);
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi drop item map for me " + player.id);
         }
     }
 
     public void showInfoPet(Player pl) {
         if (pl != null && pl.pet != null) {
-            Message msg;
-            try {
-                msg = new Message(-107);
+            try (Message msg = new Message(-107)) {
                 msg.writer().writeByte(2);
                 msg.writer().writeShort(pl.pet.getAvatar());
                 msg.writer().writeByte(pl.pet.inventory.itemsBody.size());
@@ -1534,21 +1442,21 @@ public class Service {
                     }
                 }
 
-                msg.writer().writeInt(pl.pet.nPoint.hp); //hp
-                msg.writer().writeInt(pl.pet.nPoint.hpMax); //hpfull
-                msg.writer().writeInt(pl.pet.nPoint.mp); //mp
-                msg.writer().writeInt(pl.pet.nPoint.mpMax); //mpfull
-                msg.writer().writeInt(pl.pet.nPoint.dame); //damefull
-                msg.writer().writeUTF(pl.pet.name); //name
-                msg.writer().writeUTF(getCurrStrLevel(pl.pet)); //curr level
-                msg.writer().writeLong(pl.pet.nPoint.power); //power
-                msg.writer().writeLong(pl.pet.nPoint.tiemNang); //tiềm năng
-                msg.writer().writeByte(pl.pet.getStatus()); //status
-                msg.writer().writeShort(pl.pet.nPoint.stamina); //stamina
-                msg.writer().writeShort(pl.pet.nPoint.maxStamina); //stamina full
-                msg.writer().writeByte(pl.pet.nPoint.crit); //crit
-                msg.writer().writeShort(pl.pet.nPoint.def); //def
-                msg.writer().writeByte(5); //counnt pet skill
+                msg.writer().writeInt(pl.pet.nPoint.hp); // hp
+                msg.writer().writeInt(pl.pet.nPoint.hpMax); // hpfull
+                msg.writer().writeInt(pl.pet.nPoint.mp); // mp
+                msg.writer().writeInt(pl.pet.nPoint.mpMax); // mpfull
+                msg.writer().writeInt(pl.pet.nPoint.dame); // damefull
+                msg.writer().writeUTF(pl.pet.name); // name
+                msg.writer().writeUTF(getCurrStrLevel(pl.pet)); // curr level
+                msg.writer().writeLong(pl.pet.nPoint.power); // power
+                msg.writer().writeLong(pl.pet.nPoint.tiemNang); // tiềm năng
+                msg.writer().writeByte(pl.pet.status); // status
+                msg.writer().writeShort(pl.pet.nPoint.stamina); // stamina
+                msg.writer().writeShort(pl.pet.nPoint.maxStamina); // stamina full
+                msg.writer().writeByte(pl.pet.nPoint.crit); // crit
+                msg.writer().writeShort(pl.pet.nPoint.def); // def
+                msg.writer().writeByte(5); // counnt pet skill
                 for (int i = 0; i < pl.pet.playerSkill.skills.size(); i++) {
                     if (pl.pet.playerSkill.skills.get(i).skillId != -1) {
                         msg.writer().writeShort(pl.pet.playerSkill.skills.get(i).skillId);
@@ -1579,47 +1487,38 @@ public class Service {
                 }
 
                 pl.sendMessage(msg);
-                msg.cleanup();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                Log.error(Service.class, e, "Lỗi show info pet " + pl.id);
             }
         }
     }
 
     public void sendSpeedPlayer(Player pl, int speed) {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand((byte) 8);
+        try (Message msg = Service.getInstance().messageSubCommand((byte) 8)) {
             msg.writer().writeInt((int) pl.id);
             msg.writer().writeByte(speed != -1 ? speed : pl.nPoint.speed);
             pl.sendMessage(msg);
-//            Service.getInstance().sendMessAllPlayerInMap(pl.map, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(Service.class, e);
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send speed player " + pl.id);
         }
     }
 
     public void setPos(Player player, int x, int y) {
         player.location.x = x;
         player.location.y = y;
-        Message msg;
-        try {
-            msg = new Message(123);
+        try (Message msg = new Message(123)) {
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(x);
             msg.writer().writeShort(y);
             msg.writer().writeByte(1);
             sendMessAllPlayerInMap(player, msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi set pos " + player.id);
         }
     }
 
     public void getPlayerMenu(Player player, int playerId) {
-        Message msg;
-        try {
-            msg = new Message(-79);
+        try (Message msg = new Message(-79)) {
             Player pl = player.zone.getPlayerInMap(playerId);
             if (pl != null) {
                 msg.writer().writeInt(playerId);
@@ -1628,56 +1527,49 @@ public class Service {
                 Service.getInstance().sendThongBao(pl, player.name + " vừa dòm bạn!");
                 player.sendMessage(msg);
             }
-            msg.cleanup();
             if (player.isAdmin()) {
                 SubMenuService.gI().showMenuForAdmin(player);
             }
-        } catch (Exception e) {
-            Log.error(Service.class, e);
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi get player menu " + player.id);
         }
     }
 
     public void subMenuPlayer(Player player) {
-        Message msg;
-        try {
-            msg = messageSubCommand((byte) 63);
+        try (Message msg = messageSubCommand((byte) 63)) {
             msg.writer().writeByte(1);
             msg.writer().writeUTF("String 1");
             msg.writer().writeUTF("String 2");
             msg.writer().writeShort(550);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi sub menu player " + player.id);
         }
     }
 
     public void hideWaitDialog(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(-99);
+        try (Message msg = new Message(-99)) {
             msg.writer().writeByte(-1);
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi hide wait dialog " + pl.id);
         }
     }
 
     public void chatPrivate(Player plChat, Player plReceive, String text) {
-        Message msg;
-        try {
-            msg = new Message(92);
+        try (Message msg = new Message(92)) {
             msg.writer().writeUTF(plChat.name);
             msg.writer().writeUTF("|5|" + text);
             msg.writer().writeInt((int) plChat.id);
             msg.writer().writeShort(plChat.getHead());
             msg.writer().writeShort(plChat.getBody());
-            msg.writer().writeShort(plChat.getFlagBag()); //bag
+            msg.writer().writeShort(plChat.getFlagBag()); // bag
             msg.writer().writeShort(plChat.getLeg());
             msg.writer().writeByte(1);
             plChat.sendMessage(msg);
             plReceive.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi chat private " + plChat.id);
         }
     }
 
@@ -1686,7 +1578,7 @@ public class Service {
             if (newPass.length() >= 6) {
                 if (newPass.equals(rePass)) {
                     player.getSession().pp = newPass;
-                    AccountDAO.updateAccount(player.getSession());
+                    AccountDAO.changePassword(player.getSession());
                     Service.getInstance().sendThongBao(player, "Đổi mật khẩu thành công!");
                 } else {
                     Service.getInstance().sendThongBao(player, "Mật khẩu nhập lại không đúng!");
@@ -1700,72 +1592,59 @@ public class Service {
     }
 
     public void switchToCreateChar(Session session) {
-        Message msg;
-        try {
-            msg = new Message(2);
+        try (Message msg = new Message(2)) {
             session.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
         }
     }
 
     public void sendCaption(Session session, byte gender) {
         Message msg;
         try {
-            List<Caption> captions = CaptionManager.getInstance().getCaptions();
+            Collection<Caption> captions = CaptionManager.getInstance().getCaptionsById().values();
             msg = new Message(-41);
             msg.writer().writeByte(captions.size());
             for (Caption caption : captions) {
                 msg.writer().writeUTF(caption.getCaption(gender));
             }
             session.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send caption " + session.player.id);
         }
     }
 
     public void sendHavePet(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-107);
+        try (Message msg = new Message(-107)) {
             msg.writer().writeByte(player.pet == null ? 0 : 1);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send have pet " + player.id);
         }
     }
 
     public void sendWaitToLogin(Session session, int secondsWait) {
-        Message msg;
-        try {
-            msg = new Message(122);
+        try (Message msg = new Message(122)) {
             msg.writer().writeShort(secondsWait);
             session.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(Service.class, e);
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send wait to login " + session.player.id);
         }
     }
 
     public void sendMessage(Session session, int cmd, String path) {
-        Message msg;
-        try {
-            msg = new Message(cmd);
+        try (Message msg = new Message(cmd)) {
             msg.writer().write(FileIO.readFile(path));
             session.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send message " + session.player.id);
         }
     }
 
     public void sendTopRank(Player pl) {
-        Message msg;
-        try {
-            msg = new Message(Cmd.THELUC);
+        try (Message msg = new Message(Cmd.THELUC)) {
             msg.writer().writeInt(1);
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send top rank " + pl.id);
         }
     }
 
@@ -1775,20 +1654,16 @@ public class Service {
     }
 
     public void sendNangDong(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-97);
+        try (Message msg = new Message(-97)) {
             msg.writer().writeInt(100);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send nang dong " + player.id);
         }
     }
 
     public void sendPowerInfo(Player pl, String info, short point) {
-        Message m = null;
-        try {
-            m = new Message(-115);
+        try (Message m = new Message(-115)) {
             m.writer().writeUTF(info);
             m.writer().writeShort(point);
             m.writer().writeShort(20);
@@ -1797,43 +1672,25 @@ public class Service {
             if (pl != null && pl.getSession() != null) {
                 pl.sendMessage(m);
             }
-            m.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (m != null) {
-                m.cleanup();
-            }
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send power info " + pl.id);
         }
     }
 
     public void setMabuHold(Player pl, byte type) {
-        Message m = null;
-        try {
-            m = new Message(52);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (m != null) {
-                m.cleanup();
-            }
-        }
     }
 
     public void sendPercentMabuEgg(Player player, byte percent) {
-        try {
-            Message msg = new Message(-117);
+        try (Message msg = new Message(-117)) {
             msg.writer().writeByte(percent);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send percent mabu egg " + player.id);
         }
     }
 
     public void sendPlayerInfo(Player player) {
-        try {
-            Message msg = messageSubCommand((byte) 7);
+        try (Message msg = messageSubCommand((byte) 7)) {
             msg.writer().writeInt((int) player.id);
             if (player.clan != null) {
                 msg.writer().writeInt(player.clan.id);
@@ -1861,13 +1718,12 @@ public class Service {
             msg.writer().writeShort(0);
             msg.writer().writeByte(0);
 
-//            msg.writer().writeShort(0);
-//            msg.writer().writeByte(0);
-//            msg.writer().writeShort(0);
+            // msg.writer().writeShort(0);
+            // msg.writer().writeByte(0);
+            // msg.writer().writeShort(0);
             sendMessAllPlayer(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send player info " + player.id);
         }
     }
 
@@ -1884,8 +1740,7 @@ public class Service {
 
     public void showTopPower(Player player) {
         List<Player> list = TopManager.getInstance().getList();
-        Message msg = new Message(Cmd.TOP);
-        try {
+        try (Message msg = new Message(Cmd.TOP)) {
             msg.writer().writeByte(0);
             msg.writer().writeUTF("Top Sức Mạnh");
             msg.writer().writeByte(list.size());
@@ -1905,16 +1760,14 @@ public class Service {
                 msg.writer().writeUTF("Sức mạnh: " + Util.numberToMoney(pl.nPoint.power));
             }
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send top power " + player.id);
         }
     }
 
     public void showTopTask(Player player) {
         List<Player> list = TopToTask.getInstance().load();
-        Message msg = new Message(Cmd.TOP);
-        try {
+        try (Message msg = new Message(Cmd.TOP)) {
             msg.writer().writeByte(0);
             msg.writer().writeUTF("Top Nhiệm Vụ");
             msg.writer().writeByte(list.size());
@@ -1931,20 +1784,18 @@ public class Service {
                 msg.writer().writeShort(pl.getLeg());
                 msg.writer().writeUTF(pl.name);
                 msg.writer().writeUTF(Client.gI().getPlayer(pl.id) != null ? "Online" : "");
-//                msg.writer().writeUTF("Sức mạnh: " + Util.numberToMoney(pl.nPoint.power));
+                // msg.writer().writeUTF("Sức mạnh: " + Util.numberToMoney(pl.nPoint.power));
                 msg.writer().writeUTF(" ặ ặ");
             }
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send top task " + player.id);
         }
     }
 
     public static void ShowTopNap(Player player) {
-        List<TopPlayer> list = GetTopNap();
-        Message msg = new Message(Cmd.TOP);
-        try {
+        List<TopPlayer> list = new ArrayList<>();
+        try (Message msg = new Message(Cmd.TOP)) {
             msg.writer().writeByte(0);
             msg.writer().writeUTF("Bảng xếp hạng Nạp");
             msg.writer().writeByte(list.size());
@@ -1966,16 +1817,14 @@ public class Service {
                 msg.writer().writeUTF("");
             }
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send top nap " + player.id);
         }
     }
 
     public static void ShowTopPower(Player player) {
-        List<TopPlayer> list = GetTopPower();
-        Message msg = new Message(Cmd.TOP);
-        try {
+        List<TopPlayer> list = new ArrayList<>();
+        try (Message msg = new Message(Cmd.TOP)) {
             msg.writer().writeByte(0);
             msg.writer().writeUTF("Bảng xếp hạng Sức mạnh");
             msg.writer().writeByte(list.size());
@@ -1997,9 +1846,8 @@ public class Service {
                 msg.writer().writeUTF("");
             }
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(Service.class, e, "Lỗi send top power " + player.id);
         }
     }
 

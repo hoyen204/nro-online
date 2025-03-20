@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import nro.jdbc.DBService;
-import nro.models.TopPlayer;
+import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.models.TopPlayer;
 
 public class TopPlayerManager {
 

@@ -1,6 +1,9 @@
 package com.nro.nro_online.models.map.war;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,9 +72,14 @@ public class BlackBallWar {
             day = TimeUtil.getCurrDay();
             try {
                 String dateNow = TimeUtil.getTimeNow("dd/MM/yyyy");
-                TIME_OPEN = getTime(dateNow + " " + HOUR_OPEN + ":" + MIN_OPEN + ":" + SECOND_OPEN, "dd/MM/yyyy HH:mm:ss");
-                TIME_CAN_PICK_DB = getTime(dateNow + " " + HOUR_CAN_PICK_DB + ":" + MIN_CAN_PICK_DB + ":" + SECOND_CAN_PICK_DB, "dd/MM/yyyy HH:mm:ss");
-                TIME_CLOSE = getTime(dateNow + " " + HOUR_CLOSE + ":" + MIN_CLOSE + ":" + SECOND_CLOSE, "dd/MM/yyyy HH:mm:ss");
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+                LocalDate currentDate = LocalDate.parse(dateNow, dateFormatter);
+
+                TIME_OPEN = LocalDateTime.of(currentDate, LocalTime.of(HOUR_OPEN, MIN_OPEN, SECOND_OPEN));
+                TIME_CAN_PICK_DB = LocalDateTime.of(currentDate, LocalTime.of(HOUR_CAN_PICK_DB, MIN_CAN_PICK_DB, SECOND_CAN_PICK_DB));
+                TIME_CLOSE = LocalDateTime.of(currentDate, LocalTime.of(HOUR_CLOSE, MIN_CLOSE, SECOND_CLOSE));
+
             } catch (Exception e) {
                 Log.error(BlackBallWar.class, e, "Error setting time for BlackBallWar");
             }

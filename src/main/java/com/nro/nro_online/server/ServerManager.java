@@ -94,7 +94,6 @@ public class ServerManager {
     }
 
     public static void main(String[] args) {
-
         ServerManager.gI().run();
     }
 
@@ -117,6 +116,7 @@ public class ServerManager {
         try {
             Log.log("Start server......... Current thread: " + Thread.activeCount());
             listenSocket = new ServerSocket(port);
+            Log.success("Start run on port: " + port);
             while (isRunning) {
                 try {
                     Socket sc = listenSocket.accept();

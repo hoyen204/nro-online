@@ -7,8 +7,8 @@ public abstract class SpecialEgg {
     protected static final short EGG_ID = 50; // ID NPC chung
 
     protected Player player;
-    protected long lastTimeCreate;
-    protected long timeDone;
+    public long lastTimeCreate;
+    public long timeDone;
 
     public SpecialEgg(Player player, long lastTimeCreate, long timeDone) {
         this.player = player;

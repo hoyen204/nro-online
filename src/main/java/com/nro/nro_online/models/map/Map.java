@@ -92,21 +92,21 @@ public class Map implements Runnable {
         this.zones = new ArrayList<>();
         int countZone = 1;
         switch (this.type) {
-            case ConstMap.MAP_NORMAL:
-                countZone = number;
-                break;
-            case ConstMap.MAP_DOANH_TRAI:
-                countZone = DoanhTrai.MAX_AVAILABLE;
-                break;
-            case ConstMap.MAP_BLACK_BALL_WAR:
-                countZone = BlackBallWar.ZONES;
-                BlackBallWar.gI().addMap(this);
-                break;
-            case ConstMap.MAP_BAN_DO_KHO_BAU:
-                countZone = BanDoKhoBau.MAX_AVAILABLE;
-                break;
-            default:
-                break;
+        case ConstMap.MAP_NORMAL:
+            countZone = number;
+            break;
+        case ConstMap.MAP_DOANH_TRAI:
+            countZone = DoanhTrai.MAX_AVAILABLE;
+            break;
+        case ConstMap.MAP_BLACK_BALL_WAR:
+            countZone = BlackBallWar.ZONES;
+            BlackBallWar.gI().addMap(this);
+            break;
+        case ConstMap.MAP_BAN_DO_KHO_BAU:
+            countZone = BanDoKhoBau.MAX_AVAILABLE;
+            break;
+        default:
+            break;
         }
         for (int i = 0; i < countZone; i++) {
             Zone zone = null;
@@ -145,7 +145,7 @@ public class Map implements Runnable {
                 long timeDo = System.currentTimeMillis() - st;
                 Thread.sleep(1000 - timeDo);
             } catch (Exception e) {
-//                System.out.println("Lỗi update map " + this.mapName);
+                //                System.out.println("Lỗi update map " + this.mapName);
             }
         }
     }
@@ -189,15 +189,15 @@ public class Map implements Runnable {
         for (Zone zone : zones) {
             TrapMap trap = null;
             switch (this.mapId) {
-                case 135:
-                    trap = new TrapMap();
-                    trap.x = 260;
-                    trap.y = 960;
-                    trap.w = 740;
-                    trap.h = 72;
-                    trap.effectId = 49; //xiên
-                    zone.trapMaps.add(trap);
-                    break;
+            case 135:
+                trap = new TrapMap();
+                trap.x = 260;
+                trap.y = 960;
+                trap.w = 740;
+                trap.h = 72;
+                trap.effectId = 49; //xiên
+                zone.trapMaps.add(trap);
+                break;
             }
         }
     }
@@ -259,8 +259,10 @@ public class Map implements Runnable {
     }
 
     private boolean isTileTop(int tileMap) {
-        for (int i = 0; i < tileTop.length; i++) {
-            if (tileTop[i] == tileMap) {
+        if (tileTop == null)
+            return false;
+        for (int j : tileTop) {
+            if (j == tileMap) {
                 return true;
             }
         }

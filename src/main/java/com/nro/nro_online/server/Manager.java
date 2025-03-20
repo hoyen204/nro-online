@@ -144,7 +144,7 @@ public class Manager {
             Event.getInstance().init();
         }
         initRandomItem();
-        NamekBallManager.gI().initBall();
+//        NamekBallManager.gI().initBall();
     }
 
     private void initRandomItem() {
@@ -193,12 +193,10 @@ public class Manager {
                         mapTemp.zones, mapTemp.isMapOffline(),
                         mapTemp.maxPlayerPerZone, mapTemp.wayPoints, mapTemp.effectMaps);
             }
-            if (map != null) {
-                MAPS.add(map);
-                map.initMob(mapTemp.mobTemp, mapTemp.mobLevel, mapTemp.mobHp, mapTemp.mobX, mapTemp.mobY);
-                map.initNpc(mapTemp.npcId, mapTemp.npcX, mapTemp.npcY, mapTemp.npcAvatar);
-                new Thread(map, "update map " + map.mapName).start();
-            }
+            MAPS.add(map);
+            map.initMob(mapTemp.mobTemp, mapTemp.mobLevel, mapTemp.mobHp, mapTemp.mobX, mapTemp.mobY);
+            map.initNpc(mapTemp.npcId, mapTemp.npcX, mapTemp.npcY, mapTemp.npcAvatar);
+            new Thread(map, "update map " + map.mapName).start();
         }
         Referee r = new Referee();
         r.initReferee();
@@ -379,7 +377,7 @@ public class Manager {
                     ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     FlagBag flagBag = new FlagBag();
-                    flagBag.id = rs.getByte("id");
+                    flagBag.id = rs.getInt("id");
                     flagBag.name = rs.getString("name");
                     flagBag.gold = rs.getInt("gold");
                     flagBag.gem = rs.getInt("gem");
@@ -817,7 +815,7 @@ public class Manager {
         }
 
         // Config DB
-        DBService.DRIVER = properties.getProperty("server.db.driver", "");
+        DBService.DRIVER = properties.getProperty("server.db.driver", "com.mysql.cj.jdbc.Driver");
         DBService.DB_HOST = properties.getProperty("server.db.ip", "");
         DBService.DB_PORT = Integer.parseInt(properties.getProperty("server.db.port", "3306"));
         DBService.DB_NAME = properties.getProperty("server.db.name", "");

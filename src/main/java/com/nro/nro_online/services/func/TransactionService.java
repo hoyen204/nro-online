@@ -1,5 +1,6 @@
 package com.nro.nro_online.services.func;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,11 +8,7 @@ import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.utils.Log;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.Service;
-import nro.utils.Log;
-import nro.utils.Util;
+import com.nro.nro_online.utils.Util;
 
 /**
  *
@@ -132,14 +129,12 @@ public class TransactionService implements Runnable {
      * Mời giao dịch
      */
     private void sendInviteTrade(Player plInvite, Player plReceive) {
-        Message msg;
-        try {
-            msg = new Message(-86);
+        try (Message msg = new Message(-86)) {
             msg.writer().writeByte(0);
             msg.writer().writeInt((int) plInvite.id);
             plReceive.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(this.getClass(), e);
         }
     }
 

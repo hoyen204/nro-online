@@ -2,6 +2,7 @@ package com.nro.nro_online.services;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,22 +10,13 @@ import com.nro.nro_online.models.boss.list_boss.WhisTop;
 import com.nro.nro_online.models.map.Map;
 import com.nro.nro_online.models.map.WayPoint;
 import com.nro.nro_online.models.map.Zone;
+import com.nro.nro_online.models.map.war.BlackBallWar;
+import com.nro.nro_online.models.player.NPoint;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.Util;
-import nro.models.boss.list_boss.WhisTop;
-import nro.models.map.Map;
-import nro.models.map.WayPoint;
-import nro.models.map.Zone;
-import nro.models.map.war.BlackBallWar;
-import nro.models.player.NPoint;
-import nro.models.player.Player;
-import nro.server.Manager;
-import nro.server.io.Message;
-import nro.utils.Log;
-import nro.utils.Util;
 
 /**
  * @Build by Arriety
@@ -264,28 +256,22 @@ public class MapService {
     }
 
     public void sendPlayerMove(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-7);
+        try (Message msg = new Message(-7)){
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(player.location.x);
             msg.writer().writeShort(player.location.y);
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-            msg.cleanup();
         } catch (Exception e) {
             Log.error(MapService.class, e);
         }
     }
 
     public void sendPlayerMovePlayer(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-7);
+        try (Message msg = new Message(7)){
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(player.location.x);
             msg.writer().writeShort(player.location.y);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             Log.error(MapService.class, e);
         }
@@ -316,27 +302,21 @@ public class MapService {
             }
             player.zone.removePlayer(player);
             if (!player.zone.map.isMapOffline) {
-                Message msg;
-                try {
-                    msg = new Message(-6);
+                try (Message msg = new Message(-6)) {
                     msg.writer().writeInt((int) player.id);
                     Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
-                    msg.cleanup();
                     player.zone = null;
-                } catch (Exception e) {
-                    Log.error(MapService.class, e);
+                } catch (IOException e) {
+                    Log.error(MapService.class, e, "Lỗi send mess another not me in map " + player.id);
                 }
             } else {
                 if (player instanceof WhisTop) {
-                    Message msg;
-                    try {
-                        msg = new Message(-6);
+                    try (Message msg = new Message(-6)) {
                         msg.writer().writeInt((int) player.id);
                         Service.getInstance().sendMessToPlayer(player, msg, (Long) Util.getPropertyByName(player, "player_id"));
-                        msg.cleanup();
                         player.zone = null;
-                    } catch (Exception e) {
-                        Log.error(MapService.class, e);
+                    } catch (IOException e) {
+                        Log.error(MapService.class, e, "Lỗi send mess to player " + player.id);
                     }
                 }
             }

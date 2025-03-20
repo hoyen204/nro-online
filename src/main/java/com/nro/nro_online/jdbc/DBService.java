@@ -40,7 +40,6 @@ public class DBService {
         if (conn == null || conn.isClosed()) {
             conn = DBHika.getConnection();
             connections[index] = conn;
-            Log.log("Tạo connection mới cho slot " + index + " 🎉");
         }
         return conn;
     }

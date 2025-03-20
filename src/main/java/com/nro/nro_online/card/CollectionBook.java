@@ -1,7 +1,10 @@
 package com.nro.nro_online.card;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.nro.nro_online.models.player.Player;
 import lombok.Getter;
@@ -62,5 +65,9 @@ public class CollectionBook {
                 .filter(card -> card.getCardTemplate() != null && card.getCardTemplate().getMobID() == mobId)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void setCards(List<Card> cards) {
+        this.cards = cards.stream().collect(Collectors.toMap(Card::getId, Function.identity()));
     }
 }

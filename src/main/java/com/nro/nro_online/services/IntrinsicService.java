@@ -7,12 +7,13 @@ import com.nro.nro_online.models.intrinsic.Intrinsic;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.Util;
 
 public class IntrinsicService {
 
     private static IntrinsicService i;
-    private static final int[] COST_OPEN = {10, 20, 40, 80, 160, 320, 640, 1280};
+    private static final int[] COST_OPEN = { 10, 20, 40, 80, 160, 320, 640, 1280 };
 
     public static IntrinsicService gI() {
         if (i == null) {
@@ -54,25 +55,21 @@ public class IntrinsicService {
     }
 
     public void sendInfoIntrinsic(Player player) {
-        Message msg;
-        try {
-            msg = new Message(112);
+        try (Message msg = new Message(112)) {
             msg.writer().writeByte(0);
             msg.writer().writeShort(player.playerIntrinsic.intrinsic.icon);
             msg.writer().writeUTF(player.playerIntrinsic.intrinsic.getName());
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
+            Log.error(this.getClass(), e);
         }
     }
 
     public void showAllIntrinsic(Player player) {
         List<Intrinsic> listIntrinsic = getIntrinsics(player.gender);
-        Message msg;
-        try {
-            msg = new Message(112);
+        try (Message msg = new Message(112)){
             msg.writer().writeByte(1);
-            msg.writer().writeByte(1); //count tab
+            msg.writer().writeByte(1); // count tab
             msg.writer().writeUTF("Nội tại");
             msg.writer().writeByte(listIntrinsic.size() - 1);
             for (int i = 1; i < listIntrinsic.size(); i++) {
@@ -80,7 +77,6 @@ public class IntrinsicService {
                 msg.writer().writeUTF(listIntrinsic.get(i).getDescription());
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -94,8 +90,10 @@ public class IntrinsicService {
     public void showConfirmOpen(Player player) {
         int index = player.playerIntrinsic.countOpen;
         if (index >= 0 && index < COST_OPEN.length) {
-            NpcService.gI().createMenuConMeo(player, ConstNpc.CONFIRM_OPEN_INTRINSIC, -1, "Bạn muốn đổi Nội Tại khác\nvới giá là "
-                    + COST_OPEN[index] + " Tr vàng ?", "Mở\nNội Tại", "Từ chối");
+            NpcService.gI().createMenuConMeo(player, ConstNpc.CONFIRM_OPEN_INTRINSIC, -1,
+                    "Bạn muốn đổi Nội Tại khác\nvới giá là "
+                            + COST_OPEN[index] + " Tr vàng ?",
+                    "Mở\nNội Tại", "Từ chối");
         } else {
             Service.getInstance().sendThongBao(player, "Lỗi");
         }
@@ -103,37 +101,41 @@ public class IntrinsicService {
 
     public void showConfirmOpenVip(Player player) {
         NpcService.gI().createMenuConMeo(player, ConstNpc.CONFIRM_OPEN_INTRINSIC_VIP, -1,
-                "Bạn có muốn mở Nội Tại\nvới giá là 500 hồng ngọc và\ntái lập giá vàng quay lại ban đầu không?", "Mở\nNội VIP", "Từ chối");
+                "Bạn có muốn mở Nội Tại\nvới giá là 500 hồng ngọc và\ntái lập giá vàng quay lại ban đầu không?",
+                "Mở\nNội VIP", "Từ chối");
     }
 
     private void changeIntrinsic(Player player) {
         List<Intrinsic> listIntrinsic = getIntrinsics(player.gender);
         player.playerIntrinsic.intrinsic = new Intrinsic(listIntrinsic.get(Util.nextInt(1, listIntrinsic.size() - 1)));
-        player.playerIntrinsic.intrinsic.param1 = (short) Util.nextInt(player.playerIntrinsic.intrinsic.paramFrom1, player.playerIntrinsic.intrinsic.paramTo1);
-        player.playerIntrinsic.intrinsic.param2 = (short) Util.nextInt(player.playerIntrinsic.intrinsic.paramFrom2, player.playerIntrinsic.intrinsic.paramTo2);
-        Service.getInstance().sendThongBao(player, "Bạn nhận được Nội tại:\n" + player.playerIntrinsic.intrinsic.getName().substring(0, player.playerIntrinsic.intrinsic.getName().indexOf(" [")));
+        player.playerIntrinsic.intrinsic.param1 = (short) Util.nextInt(player.playerIntrinsic.intrinsic.paramFrom1,
+                player.playerIntrinsic.intrinsic.paramTo1);
+        player.playerIntrinsic.intrinsic.param2 = (short) Util.nextInt(player.playerIntrinsic.intrinsic.paramFrom2,
+                player.playerIntrinsic.intrinsic.paramTo2);
+        Service.getInstance().sendThongBao(player, "Bạn nhận được Nội tại:\n" + player.playerIntrinsic.intrinsic
+                .getName().substring(0, player.playerIntrinsic.intrinsic.getName().indexOf(" [")));
         sendInfoIntrinsic(player);
     }
 
     public void open(Player player) {
-//        if (player.nPoint.power >= 10000000000L) {
-//            int goldRequire = COST_OPEN[player.playerIntrinsic.countOpen] * 1000000;
-//            if (player.inventory.gold >= goldRequire) {
-//                player.inventory.gold -= goldRequire;
-//                PlayerService.gI().sendInfoHpMpMoney(player);
-//                changeIntrinsic(player);
-//                player.playerIntrinsic.countOpen++;
-//            } else {
-//                Service.getInstance().sendThongBao(player, "Bạn không đủ vàng, còn thiếu "
-//                        + Util.numberToMoney(goldRequire - player.inventory.gold) + " vàng nữa");
-//            }
-//        } else {
-        Service.getInstance().sendThongBao(player, "Chỉ có thể sửa dụng Mở Nội Tại Víp");
-//        }
+        // if (player.nPoint.power >= 10000000000L) {
+        // int goldRequire = COST_OPEN[player.playerIntrinsic.countOpen] * 1000000;
+        // if (player.inventory.gold >= goldRequire) {
+        // player.inventory.gold -= goldRequire;
+        // PlayerService.gI().sendInfoHpMpMoney(player);
+        // changeIntrinsic(player);
+        // player.playerIntrinsic.countOpen++;
+        // } else {
+        // Service.getInstance().sendThongBao(player, "Bạn không đủ vàng, còn thiếu "
+        // + Util.numberToMoney(goldRequire - player.inventory.gold) + " vàng nữa");
+        // }
+        // } else {
+        Service.getInstance().sendThongBao(player, "Chỉ có thể sử dụng Mở Nội Tại Víp");
+        // }
     }
 
     public void openVip(Player player) {
-        if (player.nPoint.power >= 10000000000L) {
+        if (player.nPoint.power >= 10_000_000_000L) {
             int ruby = 1_000;
             if (player.inventory.getRuby() >= 1_000) {
                 player.inventory.subRuby(ruby);

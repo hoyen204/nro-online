@@ -15,7 +15,7 @@ public class PlayerSkill {
     private final Player player;
     public final List<Skill> skills;
     public Skill skillSelect;
-    private final Timer timer;
+    public final Timer timer;
     public byte[] skillShortCut = new byte[10];
     public boolean prepareQCKK;
     public boolean prepareTuSat;

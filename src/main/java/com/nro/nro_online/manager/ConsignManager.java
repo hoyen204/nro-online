@@ -8,11 +8,11 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 
-import nro.jdbc.DBService;
-import nro.models.item.ItemOption;
-import nro.models.kygui.ConsignmentItem;
-import nro.models.kygui.ConsignmentShop;
-import nro.services.ItemService;
+import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.models.item.ItemOption;
+import com.nro.nro_online.models.kygui.ConsignmentItem;
+import com.nro.nro_online.models.kygui.ConsignmentShop;
+import com.nro.nro_online.services.ItemService;
 
 /**
  * @build by arriety
@@ -59,7 +59,7 @@ public class ConsignManager {
                 if (daysExpired < 6) {
                     consignmentShop.addItem(item);
                 }
-//                System.err.println("sss " + item.getConsignID());
+                // System.err.println("sss " + item.getConsignID());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,7 +67,10 @@ public class ConsignManager {
     }
 
     public void close() {
-        try (Connection con = DBService.gI().getConnection(); PreparedStatement truncateStatement = con.prepareStatement("TRUNCATE consignment_shop"); PreparedStatement insertStatement = con.prepareStatement("INSERT INTO `consignment_shop`(`id`, `consignor_id`, `tab`, `item_id`, `gold`, `gem`, `quantity`, `item_options`, `up_top`, `sold`,`time_consign`) VALUES (? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+        try (Connection con = DBService.gI().getConnection();
+                PreparedStatement truncateStatement = con.prepareStatement("TRUNCATE consignment_shop");
+                PreparedStatement insertStatement = con.prepareStatement(
+                        "INSERT INTO `consignment_shop`(`id`, `consignor_id`, `tab`, `item_id`, `gold`, `gem`, `quantity`, `item_options`, `up_top`, `sold`,`time_consign`) VALUES (? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             truncateStatement.executeUpdate();
             int id = 0;
             List<ConsignmentItem> list = ConsignmentShop.getInstance().getList();

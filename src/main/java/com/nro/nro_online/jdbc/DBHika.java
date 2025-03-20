@@ -42,12 +42,10 @@ public class DBHika {
         config.addDataSourceProperty("useUnicode", "true");
 
         ds = new HikariDataSource(config);
-        Log.success("Khởi tạo HikariCP pool xong, mượt như bơ! 🧀");
     }
 
     public static Connection getConnection() throws SQLException {
         Connection conn = ds.getConnection();
-        Log.log("Lấy connection từ pool, nhanh vèo! ⚡");
         return conn;
     }
 

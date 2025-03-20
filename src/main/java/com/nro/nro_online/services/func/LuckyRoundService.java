@@ -7,9 +7,9 @@ package com.nro.nro_online.services.func;
 
 import java.io.IOException;
 
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.services.func.lr.LuckyRoundGem;
+import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.services.func.lr.LuckyRoundGem;
 
 /**
  *

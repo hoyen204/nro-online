@@ -11,12 +11,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.player.Player;
-import nro.jdbc.DBService;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.player.Player;
-import nro.utils.Util;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @Build by Arriety
@@ -50,7 +48,8 @@ public class GiftService {
         }
         code = code.toLowerCase();
         try {
-            PreparedStatement stmt = DBService.gI().getConnectionForGame().prepareStatement("SELECT * FROM `gift_codes` WHERE `code` like ? AND (expires_at IS NULL OR expires_at > now()) LIMIT 1;",
+            PreparedStatement stmt = DBService.gI().getConnectionForGame().prepareStatement(
+                    "SELECT * FROM `gift_codes` WHERE `code` like ? AND (expires_at IS NULL OR expires_at > now()) LIMIT 1;",
                     ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             stmt.setString(1, code);
             ResultSet res = stmt.executeQuery();
@@ -155,7 +154,9 @@ public class GiftService {
 
     private boolean isUsedGiftCode(int playerID, int giftCodeId) {
         try {
-            PreparedStatement stmt = DBService.gI().getConnectionForGame().prepareStatement("SELECT * FROM `gift_code_histories` WHERE `gift_code_id` = ? AND `player_id` = ? LIMIT 1;", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            PreparedStatement stmt = DBService.gI().getConnectionForGame().prepareStatement(
+                    "SELECT * FROM `gift_code_histories` WHERE `gift_code_id` = ? AND `player_id` = ? LIMIT 1;",
+                    ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             stmt.setInt(1, giftCodeId);
             stmt.setInt(2, playerID);
             ResultSet res = stmt.executeQuery();
@@ -176,7 +177,8 @@ public class GiftService {
     private void addUsedGiftCode(int playerID, int giftCodeId, String code) {
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            PreparedStatement stmt = DBService.gI().getConnectionForGame().prepareStatement("INSERT INTO `gift_code_histories`(`player_id`, `gift_code_id`, `code`, `created_at`) VALUES (?, ?, ?, ?)");
+            PreparedStatement stmt = DBService.gI().getConnectionForGame().prepareStatement(
+                    "INSERT INTO `gift_code_histories`(`player_id`, `gift_code_id`, `code`, `created_at`) VALUES (?, ?, ?, ?)");
             stmt.setInt(1, playerID);
             stmt.setInt(2, giftCodeId);
             stmt.setString(3, code);

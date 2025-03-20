@@ -23,6 +23,7 @@ import com.nro.nro_online.card.CollectionBook;
 import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.jdbc.DBService;
 import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.player.Fusion;
 import com.nro.nro_online.models.player.MiniPet;
 import com.nro.nro_online.models.player.Pet;
@@ -34,21 +35,8 @@ import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.services.ItemService;
 import com.nro.nro_online.services.Service;
 import com.nro.nro_online.utils.Log;
-import nro.card.Card;
-import nro.card.CollectionBook;
-import nro.consts.ConstPlayer;
-import nro.jdbc.DBService;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.player.*;
-import nro.models.sieu_hang.SieuHangModel;
-import nro.models.skill.Skill;
-import nro.server.io.Message;
-import nro.services.ItemService;
-import nro.services.Service;
-import nro.utils.Log;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
+import com.nro.nro_online.utils.SkillUtil;
+import com.nro.nro_online.utils.Util;
 
 public class SieuHangManager {
 
@@ -76,16 +64,16 @@ public class SieuHangManager {
             if (CanGetRewardDay(player.id)) {
                 int ruby = GetRubyByRank(rank);
                 player.inventory.addRuby((int) ruby);
-                System.out.println("player sieu hang: " + player.name + " được cộng: " + ruby + " ruby" + " rank: " + rank);
+                System.out.println(
+                        "player sieu hang: " + player.name + " được cộng: " + ruby + " ruby" + " rank: " + rank);
 
-                try {
-                    Message msg = new Message(-43);
+                try (Message msg = new Message(-43)) {
                     msg.writer().writeByte(-1);
                     msg.writer().writeByte(-1);
                     msg.writer().writeByte(-1);
-                    msg.writer().writeUTF("Bạn xếp hạng thứ " + rank + " giải siêu hạng và nhận được phần thưởng là " + Util.numberToMoney(ruby) + " hồng ngọc");
+                    msg.writer().writeUTF("Bạn xếp hạng thứ " + rank + " giải siêu hạng và nhận được phần thưởng là "
+                            + Util.numberToMoney(ruby) + " hồng ngọc");
                     player.sendMessage(msg);
-                    msg.cleanup();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -93,7 +81,8 @@ public class SieuHangManager {
                 UpdateIsGetReward(player.id);
             }
             if (rank == 1) {
-                Service.getInstance().sendThongBaoAllPlayer("Chào mừng top 1 giải siêu hạng tên: " + player.name + " đã vào game!!");
+                Service.getInstance()
+                        .sendThongBaoAllPlayer("Chào mừng top 1 giải siêu hạng tên: " + player.name + " đã vào game!!");
             }
         }
     }
@@ -106,7 +95,7 @@ public class SieuHangManager {
 
     public static void Update() {
         LocalTime currentTime = LocalTime.now();
-        //update 12h trao qua + reset top
+        // update 12h trao qua + reset top
         if (currentTime.getHour() == 0 && currentTime.getMinute() == 0 && currentTime.getSecond() == 0) {
             UpdateTop100();
             UpdateFreeTurn();
@@ -177,8 +166,10 @@ public class SieuHangManager {
                     dataObject = (JSONObject) jv.parse(dataArray.get(i).toString());
                     short tempId = Short.parseShort(String.valueOf(dataObject.get("temp_id")));
                     if (tempId != -1) {
-                        item = ItemService.gI().createNewItem(tempId, Integer.parseInt(String.valueOf(dataObject.get("quantity"))));
-                        JSONArray options = (JSONArray) jv.parse(String.valueOf(dataObject.get("option")).replaceAll("\"", ""));
+                        item = ItemService.gI().createNewItem(tempId,
+                                Integer.parseInt(String.valueOf(dataObject.get("quantity"))));
+                        JSONArray options = (JSONArray) jv
+                                .parse(String.valueOf(dataObject.get("option")).replaceAll("\"", ""));
                         for (int j = 0; j < options.size(); j++) {
                             JSONArray opt = (JSONArray) jv.parse(String.valueOf(options.get(j)));
                             item.itemOptions.add(new ItemOption(Integer.parseInt(String.valueOf(opt.get(0))),
@@ -195,7 +186,7 @@ public class SieuHangManager {
                 }
                 dataArray.clear();
 
-                //data chỉ số
+                // data chỉ số
                 dataArray = (JSONArray) jv.parse(rs.getString("data_point"));
                 plMp = Integer.parseInt(dataArray.get(1).toString());
                 top.player.nPoint.mpg = Integer.parseInt(dataArray.get(2).toString());
@@ -213,7 +204,7 @@ public class SieuHangManager {
 
                 dataObject.clear();
 
-                //data pet
+                // data pet
                 dataObject = (JSONObject) jv.parse(rs.getString("pet_info"));
                 if (!String.valueOf(dataObject).equals("{}")) {
                     Pet pet = new Pet(top.player);
@@ -262,7 +253,8 @@ public class SieuHangManager {
         int result = 0;
 
         try {
-            PreparedStatement ps = DBService.gI().getConnectionForGame().prepareStatement("SELECT turn_per_day FROM `super` WHERE player_id = " + player.id);
+            PreparedStatement ps = DBService.gI().getConnectionForGame()
+                    .prepareStatement("SELECT turn_per_day FROM `super` WHERE player_id = " + player.id);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -285,7 +277,9 @@ public class SieuHangManager {
         try {
             // Kết nối đến cơ sở dữ liệu
             connection = DBService.gI().getConnectionForGame();
-            PreparedStatement ps = connection.prepareStatement("SELECT COALESCE(rank, -1) AS `rank` FROM (SELECT 1 AS dummy) dummy_table LEFT JOIN super_top ON super_top.player_id = " + player_id);
+            PreparedStatement ps = connection.prepareStatement(
+                    "SELECT COALESCE(rank, -1) AS `rank` FROM (SELECT 1 AS dummy) dummy_table LEFT JOIN super_top ON super_top.player_id = "
+                            + player_id);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -313,7 +307,8 @@ public class SieuHangManager {
         int result = 0;
 
         try {
-            PreparedStatement ps = DBService.gI().getConnectionForGame().prepareStatement("SELECT is_get_reward_day FROM `super` WHERE player_id = " + player_id);
+            PreparedStatement ps = DBService.gI().getConnectionForGame()
+                    .prepareStatement("SELECT is_get_reward_day FROM `super` WHERE player_id = " + player_id);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -333,7 +328,8 @@ public class SieuHangManager {
         Timestamp result = null;
 
         try {
-            PreparedStatement ps = DBService.gI().getConnectionForGame().prepareStatement("SELECT modified_date FROM `super` WHERE player_id = " + player.id);
+            PreparedStatement ps = DBService.gI().getConnectionForGame()
+                    .prepareStatement("SELECT modified_date FROM `super` WHERE player_id = " + player.id);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -365,13 +361,13 @@ public class SieuHangManager {
 
                     Player player = new Player();
 
-                    //base info
+                    // base info
                     player.id = rs.getInt("id");
                     player.name = rs.getString("name");
                     player.head = rs.getShort("head");
                     player.gender = rs.getByte("gender");
 
-                    //data chỉ số
+                    // data chỉ số
                     dataArray = (JSONArray) jv.parse(rs.getString("data_point"));
                     plMp = Integer.parseInt(dataArray.get(1).toString());
                     player.nPoint.mpg = Integer.parseInt(dataArray.get(2).toString());
@@ -387,18 +383,20 @@ public class SieuHangManager {
                     player.nPoint.hpg = Integer.parseInt(dataArray.get(12).toString());
                     dataArray.clear();
 
-                    //data body
+                    // data body
                     dataArray = (JSONArray) jv.parse(rs.getString("items_body"));
                     for (int i = 0; i < dataArray.size(); i++) {
                         Item item = null;
                         dataObject = (JSONObject) dataArray.get(i);
                         short tempId = Short.parseShort(String.valueOf(dataObject.get("temp_id")));
                         if (tempId != -1) {
-                            item = ItemService.gI().createNewItem(tempId, Integer.parseInt(String.valueOf(dataObject.get("quantity"))));
+                            item = ItemService.gI().createNewItem(tempId,
+                                    Integer.parseInt(String.valueOf(dataObject.get("quantity"))));
                             JSONArray options = (JSONArray) dataObject.get("option");
                             for (int j = 0; j < options.size(); j++) {
                                 JSONArray opt = (JSONArray) options.get(j);
-                                item.itemOptions.add(new ItemOption(Integer.parseInt(String.valueOf(opt.get(0))), Integer.parseInt(String.valueOf(opt.get(1)))));
+                                item.itemOptions.add(new ItemOption(Integer.parseInt(String.valueOf(opt.get(0))),
+                                        Integer.parseInt(String.valueOf(opt.get(1)))));
                             }
                             item.createTime = Long.parseLong(String.valueOf(dataObject.get("create_time")));
                             if (ItemService.gI().isOutOfDateTime(item)) {
@@ -412,7 +410,7 @@ public class SieuHangManager {
                     dataArray.clear();
                     dataObject.clear();
 
-                    //data skill
+                    // data skill
                     dataArray = (JSONArray) jv.parse(rs.getString("skills"));
                     for (int i = 0; i < dataArray.size(); i++) {
                         JSONArray skillTemp = (JSONArray) jv.parse(String.valueOf(dataArray.get(i)));
@@ -430,20 +428,23 @@ public class SieuHangManager {
                     }
                     dataArray.clear();
 
-                    //data skill shortcut
+                    // data skill shortcut
                     dataArray = (JSONArray) jv.parse(rs.getString("skills_shortcut"));
                     for (int i = 0; i < dataArray.size(); i++) {
                         player.playerSkill.skillShortCut[i] = Byte.parseByte(String.valueOf(dataArray.get(i)));
                     }
                     for (int i : player.playerSkill.skillShortCut) {
-                        if (player.playerSkill.getSkillbyId(i) != null && player.playerSkill.getSkillbyId(i).damage > 0) {
+                        if (player.playerSkill.getSkillbyId(i) != null
+                                && player.playerSkill.getSkillbyId(i).damage > 0) {
                             player.playerSkill.skillSelect = player.playerSkill.getSkillbyId(i);
                             break;
                         }
                     }
                     if (player.playerSkill.skillSelect == null) {
-                        player.playerSkill.skillSelect = player.playerSkill.getSkillbyId(player.gender == ConstPlayer.TRAI_DAT
-                                ? Skill.DRAGON : (player.gender == ConstPlayer.NAMEC ? Skill.DEMON : Skill.GALICK));
+                        player.playerSkill.skillSelect = player.playerSkill
+                                .getSkillbyId(player.gender == ConstPlayer.TRAI_DAT
+                                        ? Skill.DRAGON
+                                        : (player.gender == ConstPlayer.NAMEC ? Skill.DEMON : Skill.GALICK));
                     }
                     dataArray.clear();
 
@@ -468,9 +469,9 @@ public class SieuHangManager {
                         player.setPetFollow(pet);
                     }
 
-                    player.canGeFirstTimeLogin = false;
+                    player.canGetFirstTimeLogin = false;
 
-                    //data pet
+                    // data pet
                     dataObject = (JSONObject) jv.parse(rs.getString("pet_info"));
                     if (!String.valueOf(dataObject).equals("{}")) {
                         Pet pet = new Pet(player);
@@ -480,7 +481,8 @@ public class SieuHangManager {
                         pet.name = String.valueOf(dataObject.get("name"));
                         player.fusion.typeFusion = Byte.parseByte(String.valueOf(dataObject.get("type_fusion")));
                         player.fusion.lastTimeFusion = System.currentTimeMillis()
-                                - (Fusion.TIME_FUSION - Integer.parseInt(String.valueOf(dataObject.get("left_fusion"))));
+                                - (Fusion.TIME_FUSION
+                                        - Integer.parseInt(String.valueOf(dataObject.get("left_fusion"))));
                         pet.status = Byte.parseByte(String.valueOf(dataObject.get("status")));
 
                         try {
@@ -489,7 +491,7 @@ public class SieuHangManager {
                             pet.setLever(0);
                         }
 
-                        //data chỉ số
+                        // data chỉ số
                         dataObject = (JSONObject) jv.parse(rs.getString("pet_point"));
                         pet.nPoint.stamina = Short.parseShort(String.valueOf(dataObject.get("stamina")));
                         pet.nPoint.maxStamina = Short.parseShort(String.valueOf(dataObject.get("max_stamina")));
@@ -504,14 +506,15 @@ public class SieuHangManager {
                         int hp = Integer.parseInt(String.valueOf(dataObject.get("hp")));
                         int mp = Integer.parseInt(String.valueOf(dataObject.get("mp")));
 
-                        //data body
+                        // data body
                         dataArray = (JSONArray) jv.parse(rs.getString("pet_body"));
                         for (int i = 0; i < dataArray.size(); i++) {
                             dataObject = (JSONObject) dataArray.get(i);
                             Item item = null;
                             short tempId = Short.parseShort(String.valueOf(dataObject.get("temp_id")));
                             if (tempId != -1) {
-                                item = ItemService.gI().createNewItem(tempId, Integer.parseInt(String.valueOf(dataObject.get("quantity"))));
+                                item = ItemService.gI().createNewItem(tempId,
+                                        Integer.parseInt(String.valueOf(dataObject.get("quantity"))));
                                 JSONArray options = (JSONArray) dataObject.get("option");
                                 for (int j = 0; j < options.size(); j++) {
                                     JSONArray opt = (JSONArray) options.get(j);
@@ -528,7 +531,7 @@ public class SieuHangManager {
                             pet.inventory.itemsBody.add(item);
                         }
 
-                        //data skills
+                        // data skills
                         dataArray = (JSONArray) jv.parse(rs.getString("pet_skill"));
                         for (int i = 0; i < dataArray.size(); i++) {
                             JSONArray skillTemp = (JSONArray) dataArray.get(i);
@@ -554,7 +557,7 @@ public class SieuHangManager {
                         }
                         pet.nPoint.hp = hp;
                         pet.nPoint.mp = mp;
-//                    pet.nPoint.calPoint();
+                        // pet.nPoint.calPoint();
                         player.pet = pet;
                     }
 
@@ -577,7 +580,8 @@ public class SieuHangManager {
         List<SieuHangModel> result = new ArrayList<>();
         try {
             Connection connection = DBService.gI().getConnectionForLogin();
-            PreparedStatement ps = connection.prepareStatement("SELECT player_id, `rank` FROM `super` WHERE player_id IN (?, ?)");
+            PreparedStatement ps = connection
+                    .prepareStatement("SELECT player_id, `rank` FROM `super` WHERE player_id IN (?, ?)");
             ps.setLong(1, player.id);
             ps.setInt(2, playerId);
             ResultSet rs = ps.executeQuery();
@@ -685,22 +689,23 @@ public class SieuHangManager {
         }
     }
 
-//    public static void UpdatePedingFight() {
-//        PreparedStatement ps = null;
-//        try (Connection con = DBService.gI().getConnectionForGetPlayer();) {
-//            ps = con.prepareStatement("UPDATE super set is_fight = FALSE WHERE is_fight = true AND TIMESTAMPDIFF(SECOND, modified_date, NOW()) > 500");
-//            ps.executeUpdate();
-//        } catch (Exception e) {
-//            Log.error(SieuHangManager.class, e);
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                ps.close();
-//            } catch (SQLException ex) {
-//                ex.printStackTrace();
-//            }
-//        }
-//    }
+    // public static void UpdatePedingFight() {
+    // PreparedStatement ps = null;
+    // try (Connection con = DBService.gI().getConnectionForGetPlayer();) {
+    // ps = con.prepareStatement("UPDATE super set is_fight = FALSE WHERE is_fight =
+    // true AND TIMESTAMPDIFF(SECOND, modified_date, NOW()) > 500");
+    // ps.executeUpdate();
+    // } catch (Exception e) {
+    // Log.error(SieuHangManager.class, e);
+    // e.printStackTrace();
+    // } finally {
+    // try {
+    // ps.close();
+    // } catch (SQLException ex) {
+    // ex.printStackTrace();
+    // }
+    // }
+    // }
     public static void UpdatePedingFight() {
         Connection connection = null;
         Statement statement = null;
@@ -828,7 +833,7 @@ public class SieuHangManager {
             JSONObject jPetInfo = new JSONObject();
             petInfo = jPetInfo.toJSONString();
 
-            //data chỉ số
+            // data chỉ số
             JSONArray dataPoint = new JSONArray();
             dataPoint.add(0);
             dataPoint.add(player.nPoint.mp);
@@ -845,7 +850,7 @@ public class SieuHangManager {
             dataPoint.add(player.nPoint.hpg);
             point = dataPoint.toJSONString();
 
-            //data body
+            // data body
             JSONArray dataBody = new JSONArray();
             for (Item item : player.inventory.itemsBody) {
                 JSONObject dataItem = new JSONObject();
@@ -872,7 +877,7 @@ public class SieuHangManager {
             }
             itemsBody = dataBody.toJSONString();
 
-            //data pet
+            // data pet
             if (player.pet != null) {
                 jPetInfo.put("name", player.pet.name);
                 jPetInfo.put("gender", player.pet.gender);
@@ -880,7 +885,8 @@ public class SieuHangManager {
                 jPetInfo.put("status", player.pet.status);
                 jPetInfo.put("type_fusion", player.fusion.typeFusion);
                 jPetInfo.put("level", player.pet.getLever());
-                int timeLeftFusion = (int) (Fusion.TIME_FUSION - (System.currentTimeMillis() - player.fusion.lastTimeFusion));
+                int timeLeftFusion = (int) (Fusion.TIME_FUSION
+                        - (System.currentTimeMillis() - player.fusion.lastTimeFusion));
                 jPetInfo.put("left_fusion", timeLeftFusion < 0 ? 0 : timeLeftFusion);
                 petInfo = jPetInfo.toJSONString();
             }

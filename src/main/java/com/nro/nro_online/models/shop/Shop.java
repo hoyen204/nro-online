@@ -40,5 +40,6 @@ public class Shop {
         this.id = rs.getInt(1);
         this.npcId = rs.getByte(2);
         this.shopOrder = rs.getByte(3);
+        this.tabShops = new ArrayList<>();
     }
 }

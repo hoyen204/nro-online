@@ -1,5 +1,6 @@
 package com.nro.nro_online.services;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,43 +24,41 @@ public class FlagBagService {
     public void sendIconFlagChoose(Player player, int id) {
         FlagBag fb = getFlagBag(id);
         if (fb != null) {
-            Message msg;
-            try {
-                msg = new Message(-62);
+            try (Message msg = new Message(-62)) {
                 msg.writer().writeByte(fb.id);
                 msg.writer().writeByte(1);
                 msg.writer().writeShort(fb.iconId);
 
                 player.sendMessage(msg);
-                msg.cleanup();
-            } catch (Exception e) {
+            } catch (IOException e) {
+                e.printStackTrace(); // Log the exception for debugging purposes
             }
         }
     }
 
     public void sendIconEffectFlag(Player player, int id) {
+        if (player == null) {
+            System.out.println("Player is null"); // Log if player is null
+            return;
+        }
         FlagBag fb = getFlagBag(id);
         if (fb != null) {
-            Message msg;
-            try {
-                msg = new Message(-63);
+            try (Message msg = new Message(-63)) {
                 msg.writer().writeByte(fb.id);
                 msg.writer().writeByte(fb.iconEffect.length);
                 for (Short iconId : fb.iconEffect) {
                     msg.writer().writeShort(iconId);
                 }
                 player.sendMessage(msg);
-                msg.cleanup();
-            } catch (Exception e) {
+            } catch (IOException e) {
+                e.printStackTrace(); // Log the exception for debugging purposes
             }
         }
     }
 
     public void sendListFlagClan(Player pl) {
         List<FlagBag> list = getFlagsForChooseClan();
-        Message msg;
-        try {
-            msg = new Message(-46);
+        try (Message msg = new Message(-46)) {
             msg.writer().writeByte(1); //type
             msg.writer().writeByte(list.size());
             for (FlagBag fb : list) {
@@ -69,8 +68,8 @@ public class FlagBagService {
                 msg.writer().writeInt(fb.gem);
             }
             pl.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            e.printStackTrace(); // Log the exception for debugging purposes
         }
     }
 

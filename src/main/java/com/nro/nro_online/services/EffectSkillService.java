@@ -2,7 +2,6 @@ package com.nro.nro_online.services;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Consumer;
 
 import com.nro.nro_online.models.mob.Mob;
 import com.nro.nro_online.models.player.Player;
@@ -11,11 +10,17 @@ import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.SkillUtil;
 
+/**
+ *
+ * @Build by Arriety
+ *
+ */
 public class EffectSkillService {
 
     public static final byte TURN_ON_EFFECT = 1;
     public static final byte TURN_OFF_EFFECT = 0;
     public static final byte TURN_OFF_ALL_EFFECT = 2;
+
     public static final byte HOLD_EFFECT = 32;
     public static final byte SHIELD_EFFECT = 33;
     public static final byte HUYT_SAO_EFFECT = 39;
@@ -23,58 +28,78 @@ public class EffectSkillService {
     public static final byte SLEEP_EFFECT = 41;
     public static final byte STONE_EFFECT = 42;
 
-    private static final EffectSkillService i = new EffectSkillService();
-    private Player player;
+    private static EffectSkillService i;
+
+    private EffectSkillService() {
+
+    }
 
     public static EffectSkillService gI() {
+        if (i == null) {
+            i = new EffectSkillService();
+        }
         return i;
     }
 
+    // hiệu ứng player dùng skill
     public void sendEffectUseSkill(Player player, byte skillId) {
         Skill skill = SkillUtil.getSkillbyId(player, skillId);
-        sendMessage(player, -45, msg -> {
+        try (Message msg = new Message(-45)) {
             msg.writer().writeByte(8);
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(skill.skillId);
             Service.getInstance().sendMessAnotherNotMeInMap(player, msg);
-        });
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect use skill " + player.id);
+        }
     }
 
     public void sendEffectPlayer(Player plUseSkill, Player plTarget, byte toggle, byte effect) {
-        sendMessage(plUseSkill, -124, msg -> {
-            msg.writer().writeByte(toggle);
-            msg.writer().writeByte(0);
+        try (Message msg = new Message(-124)) {
+            msg.writer().writeByte(toggle); // 0: hủy hiệu ứng, 1: bắt đầu hiệu ứng
+            msg.writer().writeByte(0); // 0: vào phần phayer, 1: vào phần mob
             if (toggle == TURN_OFF_ALL_EFFECT) {
                 msg.writer().writeInt((int) plTarget.id);
             } else {
-                msg.writer().writeByte(effect);
-                msg.writer().writeInt((int) plTarget.id);
-                msg.writer().writeInt((int) plUseSkill.id);
+                msg.writer().writeByte(effect); // loại hiệu ứng
+                msg.writer().writeInt((int) plTarget.id); // id player dính effect
+                msg.writer().writeInt((int) plUseSkill.id); // id player dùng skill
             }
             Service.getInstance().sendMessAllPlayerInMap(plUseSkill, msg);
-        });
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect player " + plUseSkill.id);
+        }
     }
 
     public void sendEffectMob(Player plUseSkill, Mob mobTarget, byte toggle, byte effect) {
-        sendMessage(mobTarget.zone, -124, msg -> {
-            msg.writer().writeByte(toggle);
-            msg.writer().writeByte(1);
-            msg.writer().writeByte(effect);
-            msg.writer().writeByte(mobTarget.id);
-            msg.writer().writeInt((int) plUseSkill.id);
+        try (Message msg = new Message(-124)) {
+            msg.writer().writeByte(toggle); // 0: hủy hiệu ứng, 1: bắt đầu hiệu ứng
+            msg.writer().writeByte(1); // 0: vào phần phayer, 1: vào phần mob
+            msg.writer().writeByte(effect); // loại hiệu ứng
+            msg.writer().writeByte(mobTarget.id); // id mob dính effect
+            msg.writer().writeInt((int) plUseSkill.id); // id player dùng skill
             Service.getInstance().sendMessAllPlayerInMap(mobTarget.zone, msg);
-        });
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect mob " + plUseSkill.id);
+        }
     }
 
+    // Trói *********************************************************************
+    // dừng sử dụng trói
     public void removeUseTroi(Player player) {
-        if (player.effectSkill.mobAnTroi != null) player.effectSkill.mobAnTroi.effectSkill.removeAnTroi();
-        if (player.effectSkill.plAnTroi != null) removeAnTroi(player.effectSkill.plAnTroi);
+        if (player.effectSkill.mobAnTroi != null) {
+            player.effectSkill.mobAnTroi.effectSkill.removeAnTroi();
+        }
+        if (player.effectSkill.plAnTroi != null) {
+            removeAnTroi(player.effectSkill.plAnTroi);
+        }
         player.effectSkill.useTroi = false;
         player.effectSkill.mobAnTroi = null;
         player.effectSkill.plAnTroi = null;
         sendEffectPlayer(player, player, TURN_OFF_EFFECT, HOLD_EFFECT);
     }
 
+    // hết thời gian bị trói
     private void removeAnTroi(Player player) {
         if (player != null && player.effectSkill != null) {
             player.effectSkill.anTroi = false;
@@ -85,6 +110,8 @@ public class EffectSkillService {
 
     public void setAnTroi(Player player, Player plTroi, long lastTimeAnTroi, int timeAnTroi) {
         player.effectSkill.anTroi = true;
+        // player.effectSkill.lastTimeAnTroi = lastTimeAnTroi;
+        // player.effectSkill.timeAnTroi = timeAnTroi;
         player.effectSkill.plTroi = plTroi;
     }
 
@@ -93,18 +120,25 @@ public class EffectSkillService {
         player.effectSkill.lastTimeTroi = lastTimeTroi;
         player.effectSkill.timeTroi = timeTroi;
     }
+    // **************************************************************************
 
+    // Thôi miên ****************************************************************
+    // thiết lập thời gian bắt đầu bị thôi miên
     public void setThoiMien(Player player, long lastTimeThoiMien, int timeThoiMien) {
         player.effectSkill.isThoiMien = true;
         player.effectSkill.lastTimeThoiMien = lastTimeThoiMien;
         player.effectSkill.timeThoiMien = timeThoiMien;
     }
 
+    // hết hiệu ứng thôi miên
     public void removeThoiMien(Player player) {
         player.effectSkill.isThoiMien = false;
         sendEffectPlayer(player, player, TURN_OFF_EFFECT, SLEEP_EFFECT);
     }
 
+    // **************************************************************************
+    // Thái dương hạ san &&&&****************************************************
+    // player ăn choáng thái dương hạ san
     public void startStun(Player player, long lastTimeStartBlind, int timeBlind) {
         player.effectSkill.lastTimeStartStun = lastTimeStartBlind;
         player.effectSkill.timeStun = timeBlind;
@@ -112,11 +146,15 @@ public class EffectSkillService {
         sendEffectPlayer(player, player, TURN_ON_EFFECT, BLIND_EFFECT);
     }
 
+    // kết thúc choáng thái dương hạ san
     public void removeStun(Player player) {
         player.effectSkill.isStun = false;
         sendEffectPlayer(player, player, TURN_OFF_EFFECT, BLIND_EFFECT);
     }
+    // **************************************************************************
 
+    // Socola *******************************************************************
+    // player biến thành socola
     public void setSocola(Player player, long lastTimeSocola, int timeSocola) {
         player.effectSkill.lastTimeSocola = lastTimeSocola;
         player.effectSkill.timeSocola = timeSocola;
@@ -124,21 +162,27 @@ public class EffectSkillService {
         player.effectSkill.countPem1hp = 0;
     }
 
+    // player trở lại thành người
     public void removeSocola(Player player) {
         player.effectSkill.isSocola = false;
         Service.getInstance().Send_Caitrang(player);
     }
 
+    // quái biến thành socola
     public void sendMobToSocola(Player player, Mob mob, int timeSocola) {
-        sendMessage(player, -112, msg -> {
+        try (Message msg = new Message(-112)) {
             msg.writer().writeByte(1);
-            msg.writer().writeByte(mob.id);
-            msg.writer().writeShort(4133);
+            msg.writer().writeByte(mob.id); // mob id
+            msg.writer().writeShort(4133); // icon socola
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-        });
-        mob.effectSkill.setSocola(System.currentTimeMillis(), timeSocola);
+            mob.effectSkill.setSocola(System.currentTimeMillis(), timeSocola);
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send mob to socola " + player.id);
+        }
     }
+    // **************************************************************************
 
+    // Dịch chuyển tức thời *****************************************************
     public void setBlindDCTT(Player player, long lastTimeDCTT, int timeBlindDCTT) {
         player.effectSkill.isBlindDCTT = true;
         player.effectSkill.lastTimeBlindDCTT = lastTimeDCTT;
@@ -149,12 +193,16 @@ public class EffectSkillService {
         player.effectSkill.isBlindDCTT = false;
         sendEffectPlayer(player, player, TURN_OFF_EFFECT, BLIND_EFFECT);
     }
+    // **************************************************************************
 
+    // Huýt sáo *****************************************************************
+    // Hưởng huýt sáo
     public void setStartHuytSao(Player player, int tiLeHP) {
         player.effectSkill.tiLeHPHuytSao = tiLeHP;
         player.effectSkill.lastTimeHuytSao = System.currentTimeMillis();
     }
 
+    // Hết hiệu ứng huýt sáo
     public void removeHuytSao(Player player) {
         player.effectSkill.tiLeHPHuytSao = 0;
         sendEffectPlayer(player, player, TURN_OFF_EFFECT, HUYT_SAO_EFFECT);
@@ -162,6 +210,9 @@ public class EffectSkillService {
         Service.getInstance().Send_Info_NV(player);
     }
 
+    // **************************************************************************
+    // Biến khỉ *****************************************************************
+    // Bắt đầu biến khỉ
     public void setIsMonkey(Player player) {
         try {
             Thread.sleep(2000);
@@ -169,8 +220,12 @@ public class EffectSkillService {
             ex.printStackTrace();
         }
         int timeMonkey = SkillUtil.getTimeMonkey(player.playerSkill.skillSelect.point);
-        if (player.setClothes.cadic2 == 5) timeMonkey *= 5;
-        if (player.setClothes.cadic1 == 5) timeMonkey *= 2;
+        if (player.setClothes.cadic2 == 5) {
+            timeMonkey *= 5;
+        }
+        if (player.setClothes.cadic1 == 5) {
+            timeMonkey *= 2;
+        }
         player.effectSkill.isMonkey = true;
         player.effectSkill.timeMonkey = timeMonkey;
         player.effectSkill.lastTimeUpMonkey = System.currentTimeMillis();
@@ -181,7 +236,10 @@ public class EffectSkillService {
     public void monkeyDown(Player player) {
         player.effectSkill.isMonkey = false;
         player.effectSkill.levelMonkey = 0;
-        if (player.nPoint.hp > player.nPoint.hpMax) player.nPoint.setHp(player.nPoint.hpMax);
+        if (player.nPoint.hp > player.nPoint.hpMax) {
+            player.nPoint.setHp(player.nPoint.hpMax);
+        }
+
         sendEffectEndCharge(player);
         sendEffectMonkey(player);
         Service.getInstance().setNotMonkey(player);
@@ -191,6 +249,8 @@ public class EffectSkillService {
         Service.getInstance().Send_Info_NV(player);
         Service.getInstance().sendInfoPlayerEatPea(player);
     }
+    // **************************************************************************
+    // Tái tạo năng lượng *******************************************************
 
     public void startCharge(Player player) {
         if (!player.effectSkill.isCharging) {
@@ -202,9 +262,13 @@ public class EffectSkillService {
     public void stopCharge(Player player) {
         player.effectSkill.countCharging = 0;
         player.effectSkill.isCharging = false;
+        ;
         sendEffectStopCharge(player);
+
     }
 
+    // **************************************************************************
+    // Khiên năng lượng *********************************************************
     public void setStartShield(Player player) {
         player.effectSkill.isShielding = true;
         player.effectSkill.lastTimeShieldUp = System.currentTimeMillis();
@@ -222,8 +286,9 @@ public class EffectSkillService {
         ItemTimeService.gI().removeItemTime(player, 3784);
     }
 
+    // **************************************************************************
     public void sendEffectBlindThaiDuongHaSan(Player plUseSkill, List<Player> players, List<Mob> mobs, int timeStun) {
-        sendMessage(plUseSkill, -45, msg -> {
+        try (Message msg = new Message(-45)) {
             msg.writer().writeByte(0);
             msg.writer().writeInt((int) plUseSkill.id);
             msg.writer().writeShort(plUseSkill.playerSkill.skillSelect.skillId);
@@ -238,72 +303,75 @@ public class EffectSkillService {
                 msg.writer().writeByte(timeStun / 1000);
             }
             Service.getInstance().sendMessAllPlayerInMap(plUseSkill, msg);
-        });
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect blind thái dương hạ san " + plUseSkill.id);
+        }
     }
 
+    // hiệu ứng bắt đầu gồng
     public void sendEffectStartCharge(Player player) {
         Skill skill = SkillUtil.getSkillbyId(player, Skill.TAI_TAO_NANG_LUONG);
-        sendMessage(player, -45, msg -> {
+        try (Message msg = new Message(-45)) {
             msg.writer().writeByte(6);
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(skill.skillId);
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-        });
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect start charge " + player.id);
+        }
     }
 
+    // hiệu ứng đang gồng
     public void sendEffectCharge(Player player) {
         Skill skill = SkillUtil.getSkillbyId(player, Skill.TAI_TAO_NANG_LUONG);
-        sendMessage(player, -45, msg -> {
+        try (Message msg = new Message(-45)) {
             msg.writer().writeByte(1);
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(skill.skillId);
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-        });
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect charge " + player.id);
+        }
     }
 
+    // dừng gồng
     public void sendEffectStopCharge(Player player) {
-        sendMessage(player, -45, msg -> {
+        try (Message msg = new Message(-45)) {
             msg.writer().writeByte(3);
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(-1);
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-        });
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect stop charge " + player.id);
+        }
     }
 
+    // hiệu ứng nổ kết thúc gồng
     public void sendEffectEndCharge(Player player) {
-        sendMessage(player, -45, msg -> {
+        try (Message msg = new Message(-45)) {
             msg.writer().writeByte(5);
             msg.writer().writeInt((int) player.id);
             msg.writer().writeShort(player.playerSkill.skillSelect.skillId);
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-        });
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect end charge " + player.id);
+        }
     }
 
+    // hiệu ứng biến khỉ
     public void sendEffectMonkey(Player player) {
         Skill skill = SkillUtil.getSkillbyId(player, Skill.BIEN_KHI);
         if (skill == null) {
             Service.getInstance().sendThongBao(player, "Errorrr");
             return;
         }
-        sendMessage(player, -45, msg -> {
-            try{
-                msg.writer().writeByte(6);
-                msg.writer().writeInt((int) player.id);
-                msg.writer().writeShort(skill.skillId);
-            }
-            catch (IOException ex){
-                Log.error(ex.getMessage());
-            }
+        try (Message msg = new Message(-45)) {
+            msg.writer().writeByte(6);
+            msg.writer().writeInt((int) player.id);
+            msg.writer().writeShort(skill.skillId);
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-        });
-    }
-
-    private void sendMessage(Player player, int cmd, Consumer<Message> consumer) {
-        this.player = player;
-        try (Message msg = new Message(cmd)) {
-            consumer.accept(msg);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(this.getClass(), e, "Lỗi send effect monkey " + player.id);
         }
     }
 }

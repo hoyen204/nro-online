@@ -13,29 +13,22 @@ import org.json.simple.JSONObject;
 
 import com.google.gson.Gson;
 import com.nro.nro_online.consts.ConstMap;
+import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.manager.AchieveManager;
+import com.nro.nro_online.manager.SieuHangManager;
 import com.nro.nro_online.models.item.Item;
 import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.item.ItemTime;
 import com.nro.nro_online.models.player.Friend;
+import com.nro.nro_online.models.player.Fusion;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.models.skill.Skill;
+import com.nro.nro_online.models.task.Achievement;
+import com.nro.nro_online.models.task.AchievementTemplate;
+import com.nro.nro_online.server.Manager;
 import com.nro.nro_online.services.MapService;
+import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.Util;
-import nro.consts.ConstMap;
-import nro.jdbc.DBService;
-import nro.manager.AchiveManager;
-import nro.manager.SieuHangManager;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.item.ItemTime;
-import nro.models.player.*;
-import nro.models.skill.Skill;
-import nro.models.task.Achivement;
-import nro.models.task.AchivementTemplate;
-import nro.server.Manager;
-import nro.services.MapService;
-import nro.utils.Log;
-import nro.utils.Util;
 
 /**
  * Arriety
@@ -44,7 +37,8 @@ public class PlayerDAO {
 
     public static boolean updateTimeLogout;
 
-    public static void createNewPlayer(Connection con, int userId, String name, byte gender, int hair, PreparedStatement ps) {
+    public static void createNewPlayer(Connection con, int userId, String name, byte gender, int hair,
+            PreparedStatement ps) {
         try {
             JSONArray dataInventory = new JSONArray();
 
@@ -61,26 +55,26 @@ public class PlayerDAO {
 
             JSONArray dataPoint = new JSONArray();
             dataPoint.add(0);// nang dong
-            dataPoint.add(gender == 1 ? 200 : 100);//mp
-            dataPoint.add(gender == 1 ? 200 : 100);//mpg
-            dataPoint.add(0);//critg
-            dataPoint.add(0);//limitpower
-            dataPoint.add(1000);//stamina
-            dataPoint.add(gender == 0 ? 200 : 100);//hp
-            dataPoint.add(0);//defg
-            dataPoint.add(2000);//tn
-            dataPoint.add(1000);//maxsta
-            dataPoint.add(gender == 2 ? 15 : 10);//damg
-            dataPoint.add(2000);//pow
-            dataPoint.add(gender == 0 ? 200 : 100);//hpg
+            dataPoint.add(gender == 1 ? 200 : 100);// mp
+            dataPoint.add(gender == 1 ? 200 : 100);// mpg
+            dataPoint.add(0);// critg
+            dataPoint.add(0);// limitpower
+            dataPoint.add(1000);// stamina
+            dataPoint.add(gender == 0 ? 200 : 100);// hp
+            dataPoint.add(0);// defg
+            dataPoint.add(2000);// tn
+            dataPoint.add(1000);// maxsta
+            dataPoint.add(gender == 2 ? 15 : 10);// damg
+            dataPoint.add(2000);// pow
+            dataPoint.add(gender == 0 ? 200 : 100);// hpg
             String point = dataPoint.toJSONString();
 
             JSONArray dataMagicTree = new JSONArray();
-            dataMagicTree.add(0);//isupgr
+            dataMagicTree.add(0);// isupgr
             dataMagicTree.add(new Date().getTime());
-            dataMagicTree.add(1);//LV
+            dataMagicTree.add(1);// LV
             dataMagicTree.add(new Date().getTime());
-            dataMagicTree.add(5);//curr_pea
+            dataMagicTree.add(5);// curr_pea
             String magicTree = dataMagicTree.toJSONString();
 
             int idAo = gender == 0 ? 0 : gender == 1 ? 1 : 2;
@@ -224,7 +218,7 @@ public class PlayerDAO {
             String task = dataTask.toJSONString();
 
             JSONArray dataAchive = new JSONArray();
-            for (AchivementTemplate a : AchiveManager.getInstance().getList()) {
+            for (AchievementTemplate a : AchieveManager.getInstance().getList()) {
                 JSONObject jobj = new JSONObject();
                 jobj.put("id", a.getId());
                 jobj.put("count", 0);
@@ -249,25 +243,25 @@ public class PlayerDAO {
             dataCharms.add(0);
             String charms = dataCharms.toJSONString();
 
-            int[] skillsArr = gender == 0 ? new int[]{0, 1, 6, 9, 10, 20, 22, 19, 24}
-                    : gender == 1 ? new int[]{2, 3, 7, 11, 12, 17, 18, 19, 26}
-                    : new int[]{4, 5, 8, 13, 14, 21, 23, 19, 25};
-            //[{"temp_id":"4","point":0,"last_time_use":0},]
+            int[] skillsArr = gender == 0 ? new int[] { 0, 1, 6, 9, 10, 20, 22, 19, 24 }
+                    : gender == 1 ? new int[] { 2, 3, 7, 11, 12, 17, 18, 19, 26 }
+                            : new int[] { 4, 5, 8, 13, 14, 21, 23, 19, 25 };
+            // [{"temp_id":"4","point":0,"last_time_use":0},]
 
-//            for (int i = 0; i < skillsArr.length; i++) {
-//                dataObject.put("temp_id", skillsArr[i]);
-//                if (i == 0) {
-//                    dataObject.put("point", 1);
-//                } else {
-//                    dataObject.put("point", 0);
-//                }
-//                dataObject.put("last_time_use", 0);
-//                dataArray.add(dataObject.toJSONString());
-//                dataObject.clear();
-//            }
-//            String skills = dataArray.toJSONString();
-//            dataArray.clear();
-//
+            // for (int i = 0; i < skillsArr.length; i++) {
+            // dataObject.put("temp_id", skillsArr[i]);
+            // if (i == 0) {
+            // dataObject.put("point", 1);
+            // } else {
+            // dataObject.put("point", 0);
+            // }
+            // dataObject.put("last_time_use", 0);
+            // dataArray.add(dataObject.toJSONString());
+            // dataObject.clear();
+            // }
+            // String skills = dataArray.toJSONString();
+            // dataArray.clear();
+            //
             JSONArray dataSkills = new JSONArray();
             for (int i = 0; i < skillsArr.length; i++) {
                 JSONArray skill = new JSONArray();
@@ -339,13 +333,13 @@ public class PlayerDAO {
             ps.setString(26, petBody);
             ps.setString(27, petSkill);
             ps.setString(28, blackBall);
-            ps.setInt(29, 10); //gold bar
+            ps.setInt(29, 10); // gold bar
             ps.setString(30, "{}");
             ps.setString(31, achive);
             ps.setString(32, itemTimeNew);
             ps.setString(33, itemMayDo);
             ps.executeUpdate();
-//            Log.success("Tạo player mới thành công!");
+            // Log.success("Tạo player mới thành công!");
         } catch (Exception e) {
             Log.error(PlayerDAO.class, e, "Lỗi tạo player mới");
         } finally {
@@ -395,7 +389,7 @@ public class PlayerDAO {
             if (player.loaded) {
                 try {
                     JSONArray dataInventory = new JSONArray();
-                    //data kim lượng
+                    // data kim lượng
                     dataInventory.add(player.inventory.gold);
                     dataInventory.add(player.inventory.gem);
                     dataInventory.add(player.inventory.ruby);
@@ -428,13 +422,13 @@ public class PlayerDAO {
                             y = 336;
                         }
                     }
-                    //data vị trí
+                    // data vị trí
                     JSONArray dataLocation = new JSONArray();
                     dataLocation.add(x);
                     dataLocation.add(y);
                     dataLocation.add(mapId);
                     String location = dataLocation.toJSONString();
-                    //data chỉ số
+                    // data chỉ số
 
                     JSONArray dataPoint = new JSONArray();
                     dataPoint.add(0);
@@ -452,7 +446,7 @@ public class PlayerDAO {
                     dataPoint.add(player.nPoint.hpg);
                     String point = dataPoint.toJSONString();
 
-                    //data đậu thần
+                    // data đậu thần
                     JSONArray dataMagicTree = new JSONArray();
                     dataMagicTree.add(player.magicTree.isUpgrade ? 1 : 0);
                     dataMagicTree.add(player.magicTree.lastTimeUpgrade);
@@ -461,7 +455,7 @@ public class PlayerDAO {
                     dataMagicTree.add(player.magicTree.currPeas);
                     String magicTree = dataMagicTree.toJSONString();
 
-                    //data body
+                    // data body
                     JSONArray dataBody = new JSONArray();
                     for (Item item : player.inventory.itemsBody) {
                         JSONObject dataItem = new JSONObject();
@@ -488,7 +482,7 @@ public class PlayerDAO {
                     }
                     String itemsBody = dataBody.toJSONString();
 
-                    //data bag
+                    // data bag
                     JSONArray dataBag = new JSONArray();
                     for (Item item : player.inventory.itemsBag) {
                         JSONObject dataItem = new JSONObject();
@@ -530,7 +524,7 @@ public class PlayerDAO {
                     }
                     String itemsBag = dataBag.toJSONString();
 
-                    //data box
+                    // data box
                     JSONArray dataBox = new JSONArray();
                     for (Item item : player.inventory.itemsBox) {
                         JSONObject dataItem = new JSONObject();
@@ -572,7 +566,7 @@ public class PlayerDAO {
                     }
                     String itemsBox = dataBox.toJSONString();
 
-                    //data box crack ball
+                    // data box crack ball
                     JSONArray dataCrackBall = new JSONArray();
                     for (Item item : player.inventory.itemsBoxCrackBall) {
                         JSONObject dataItem = new JSONObject();
@@ -599,7 +593,7 @@ public class PlayerDAO {
                     }
                     String itemsBoxLuckyRound = dataCrackBall.toJSONString();
 
-                    //data bạn bè
+                    // data bạn bè
                     JSONArray dataFriends = new JSONArray();
                     for (Friend f : player.friends) {
                         JSONObject friend = new JSONObject();
@@ -614,7 +608,7 @@ public class PlayerDAO {
                     }
                     String friend = dataFriends.toJSONString();
 
-                    //data kẻ thù
+                    // data kẻ thù
                     JSONArray dataEnemies = new JSONArray();
                     for (Friend e : player.enemies) {
                         JSONObject enemy = new JSONObject();
@@ -629,7 +623,7 @@ public class PlayerDAO {
                     }
                     String enemy = dataEnemies.toJSONString();
 
-                    //data nội tại
+                    // data nội tại
                     JSONArray dataIntrinsic = new JSONArray();
                     dataIntrinsic.add(player.playerIntrinsic.intrinsic.id);
                     dataIntrinsic.add(player.playerIntrinsic.intrinsic.param1);
@@ -637,58 +631,109 @@ public class PlayerDAO {
                     dataIntrinsic.add(player.playerIntrinsic.intrinsic.param2);
                     String intrinsic = dataIntrinsic.toJSONString();
 
-                    //data item time
+                    // data item time
                     JSONArray dataItemTime = new JSONArray();
-                    dataItemTime.add(player.itemTime.isUseBoKhi ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoKhi)) : 0);
-                    dataItemTime.add(player.itemTime.isUseAnDanh ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeAnDanh)) : 0);
-                    dataItemTime.add(player.itemTime.isOpenPower ? (ItemTime.TIME_OPEN_POWER - (System.currentTimeMillis() - player.itemTime.lastTimeOpenPower)) : 0);
-                    dataItemTime.add(player.itemTime.isUseCuongNo ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeCuongNo)) : 0);
-                    dataItemTime.add(player.itemTime.isUseMayDo ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeUseMayDo)) : 0);
-                    dataItemTime.add(player.itemTime.isUseBoHuyet ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoHuyet)) : 0);
+                    dataItemTime.add(player.itemTime.isUseBoKhi
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoKhi))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseAnDanh
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeAnDanh))
+                            : 0);
+                    dataItemTime
+                            .add(player.itemTime.isOpenPower
+                                    ? (ItemTime.TIME_OPEN_POWER
+                                            - (System.currentTimeMillis() - player.itemTime.lastTimeOpenPower))
+                                    : 0);
+                    dataItemTime.add(player.itemTime.isUseCuongNo
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeCuongNo))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseMayDo
+                            ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeUseMayDo))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseBoHuyet
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoHuyet))
+                            : 0);
                     dataItemTime.add(player.itemTime.iconMeal);
-                    dataItemTime.add(player.itemTime.isEatMeal ? (ItemTime.TIME_EAT_MEAL - (System.currentTimeMillis() - player.itemTime.lastTimeEatMeal)) : 0);
-                    dataItemTime.add(player.itemTime.isUseGiapXen ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeGiapXen)) : 0);
-                    dataItemTime.add(player.itemTime.isUseBanhChung ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhChung)) : 0);
-                    dataItemTime.add(player.itemTime.isUseBanhTet ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTet)) : 0);
-                    dataItemTime.add(player.itemTime.isUseBoKhi2 ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoKhi2)) : 0);
-                    dataItemTime.add(player.itemTime.isUseGiapXen2 ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeGiapXen2)) : 0);
-                    dataItemTime.add(player.itemTime.isUseCuongNo2 ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeCuongNo2)) : 0);
-                    dataItemTime.add(player.itemTime.isUseBoHuyet2 ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoHuyet2)) : 0);
+                    dataItemTime.add(player.itemTime.isEatMeal
+                            ? (ItemTime.TIME_EAT_MEAL - (System.currentTimeMillis() - player.itemTime.lastTimeEatMeal))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseGiapXen
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeGiapXen))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseBanhChung
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhChung))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseBanhTet
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTet))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseBoKhi2
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoKhi2))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseGiapXen2
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeGiapXen2))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseCuongNo2
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeCuongNo2))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isUseBoHuyet2
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoHuyet2))
+                            : 0);
                     String itemTime = dataItemTime.toJSONString();
 
                     JSONArray dataItemNew = new JSONArray();
-                    dataItemNew.add(player.itemTime.isDuoiKhi ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeDuoiKhi)) : 0);
-                    dataItemNew.add(player.itemTime.isBanhTrungThu1Trung ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTrungThu1Trung)) : 0);
-                    dataItemNew.add(player.itemTime.isBanhTrungThu2Trung ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTrungThu2Trung)) : 0);
-                    dataItemNew.add(player.itemTime.rateDragonHit ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimerateHit)) : 0);
-                    dataItemNew.add(player.itemTime.rateDame ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeDameDr)) : 0);
-                    dataItemTime.add(player.itemTime.rateHPKI ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimerateHPKI)) : 0);
-                    dataItemTime.add(player.itemTime.isMaTroi ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeMaTroi)) : 0);
+                    dataItemNew.add(player.itemTime.isDuoiKhi
+                            ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeDuoiKhi))
+                            : 0);
+                    dataItemNew
+                            .add(player.itemTime.isBanhTrungThu1Trung
+                                    ? (ItemTime.TIME_ITEM
+                                            - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTrungThu1Trung))
+                                    : 0);
+                    dataItemNew
+                            .add(player.itemTime.isBanhTrungThu2Trung
+                                    ? (ItemTime.TIME_ITEM
+                                            - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTrungThu2Trung))
+                                    : 0);
+                    dataItemNew.add(player.itemTime.rateDragonHit
+                            ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimerateHit))
+                            : 0);
+                    dataItemNew.add(player.itemTime.rateDame
+                            ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeDameDr))
+                            : 0);
+                    dataItemTime.add(player.itemTime.rateHPKI
+                            ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimerateHPKI))
+                            : 0);
+                    dataItemTime.add(player.itemTime.isMaTroi
+                            ? (ItemTime.TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeMaTroi))
+                            : 0);
                     String itemTimeNew = dataItemNew.toJSONString();
 
                     JSONArray dataMayDo = new JSONArray();
-                    dataMayDo.add(player.itemTime.isMayDo ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.timeMayDo)) : 0);
+                    dataMayDo.add(player.itemTime.isMayDo
+                            ? (ItemTime.TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.timeMayDo))
+                            : 0);
                     String itemMayDo = dataMayDo.toJSONString();
 
-                    //data nhiệm vụ
+                    // data nhiệm vụ
                     JSONArray dataTask = new JSONArray();
                     dataTask.add(player.playerTask.taskMain.subTasks.get(player.playerTask.taskMain.index).count);
                     dataTask.add(player.playerTask.taskMain.id);
                     dataTask.add(player.playerTask.taskMain.index);
                     String task = dataTask.toJSONString();
 
-                    //data nhiệm vụ hàng ngày
+                    // data nhiệm vụ hàng ngày
                     JSONArray dataSideTask = new JSONArray();
                     dataSideTask.add(player.playerTask.sideTask.level);
                     dataSideTask.add(player.playerTask.sideTask.count);
                     dataSideTask.add(player.playerTask.sideTask.leftTask);
-                    dataSideTask.add(player.playerTask.sideTask.template != null ? player.playerTask.sideTask.template.id : -1);
+                    dataSideTask.add(
+                            player.playerTask.sideTask.template != null ? player.playerTask.sideTask.template.id : -1);
                     dataSideTask.add(player.playerTask.sideTask.receivedTime);
                     dataSideTask.add(player.playerTask.sideTask.maxCount);
                     String sideTask = dataSideTask.toJSONString();
 
                     JSONArray dataAchive = new JSONArray();
-                    for (Achivement a : player.playerTask.achievements) {
+                    for (Achievement a : player.playerTask.achievements) {
                         JSONObject jobj = new JSONObject();
                         jobj.put("id", a.getId());
                         jobj.put("count", a.getCount());
@@ -698,14 +743,14 @@ public class PlayerDAO {
                     }
                     String achive = dataAchive.toJSONString();
 
-                    //data trứng bư
+                    // data trứng bư
                     JSONObject dataMaBu = new JSONObject();
                     if (player.mabuEgg != null) {
                         dataMaBu.put("create_time", player.mabuEgg.lastTimeCreate);
                         dataMaBu.put("time_done", player.mabuEgg.timeDone);
                     }
                     String mabuEgg = dataMaBu.toJSONString();
-                    //data bill
+                    // data bill
 
                     JSONObject dataLinhThu = new JSONObject();
                     if (player.egglinhthu != null) {
@@ -721,7 +766,7 @@ public class PlayerDAO {
                     }
                     String billEgg = dataBill.toJSONString();
 
-                    //data bùa
+                    // data bùa
                     JSONArray dataCharms = new JSONArray();
                     dataCharms.add(player.charms.tdTriTue);
                     dataCharms.add(player.charms.tdManhMe);
@@ -736,25 +781,25 @@ public class PlayerDAO {
                     dataCharms.add(player.charms.tdDeTuMabu);
                     String charm = dataCharms.toJSONString();
 
-                    //data skill
+                    // data skill
                     JSONArray dataSkills = new JSONArray();
                     for (Skill skill : player.playerSkill.skills) {
-//                    if (skill.skillId != -1) {
+                        // if (skill.skillId != -1) {
                         JSONArray dataskill = new JSONArray();
                         dataskill.add(skill.template.id);
                         dataskill.add(skill.lastTimeUseThisSkill);
                         dataskill.add(skill.point);
-//                    } else {
-//                        dataObject.put("temp_id", -1);
-//                        dataObject.put("point", 0);
-//                        dataObject.put("last_time_use", 0);
-//                    }
+                        // } else {
+                        // dataObject.put("temp_id", -1);
+                        // dataObject.put("point", 0);
+                        // dataObject.put("last_time_use", 0);
+                        // }
                         dataSkills.add(dataskill);
                     }
                     String skills = dataSkills.toJSONString();
 
                     JSONArray dataSkillShortcut = new JSONArray();
-                    //data skill shortcut
+                    // data skill shortcut
                     for (int skillId : player.playerSkill.skillShortCut) {
                         dataSkillShortcut.add(skillId);
                     }
@@ -795,7 +840,7 @@ public class PlayerDAO {
                     }
                     String rwLimit = dataRwLimit.toJSONString();
 
-                    //data pet
+                    // data pet
                     if (player.pet != null) {
                         jPetInfo.put("name", player.pet.name);
                         jPetInfo.put("gender", player.pet.gender);
@@ -803,7 +848,8 @@ public class PlayerDAO {
                         jPetInfo.put("status", player.pet.status);
                         jPetInfo.put("type_fusion", player.fusion.typeFusion);
                         jPetInfo.put("level", player.pet.getLever());
-                        int timeLeftFusion = (int) (Fusion.TIME_FUSION - (System.currentTimeMillis() - player.fusion.lastTimeFusion));
+                        int timeLeftFusion = (int) (Fusion.TIME_FUSION
+                                - (System.currentTimeMillis() - player.fusion.lastTimeFusion));
                         jPetInfo.put("left_fusion", Math.max(timeLeftFusion, 0));
                         petInfo = jPetInfo.toJSONString();
 
@@ -861,7 +907,7 @@ public class PlayerDAO {
                     }
 
                     JSONArray dataBlackBall = new JSONArray();
-                    //data thưởng ngọc rồng đen
+                    // data thưởng ngọc rồng đen
                     for (int i = 1; i <= 7; i++) {
                         JSONArray data = new JSONArray();
                         data.add(player.rewardBlackBall.timeOutOfDateReward[i - 1]);
@@ -873,7 +919,8 @@ public class PlayerDAO {
                     PreparedStatement ps = null;
                     try {
                         ps = connection.prepareStatement("update player set head = ?, have_tennis_space_ship = ?,"
-                                + "clan_id_sv" + Manager.SERVER + " = ?, data_inventory = ?, data_location = ?, data_point = ?, data_magic_tree = ?,"
+                                + "clan_id_sv" + Manager.SERVER
+                                + " = ?, data_inventory = ?, data_location = ?, data_point = ?, data_magic_tree = ?,"
                                 + "items_body = ?, items_bag = ?, items_box = ?, items_box_lucky_round = ?, friends = ?,"
                                 + "enemies = ?, data_intrinsic = ?, data_item_time = ?, data_task = ?, data_mabu_egg = ?,"
                                 + "pet_info = ?, pet_point = ?, pet_body = ?, pet_skill = ? , power = ?, pet_power = ?, "
@@ -939,7 +986,7 @@ public class PlayerDAO {
                             ps.close();
                         } catch (Exception e) {
                             System.out.println("Lỗi Close");
-//                            e.printStackTrace();
+                            // e.printStackTrace();
                         }
                     }
                 } catch (Exception e) {
@@ -994,7 +1041,9 @@ public class PlayerDAO {
     }
 
     public static boolean subVND2(Player player, int ruby) {
-        try (Connection con = DBService.gI().getConnectionForSaveData(); PreparedStatement ps = con.prepareStatement("UPDATE account SET vnd = (vnd - ?), is_active = ? WHERE id = ?")) {
+        try (Connection con = DBService.gI().getConnectionForSaveData();
+                PreparedStatement ps = con
+                        .prepareStatement("UPDATE account SET vnd = (vnd - ?), is_active = ? WHERE id = ?")) {
             if (!player.getSession().actived) {
                 player.getSession().actived = true;
             }
@@ -1011,7 +1060,9 @@ public class PlayerDAO {
     }
 
     public static boolean subPoin(Player player, int poin) {
-        try (Connection con = DBService.gI().getConnectionForSaveData(); PreparedStatement ps = con.prepareStatement("update account set pointNap = (pointNap - ?) where id = ?")) {
+        try (Connection con = DBService.gI().getConnectionForSaveData();
+                PreparedStatement ps = con
+                        .prepareStatement("update account set pointNap = (pointNap - ?) where id = ?")) {
             ps.setInt(1, poin);
             ps.setInt(2, player.getSession().userId);
             ps.executeUpdate();
@@ -1163,7 +1214,8 @@ public class PlayerDAO {
         }
     }
 
-    public static void LogNapTIen(String uid, String menhgia, String seri, String code, String trangthai, String tranid, String tinhtrang, String loaithe) {
+    public static void LogNapTIen(String uid, String menhgia, String seri, String code, String trangthai, String tranid,
+            String tinhtrang, String loaithe) {
         String UPDATE_PASS = "INSERT INTO naptien(uid, sotien, seri,code, loaithe,time, noidung, tinhtrang, tranid, magioithieu) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
         try {

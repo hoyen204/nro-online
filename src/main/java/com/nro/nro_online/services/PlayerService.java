@@ -9,7 +9,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nro.nro_online.consts.Cmd;
+import com.nro.nro_online.consts.ConstAchive;
+import com.nro.nro_online.consts.ConstTranhNgocNamek;
+import com.nro.nro_online.jdbc.DBService;
+import com.nro.nro_online.jdbc.daos.AccountDAO;
+import com.nro.nro_online.jdbc.daos.PlayerDAO;
+import com.nro.nro_online.models.dragon_namec_war.TranhNgocService;
+import com.nro.nro_online.models.player.PetFollow;
 import com.nro.nro_online.models.player.Player;
+import com.nro.nro_online.server.Client;
 import com.nro.nro_online.server.io.Message;
 import com.nro.nro_online.utils.Log;
 import com.nro.nro_online.utils.Util;
@@ -44,27 +53,21 @@ public class PlayerService {
 
     public void sendTNSM(Player player, byte type, long param) {
         if (param > 0) {
-            Message msg;
-            try {
-                msg = new Message(-3);
+            try (Message msg = new Message(-3)) {
                 msg.writer().writeByte(type);// 0 là cộng sm, 1 cộng tn, 2 là cộng cả 2
                 msg.writer().writeInt((int) param);// số tn cần cộng
                 player.sendMessage(msg);
-                msg.cleanup();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                Log.error(this.getClass(), e, "Lỗi send tnsm " + player.id);
             }
         }
         if (param < 0) {
-            Message msg;
-            try {
-                msg = new Message(-3);
+            try (Message msg = new Message(-3)) {
                 msg.writer().writeByte(type);// 0 là cộng sm, 1 cộng tn, 2 là cộng cả 2
                 msg.writer().writeInt((int) param);// số tn cần cộng
                 player.sendMessage(msg);
-                msg.cleanup();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                Log.error(this.getClass(), e, "Lỗi send tnsm " + player.id);
             }
         }
     }
@@ -76,8 +79,6 @@ public class PlayerService {
                 pl.sendMessage(msg);
             }
         }
-        msg.cleanup();
-
     }
 
     public void sendMessageIgnore(Player plIgnore, Message msg) {
@@ -86,30 +87,23 @@ public class PlayerService {
                 pl.sendMessage(msg);
             }
         }
-        msg.cleanup();
     }
 
     public void sendInfoHp(Player player) {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand((byte) 5);
+        try (Message msg = Service.getInstance().messageSubCommand((byte) 5)) {
             msg.writer().writeInt(player.nPoint.hp);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(PlayerService.class, e);
+        } catch (IOException e) {
+            Log.error(PlayerService.class, e, "Lỗi send info hp " + player.id);
         }
     }
 
     public void sendInfoMp(Player player) {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand((byte) 6);
+        try (Message msg = Service.getInstance().messageSubCommand((byte) 6)) {
             msg.writer().writeInt(player.nPoint.mp);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(PlayerService.class, e);
+        } catch (IOException e) {
+            Log.error(PlayerService.class, e, "Lỗi send info mp " + player.id);
         }
     }
 
@@ -135,14 +129,14 @@ public class PlayerService {
             long gold = player.inventory.getGoldDisplay();
             msg = Service.getInstance().messageSubCommand((byte) 4);
             if (player.isVersionAbove(214)) {
-                msg.writer().writeLong(gold);//xu
+                msg.writer().writeLong(gold);// xu
             } else {
-                msg.writer().writeInt((int) gold);//xu
+                msg.writer().writeInt((int) gold);// xu
             }
-            msg.writer().writeInt(player.inventory.gem);//luong
-            msg.writer().writeInt(player.nPoint.hp);//chp
-            msg.writer().writeInt(player.nPoint.mp);//cmp
-            msg.writer().writeInt(player.inventory.ruby);//ruby
+            msg.writer().writeInt(player.inventory.gem);// luong
+            msg.writer().writeInt(player.nPoint.hp);// chp
+            msg.writer().writeInt(player.nPoint.mp);// cmp
+            msg.writer().writeInt(player.inventory.ruby);// ruby
             player.sendMessage(msg);
         } catch (Exception e) {
             Log.error(PlayerService.class, e);
@@ -157,26 +151,20 @@ public class PlayerService {
     }
 
     public void sendCurrentStamina(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-68);
+        try (Message msg = new Message(-68)) {
             msg.writer().writeShort(player.nPoint.stamina);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(PlayerService.class, e);
+        } catch (IOException e) {
+            Log.error(PlayerService.class, e, "Lỗi send current stamina " + player.id);
         }
     }
 
     public void sendMaxStamina(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-69);
+        try (Message msg = new Message(-69)) {
             msg.writer().writeShort(player.nPoint.maxStamina);
             player.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            Log.error(PlayerService.class, e);
+        } catch (IOException e) {
+            Log.error(PlayerService.class, e, "Lỗi send max stamina " + player.id);
         }
     }
 
@@ -190,14 +178,12 @@ public class PlayerService {
     }
 
     public void sendTypePk(Player player) {
-        Message msg;
-        try {
-            msg = Service.getInstance().messageSubCommand((byte) 35);
+        try (Message msg = Service.getInstance().messageSubCommand((byte) 35)) {
             msg.writer().writeInt((int) player.id);
             msg.writer().writeByte(player.typePk);
             Service.getInstance().sendMessAllPlayerInMap(player.zone, msg);
-            msg.cleanup();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.error(PlayerService.class, e, "Lỗi send type pk " + player.id);
         }
     }
 
@@ -224,8 +210,9 @@ public class PlayerService {
                     player.inventory.gold -= COST_GOLD_HOI_SINH;
                     canHs = true;
                 } else {
-                    Service.getInstance().sendThongBao(player, "Không đủ vàng để thực hiện, còn thiếu " + Util.numberToMoney(COST_GOLD_HOI_SINH
-                            - player.inventory.gold) + " vàng");
+                    Service.getInstance().sendThongBao(player,
+                            "Không đủ vàng để thực hiện, còn thiếu " + Util.numberToMoney(COST_GOLD_HOI_SINH
+                                    - player.inventory.gold) + " vàng");
                     return;
                 }
             }
@@ -265,8 +252,7 @@ public class PlayerService {
     }
 
     public void setPos(Player player, int x, int y, int effID) {
-        Message msg = new Message(Cmd.SET_POS);
-        try {
+        try (Message msg = new Message(Cmd.SET_POS)) {
             DataOutputStream ds = msg.writer();
             ds.writeInt((int) player.id);
             ds.writeShort(x);
@@ -274,8 +260,8 @@ public class PlayerService {
             ds.writeByte(effID);
             ds.flush();
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (IOException e) {
+            Log.error(PlayerService.class, e, "Lỗi set pos " + player.id);
         }
     }
 
@@ -285,9 +271,8 @@ public class PlayerService {
         if (pet == null) {
             type = 0;
         }
-        Message msg = new Message(Cmd.STATUS_PET);
-        DataOutputStream ds = msg.writer();
-        try {
+        try (Message msg = new Message(Cmd.STATUS_PET)) {
+            DataOutputStream ds = msg.writer();
             ds.writeInt((int) player.id);
             ds.writeByte(type);
             if (type == 1) {
@@ -303,9 +288,8 @@ public class PlayerService {
             }
             ds.flush();
             Service.getInstance().sendMessAllPlayerInMap(player, msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(PlayerService.class, e, "Lỗi send pet follow " + player.id);
         }
     }
 
@@ -315,9 +299,8 @@ public class PlayerService {
         if (pet == null) {
             type = 0;
         }
-        Message msg = new Message(Cmd.STATUS_PET);
-        DataOutputStream ds = msg.writer();
-        try {
+        try (Message msg = new Message(Cmd.STATUS_PET)) {
+            DataOutputStream ds = msg.writer();
             ds.writeInt((int) info.id);
             ds.writeByte(type);
             if (type == 1) {
@@ -333,9 +316,8 @@ public class PlayerService {
             }
             ds.flush();
             me.sendMessage(msg);
-            msg.cleanup();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Log.error(PlayerService.class, e, "Lỗi send pet follow " + info.id);
         }
     }
 }

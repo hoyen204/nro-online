@@ -317,7 +317,7 @@ public class Zone {
     }
 
     public Player getRandomPlayerInMap() {
-        return notBosses.isEmpty() ? notBosses.get(Util.nextInt(0, notBosses.size() - 1)) : null;
+        return notBosses.isEmpty() ? null : notBosses.get(Util.nextInt(0, notBosses.size() - 1));
     }
 
     public Player getRandomPlayerInMap(List<Player> players) {
@@ -325,7 +325,7 @@ public class Zone {
                 .filter(p -> p != null && p.zone != null && p.zone.map.mapId == this.map.mapId
                         && p.zone.zoneId == this.zoneId)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         return playerList.isEmpty() ? null : playerList.get(Util.nextInt(0, playerList.size() - 1));
     }
 

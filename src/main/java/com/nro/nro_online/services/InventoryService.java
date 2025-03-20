@@ -8,20 +8,16 @@ import java.util.stream.IntStream;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.nro.nro_online.consts.ConstItem;
 import com.nro.nro_online.models.item.Item;
+import com.nro.nro_online.models.item.ItemOption;
 import com.nro.nro_online.models.map.war.BlackBallWar;
 import com.nro.nro_online.models.npc.specialnpc.MabuEgg;
+import com.nro.nro_online.models.npc.specialnpc.MagicTree;
+import com.nro.nro_online.models.player.Pet;
 import com.nro.nro_online.models.player.Player;
-import nro.consts.ConstItem;
-import nro.models.item.Item;
-import nro.models.item.ItemOption;
-import nro.models.map.war.BlackBallWar;
-import nro.models.npc.specialnpc.MabuEgg;
-import nro.models.npc.specialnpc.MagicTree;
-import nro.models.player.Pet;
-import nro.models.player.Player;
-import nro.server.io.Message;
-import nro.utils.Util;
+import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Util;
 
 /**
  * @Build by Arriety
@@ -71,7 +67,7 @@ public class InventoryService {
             return BlackBallWar.gI().pickBlackBall(player, item);
         }
 
-        //quả trứng
+        // quả trứng
         if (item.template.id == 568) {
             if (player.mabuEgg == null) {
                 MabuEgg.createMabuEgg(player);
@@ -79,24 +75,25 @@ public class InventoryService {
             return true;
         }
 
-        //tennis spaceship
+        // tennis spaceship
         if (item.template.id == 453) {
             player.haveTennisSpaceShip = true;
             return true;
         }
-        //đùi gà nướng
+        // đùi gà nướng
         if (item.template.id == 74) {
             player.nPoint.setFullHpMp();
             PlayerService.gI().sendInfoHpMp(player);
             return true;
         }
 
-        //gold, gem, ruby
+        // gold, gem, ruby
         switch (item.template.type) {
             case 9:
                 if (player.inventory.gold + item.quantity <= player.inventory.getGoldLimit()) {
                     if (player.playerIntrinsic.intrinsic.id == 23) {
-                        player.inventory.gold += player.nPoint.calPercent(item.quantity, player.playerIntrinsic.intrinsic.param1);
+                        player.inventory.gold += player.nPoint.calPercent(item.quantity,
+                                player.playerIntrinsic.intrinsic.param1);
                     } else {
                         player.inventory.gold += item.quantity;
                     }
@@ -116,11 +113,11 @@ public class InventoryService {
                 return true;
         }
 
-        //mở rộng hành trang - rương đồ
+        // mở rộng hành trang - rương đồ
         switch (item.template.id) {
             case 517:
                 if (player.inventory.itemsBag.size() < 60) {
-                    player.inventory.itemsBag.add(ItemService.gI().createItemNull());
+                    player.inventory.itemsBag.add(ItemService.gI().createNullItem());
                     Service.getInstance().sendThongBaoOK(player, "Hành trang của bạn đã được mở rộng thêm 1 ô");
                     return true;
                 } else {
@@ -129,7 +126,7 @@ public class InventoryService {
                 }
             case 518:
                 if (player.inventory.itemsBox.size() < 40) {
-                    player.inventory.itemsBox.add(ItemService.gI().createItemNull());
+                    player.inventory.itemsBox.add(ItemService.gI().createNullItem());
                     Service.getInstance().sendThongBaoOK(player, "Rương đồ của bạn đã được mở rộng thêm 1 ô");
                     return true;
                 } else {
@@ -139,7 +136,9 @@ public class InventoryService {
             case 988:
                 if (player.inventory.getGoldLimit() < 1000_000_000_000L) {
                     player.inventory.goldLimit += 100_000_000_000L;
-                    Service.getInstance().sendThongBao(player, "Giới hạn vàng của bạn đã tăng lên 100Tr\n" + "Giới hạn vàng hiện tại của bạn là " + Util.numberToMoney(player.inventory.getGoldLimit()));
+                    Service.getInstance().sendThongBao(player,
+                            "Giới hạn vàng của bạn đã tăng lên 100Tr\n" + "Giới hạn vàng hiện tại của bạn là "
+                                    + Util.numberToMoney(player.inventory.getGoldLimit()));
                     return true;
                 } else {
                     Service.getInstance().sendThongBaoOK(player, "Giới hạn vàng của bạn đã đạt tối đa");
@@ -170,12 +169,12 @@ public class InventoryService {
     }
 
     public boolean addItemList(List<Item> items, Item item, int maxQuantity) {
-        //nếu item ko có option, add option rỗng vào
+        // nếu item ko có option, add option rỗng vào
         if (item.itemOptions.isEmpty()) {
             item.itemOptions.add(new ItemOption(73, 0));
         }
 
-        //item cộng thêm chỉ số param: tự động luyện tập
+        // item cộng thêm chỉ số param: tự động luyện tập
         int optionId = isItemIncrementalOption(item);
         if (optionId != -1) {
             int param = 0;
@@ -196,7 +195,7 @@ public class InventoryService {
             }
         }
 
-        //item tăng số lượng
+        // item tăng số lượng
         if (isItemIncremental(item)) {
             for (Item it : items) {
                 if (it.isNotNullItem() && it.template.id == item.template.id) {
@@ -207,7 +206,7 @@ public class InventoryService {
                             int add = 99 - it.quantity;
                             it.quantity = 99;
                             item.quantity -= add;
-//                            return true;
+                            // return true;
                         } else {
                             return false;
                         }
@@ -222,7 +221,7 @@ public class InventoryService {
             }
         }
 
-        //add item vào ô mới
+        // add item vào ô mới
         for (int i = 0; i < items.size(); i++) {
             if (!items.get(i).isNotNullItem()) {
                 items.set(i, ItemService.gI().copyItem(item));
@@ -233,29 +232,29 @@ public class InventoryService {
         return false;
     }
 
-    private boolean isItemIncremental(Item item) { //item cộng dồn số lượng
+    private boolean isItemIncremental(Item item) { // item cộng dồn số lượng
         if (item.template.id == 454 || item.template.id == 921 || item.template.id == 1995) {
             return false;
         }
         switch (item.template.type) {
             case 75:
-            case 8: //vật phẩm nhiệm vụ
-            case 12: //ngọc rồng
-            case 30: //sao pha lê
-            case 6: //đậu thần
-            case 29: //item time, đồ ăn
-            case 25: //rađa dò ngọc namếc
-            case 27: //đồ tạp
-            case 33: //mảnh rada
-            case 14: //đá nâng cấp
-            case 50: //vé đổi đồ hủy diệt
+            case 8: // vật phẩm nhiệm vụ
+            case 12: // ngọc rồng
+            case 30: // sao pha lê
+            case 6: // đậu thần
+            case 29: // item time, đồ ăn
+            case 25: // rađa dò ngọc namếc
+            case 27: // đồ tạp
+            case 33: // mảnh rada
+            case 14: // đá nâng cấp
+            case 50: // vé đổi đồ hủy diệt
                 return true;
             default:
                 return false;
         }
     }
 
-    private byte isItemIncrementalOption(Item item) { //trả về id option template
+    private byte isItemIncrementalOption(Item item) { // trả về id option template
         int temp = item.template.id;
         byte opp = -1;
         switch (temp) {
@@ -293,7 +292,7 @@ public class InventoryService {
                 }
             }
         }
-        if (!itemThrow.isNotNullItem()) {
+        if (itemThrow == null || !itemThrow.isNotNullItem()) {
             return;
         } else {
             Service.getInstance().point(player);
@@ -312,7 +311,7 @@ public class InventoryService {
                     }
                 }
                 if (indexSwap != -1) {
-                    Item sItem = ItemService.gI().createItemNull();
+                    Item sItem = ItemService.gI().createNullItem();
                     list.set(i, list.get(indexSwap));
                     list.set(indexSwap, sItem);
                 } else {
@@ -326,7 +325,7 @@ public class InventoryService {
         for (int i = 0; i < player.inventory.itemsBag.size(); i++) {
             if (!player.inventory.itemsBag.get(i).isNotNullItem()) {
                 player.inventory.itemsBag.set(i, item);
-                Item sItem = ItemService.gI().createItemNull();
+                Item sItem = ItemService.gI().createNullItem();
                 return sItem;
             }
         }
@@ -337,7 +336,7 @@ public class InventoryService {
         for (int i = 0; i < player.inventory.itemsBox.size(); i++) {
             if (!player.inventory.itemsBox.get(i).isNotNullItem()) {
                 player.inventory.itemsBox.set(i, item);
-                Item sItem = ItemService.gI().createItemNull();
+                Item sItem = ItemService.gI().createNullItem();
                 return sItem;
             }
         }
@@ -348,12 +347,14 @@ public class InventoryService {
         Item sItem = item;
         byte type = item.getType();
         if (item.isNotNullItem()) {
-            if (type >= 0 && type <= 5 || type == 32 || type == 11 || type == 23 || type == 24 || type == 72 || type == 21) {
+            if (type >= 0 && type <= 5 || type == 32 || type == 11 || type == 23 || type == 24 || type == 72
+                    || type == 21) {
                 if (item.template.gender == player.gender || item.template.gender == 3) {
                     if (item.getId() == ConstItem.QUAN_DI_BIEN) {
                         List<Item> itemsBody = player.inventory.itemsBody;
                         if (itemsBody.get(0).isNotNullItem() && itemsBody.get(5).isNotNullItem()) {
-                            Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player, "Vui lòng cởi áo để có thể sử dụng!");
+                            Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player,
+                                    "Vui lòng cởi áo để có thể sử dụng!");
                             return sItem;
                         }
                     }
@@ -368,9 +369,11 @@ public class InventoryService {
                         }
                     }
                     if (forPet) {
-                        Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player, "Trang bị chỉ dành cho đệ tử!");
+                        Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player,
+                                "Trang bị chỉ dành cho đệ tử!");
                     } else if (player.isPet && type > 6 && type != 32 && type != 11) {
-                        Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player, "Trang bị không phù hợp!");
+                        Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player,
+                                "Trang bị không phù hợp!");
                     } else if (powerRequire <= player.nPoint.power) {
                         byte index = 0;
                         switch (type) {
@@ -396,19 +399,22 @@ public class InventoryService {
                         sItem = player.inventory.itemsBody.get(index);
                         player.inventory.itemsBody.set(index, item);
                     } else {
-                        Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player, "Sức mạnh không đủ yêu cầu!");
+                        Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player,
+                                "Sức mạnh không đủ yêu cầu!");
                     }
                 } else {
-                    Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player, "Trang bị không phù hợp!");
+                    Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player,
+                            "Trang bị không phù hợp!");
                 }
             } else {
-                Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player, "Trang bị không phù hợp!");
+                Service.getInstance().sendThongBaoOK(player.isPet ? ((Pet) player).master : player,
+                        "Trang bị không phù hợp!");
             }
         }
         return sItem;
     }
 
-    //==========================================================================
+    // ==========================================================================
     public void itemBagToBody(Player player, int index) {
         if (index < 0 || index >= player.inventory.itemsBag.size()) {
             return;
@@ -497,7 +503,7 @@ public class InventoryService {
         }
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     public void itemBoxToBodyOrBag(Player player, int index) {
         if (index < 0 || index >= player.inventory.itemsBox.size()) {
             return;
@@ -531,7 +537,7 @@ public class InventoryService {
             if (!done) {
                 if (addItemBag(player, item, 99)) {
                     if (item.quantity == 0) {
-                        Item sItem = ItemService.gI().createItemNull();
+                        Item sItem = ItemService.gI().createNullItem();
                         player.inventory.itemsBox.set(index, sItem);
                     }
                     sendItemBags(player);
@@ -549,7 +555,7 @@ public class InventoryService {
         if (item.isNotNullItem()) {
             if (addItemBox(player, item, 99)) {
                 if (item.quantity == 0) {
-                    Item sItem = ItemService.gI().createItemNull();
+                    Item sItem = ItemService.gI().createNullItem();
                     player.inventory.itemsBag.set(index, sItem);
                 }
                 arrangeItems(player.inventory.itemsBag);
@@ -578,7 +584,7 @@ public class InventoryService {
         }
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     public void subQuantityItemsBag(Player player, Item item, int quantity) {
         subQuantityItem(player.inventory.itemsBag, item, quantity);
     }
@@ -590,7 +596,7 @@ public class InventoryService {
     public void subQuantityItem(List<Item> items, Item item, int quantity) {
         if (item != null) {
             for (Item it : items) {
-//                if (it.isNotNullItem() && it.template.id == item.template.id) {
+                // if (it.isNotNullItem() && it.template.id == item.template.id) {
                 if (item.equals(it)) {
                     it.quantity -= quantity;
                     if (it.quantity <= 0) {
@@ -615,14 +621,14 @@ public class InventoryService {
             }
         }
         for (int i = index; i < items.size(); i++) {
-            Item item = ItemService.gI().createItemNull();
+            Item item = ItemService.gI().createNullItem();
             items.set(i, item);
         }
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     public void removeItem(List<Item> items, int index) {
-        Item item = ItemService.gI().createItemNull();
+        Item item = ItemService.gI().createNullItem();
         items.set(index, item);
     }
 
@@ -631,7 +637,7 @@ public class InventoryService {
     }
 
     public void removeItem(List<Item> items, Item item) {
-        Item it = ItemService.gI().createItemNull();
+        Item it = ItemService.gI().createNullItem();
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i).equals(item)) {
                 items.set(i, it);
@@ -788,19 +794,18 @@ public class InventoryService {
 
     public Item findGodClothesByType(Player player, int type) {
         for (Item item : player.inventory.itemsBag) {
-            if (item.isNotNullItem() && item.template.type == type && (item.template.id >= 555 && item.template.id <= 567)) {
+            if (item.isNotNullItem() && item.template.type == type
+                    && (item.template.id >= 555 && item.template.id <= 567)) {
                 return item;
             }
         }
         return null;
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     public void sendItemBags(Player player) {
         arrangeItems(player.inventory.itemsBag);
-        Message msg;
-        try {
-            msg = new Message(-36);
+        try (Message msg = new Message(-36)){
             msg.writer().writeByte(0);
             msg.writer().writeByte(player.inventory.itemsBag.size());
             for (int i = 0; i < player.inventory.itemsBag.size(); i++) {
@@ -813,7 +818,7 @@ public class InventoryService {
                 msg.writer().writeUTF(item.getInfo());
                 msg.writer().writeUTF(item.getContent());
                 List<ItemOption> itemOptions = item.getDisplayOptions();
-                msg.writer().writeByte(itemOptions.size()); //options
+                msg.writer().writeByte(itemOptions.size()); // options
                 for (ItemOption o : itemOptions) {
                     msg.writer().writeByte(o.optionTemplate.id);
                     msg.writer().writeShort(o.param);
@@ -821,15 +826,12 @@ public class InventoryService {
             }
 
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
 
     public void sendItemBody(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-37);
+        try (Message msg = new Message(-37)){
             msg.writer().writeByte(0);
             msg.writer().writeShort(player.getHead());
             msg.writer().writeByte(player.inventory.itemsBody.size());
@@ -850,7 +852,6 @@ public class InventoryService {
                 }
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -858,7 +859,8 @@ public class InventoryService {
             if (player.inventory.itemsBody.get(10).isNotNullItem()) {
                 if (!player.isLinhThuFollow) {
                     player.isLinhThuFollow = true;
-                    Service.getInstance().sendPetFollow(player, (short) (player.inventory.itemsBody.get(10).template.iconID - 1));
+                    Service.getInstance().sendPetFollow(player,
+                            (short) (player.inventory.itemsBody.get(10).template.iconID - 1));
                 }
             } else {
                 if (player.isLinhThuFollow) {
@@ -872,9 +874,7 @@ public class InventoryService {
     }
 
     public void sendItemBox(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-35);
+        try (Message msg = new Message(-35)){
             msg.writer().writeByte(0);
             msg.writer().writeByte(player.inventory.itemsBox.size());
             for (Item it : player.inventory.itemsBox) {
@@ -892,18 +892,14 @@ public class InventoryService {
                 }
             }
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
 
     public void openBox(Player player) {
-        Message msg;
-        try {
-            msg = new Message(-35);
+        try (Message msg = new Message(-35)){
             msg.writer().writeByte(1);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
@@ -957,7 +953,8 @@ public class InventoryService {
             addItemBox(player, pea, 99);
         }
         if (pea.quantity < quantity) {
-            Service.getInstance().sendThongBao(player, "Bạn vừa thu hoạch được " + (quantity - pea.quantity) + " hạt " + pea.template.name);
+            Service.getInstance().sendThongBao(player,
+                    "Bạn vừa thu hoạch được " + (quantity - pea.quantity) + " hạt " + pea.template.name);
         }
         return pea.quantity;
     }
@@ -1005,9 +1002,9 @@ public class InventoryService {
 
     public boolean isminipet(int id) {
         switch (id) {
-            case 936: //tloc
-            case 892://tho xam
-            case 893://tho trang
+            case 936: // tloc
+            case 892:// tho xam
+            case 893:// tho trang
             case 942:
             case 943:
             case 944:

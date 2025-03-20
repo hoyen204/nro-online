@@ -6,12 +6,6 @@ import com.nro.nro_online.models.player.Pet;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.utils.SkillUtil;
 import com.nro.nro_online.utils.Util;
-import nro.consts.ConstPet;
-import nro.consts.ConstPlayer;
-import nro.models.player.Pet;
-import nro.models.player.Player;
-import nro.utils.SkillUtil;
-import nro.utils.Util;
 
 /**
  *
@@ -228,41 +222,41 @@ public class PetService {
 
     private int[] getDataPetNormal() {
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 105) * 20; //hp
-        petData[1] = Util.nextInt(40, 105) * 20; //mp
-        petData[2] = Util.nextInt(20, 45); //dame
-        petData[3] = Util.nextInt(9, 50); //def
-        petData[4] = Util.nextInt(0, 2); //crit
+        petData[0] = Util.nextInt(40, 105) * 20; // hp
+        petData[1] = Util.nextInt(40, 105) * 20; // mp
+        petData[2] = Util.nextInt(20, 45); // dame
+        petData[3] = Util.nextInt(9, 50); // def
+        petData[4] = Util.nextInt(0, 2); // crit
         return petData;
     }
 
     private int[] getDataPetMabu() {
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 105) * 20; //hp
-        petData[1] = Util.nextInt(40, 105) * 20; //mp
-        petData[2] = Util.nextInt(50, 120); //dame
-        petData[3] = Util.nextInt(9, 50); //def
-        petData[4] = Util.nextInt(0, 2); //crit
+        petData[0] = Util.nextInt(40, 105) * 20; // hp
+        petData[1] = Util.nextInt(40, 105) * 20; // mp
+        petData[2] = Util.nextInt(50, 120); // dame
+        petData[3] = Util.nextInt(9, 50); // def
+        petData[4] = Util.nextInt(0, 2); // crit
         return petData;
     }
 
     private int[] getDataPetBerus() {
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 115) * 20; //hp
-        petData[1] = Util.nextInt(40, 115) * 20; //mp
-        petData[2] = Util.nextInt(70, 140); //dame
-        petData[3] = Util.nextInt(9, 50); //def
-        petData[4] = Util.nextInt(0, 2); //crit
+        petData[0] = Util.nextInt(40, 115) * 20; // hp
+        petData[1] = Util.nextInt(40, 115) * 20; // mp
+        petData[2] = Util.nextInt(70, 140); // dame
+        petData[3] = Util.nextInt(9, 50); // def
+        petData[4] = Util.nextInt(0, 2); // crit
         return petData;
     }
 
     private int[] getDataPetVidel() {
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 120) * 20; //hp
-        petData[1] = Util.nextInt(40, 120) * 20; //mp
-        petData[2] = Util.nextInt(20, 150); //dame
-        petData[3] = Util.nextInt(9, 50); //def
-        petData[4] = Util.nextInt(0, 2); //crit
+        petData[0] = Util.nextInt(40, 120) * 20; // hp
+        petData[1] = Util.nextInt(40, 120) * 20; // mp
+        petData[2] = Util.nextInt(20, 150); // dame
+        petData[3] = Util.nextInt(9, 50); // def
+        petData[4] = Util.nextInt(0, 2); // crit
         return petData;
     }
 

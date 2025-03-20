@@ -3,98 +3,92 @@ package com.nro.nro_online.jdbc;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Vector;
 
-import com.nro.nro_online.utils.Log;
-
+/**
+ *
+ * @Build by Arriety
+ */
 public class ConnPool {
 
-    private static volatile ConnPool instance; // Thread-safe singleton
-    private final String url;
-    private final String user;
-    private final String password;
-    private final int maxConn;
-    private static final int TIMEOUT = 30000; // 30s timeout
-    private final Vector<Connection> conns = new Vector<>();
-    private final Vector<Long> getTime = new Vector<>();
+    public String url;
+    public String user;
+    public String password;
+    public static ConnPool i;
 
     public static ConnPool gI() {
-        if (instance == null) {
-            synchronized (ConnPool.class) {
-                if (instance == null) {
-                    instance = new ConnPool("jdbc:mysql://" + DBService.DB_HOST + ":" + DBService.DB_PORT + "/" + DBService.DB_NAME
-                            + "?autoReconnect=true", DBService.DB_USER, DBService.DB_PASSWORD, DBService.MAX_CONN);
-                    Log.success("Khởi tạo ConnPool ngon lành! 🚀");
-                }
-            }
+        if (i == null) {
+            i = new ConnPool("jdbc:mysql://" + DBService.DB_HOST + ":" + DBService.DB_PORT + "/" + DBService.DB_NAME
+                    + "?autoReconnect=True", DBService.DB_USER, DBService.DB_PASSWORD, DBService.MAX_CONN);
         }
-        return instance;
+        return i;
     }
 
     private ConnPool(String url, String user, String password, int max) {
+        this.conns = new Vector<Connection>();
+        this.getTime = new Vector<Long>();
+        this.timeout = 30000;
         this.url = url;
         this.user = user;
         this.password = password;
         this.maxConn = max;
-        try {
-            Class.forName(DBService.DRIVER);
-        } catch (ClassNotFoundException e) {
-            Log.error(ConnPool.class, e, "Không tìm thấy driver, xui ghê! 😭");
-        }
     }
 
-    private Connection newConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+    List<Connection> conns;
+
+    List<Long> getTime;
+
+    int timeout;
+
+    int maxConn;
+
+    public Connection newConnection() throws SQLException {
+        try {
+            Class.forName(DBService.DRIVER);
+            Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
+            return conn;
+        } catch (ClassNotFoundException cnfe) {
+            throw new SQLException("Can't find class for driver: " + DBService.DRIVER);
+        }
     }
 
     public synchronized Connection getConnection() throws SQLException {
-        // Cleanup expired connections
-        for (int i = 0; i < conns.size(); i++) {
-            long time = getTime.get(i);
-            if (time != 0 && System.currentTimeMillis() - time > TIMEOUT) {
-                close(conns.get(i));
-                conns.set(i, newConnection());
-                getTime.set(i, 0L);
+        for (int i = 0; i < this.conns.size(); i++) {
+            if (((Long) this.getTime.get(i)).longValue() != 0L
+                    && System.currentTimeMillis() - ((Long) this.getTime.get(i)).longValue() > this.timeout) {
+                close(this.conns.get(i));
+                this.conns.set(i, newConnection());
+                this.getTime.set(i, Long.valueOf(0L));
             }
-            if (getTime.get(i) == 0) {
-                Connection conn = conns.get(i);
-                if (conn.isClosed()) {
-                    conns.set(i, newConnection());
+            if (((Long) this.getTime.get(i)).longValue() == 0L) {
+                this.getTime.set(i, Long.valueOf(System.currentTimeMillis()));
+                if (((Connection) this.conns.get(i)).isClosed()) {
+                    this.conns.set(i, newConnection());
                 }
-                getTime.set(i, System.currentTimeMillis());
-                return conns.get(i);
+                return this.conns.get(i);
             }
         }
-
-        // Tạo mới nếu chưa đầy
-        if (conns.size() >= maxConn) {
-            Log.warning("Hết slot connection rồi, đợi tí nha! ⏳");
-            throw new SQLException("Đã đạt giới hạn " + maxConn + " connections!");
+        if (this.conns.size() >= this.maxConn) {
+            throw new SQLException("Limited Connection for " + this.url);
         }
-
         Connection conn = newConnection();
-        conns.add(conn);
-        getTime.add(System.currentTimeMillis());
-        Log.log("Tạo connection mới, số lượng: " + conns.size() + " 🆙");
+        this.conns.add(conn);
+        this.getTime.add(Long.valueOf(System.currentTimeMillis()));
         return conn;
     }
 
     public void close(Connection conn) {
         try {
-            if (conn != null && !conn.isClosed()) {
-                conn.close();
-                Log.log("Đóng connection xong, sạch sẽ! 🧹");
-            }
-        } catch (SQLException e) {
-            Log.error(ConnPool.class, e, "Đóng connection lỗi, huhu 😢");
+            conn.close();
+        } catch (SQLException sQLException) {
         }
     }
 
     public void free(Connection conn) {
-        int index = conns.indexOf(conn);
-        if (index > -1) {
-            getTime.set(index, 0L);
-            Log.log("Trả connection về pool, chill thôi! 😌");
+        int i = this.conns.indexOf(conn);
+        if (i > -1) {
+            this.getTime.set(i, Long.valueOf(0L));
         }
     }
 }

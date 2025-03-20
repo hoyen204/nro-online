@@ -9,9 +9,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -239,14 +242,19 @@ public class Util {
         return sortHashMapByValue(hashMap, true);
     }
 
-    public static Object getPropertyByName(Object myObject, String propertyName) throws IllegalAccessException {
+    public static Object getPropertyByName(Object myObject, String propertyName) {
         Object result = null;
         Class<?> myObjectClass = myObject.getClass();
         Field[] fields = myObjectClass.getDeclaredFields();
         for (Field field : fields) {
             String fieldName = field.getName();
             if (Objects.equals(fieldName, propertyName)) {
-                result = field.get(myObject);
+                try {
+                    field.setAccessible(true);
+                    result = field.get(myObject);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
         }
@@ -274,5 +282,27 @@ public class Util {
         Matcher m = p.matcher(text);
         boolean b = m.find();
         return b || text.contains(" ");
+    }
+
+    public static int[] pickNRandInArr(int[] array, int n) {
+        if (n > array.length) {
+            throw new IllegalArgumentException(
+                    "Đại ca đòi " + n + " mà mảng có " + array.length + " thôi, tham vừa thôi! 😛");
+        }
+        int[] result = Arrays.copyOf(array, array.length); // Sao chép nhanh, khỏi lằng nhằng
+        shuffleArray(result); // Xáo trộn ngay trong mảng
+        result = Arrays.copyOfRange(result, 0, n); // Lấy n phần tử đầu
+        Arrays.sort(result); // Sort luôn
+        return result;
+    }
+
+    private static void shuffleArray(int[] arr) {
+        Random rand = new Random();
+        for (int i = arr.length - 1; i > 0; i--) {
+            int j = rand.nextInt(i + 1);
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
     }
 }

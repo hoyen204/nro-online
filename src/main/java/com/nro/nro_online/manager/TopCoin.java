@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import lombok.Getter;
-import nro.jdbc.DBService;
+import com.nro.nro_online.jdbc.DBService;
 
 /**
  *

@@ -6,7 +6,6 @@ import static com.nro.nro_online.models.item.ItemTime.TIME_EAT_MEAL;
 import static com.nro.nro_online.models.item.ItemTime.TIME_ITEM;
 import static com.nro.nro_online.models.item.ItemTime.TIME_MAY_DO;
 import static com.nro.nro_online.models.item.ItemTime.TIME_OPEN_POWER;
-import static nro.models.item.ItemTime.*;
 
 import com.nro.nro_online.consts.ConstPlayer;
 import com.nro.nro_online.models.item.Item;
@@ -16,6 +15,7 @@ import com.nro.nro_online.models.map.phoban.DoanhTrai;
 import com.nro.nro_online.models.player.Fusion;
 import com.nro.nro_online.models.player.Player;
 import com.nro.nro_online.server.io.Message;
+import com.nro.nro_online.utils.Log;
 
 public class ItemTimeService {
 
@@ -36,71 +36,95 @@ public class ItemTimeService {
                     (int) ((Fusion.TIME_FUSION - (System.currentTimeMillis() - player.fusion.lastTimeFusion)) / 1000));
         }
         if (player.itemTime.isBanhTrungThu1Trung) {
-            sendItemTime(player, 4042, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTrungThu1Trung)) / 1000));
+            sendItemTime(player, 4042,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTrungThu1Trung))
+                            / 1000));
         }
         if (player.itemTime.isBanhTrungThu2Trung) {
-            sendItemTime(player, 4043, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTrungThu2Trung)) / 1000));
+            sendItemTime(player, 4043,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTrungThu2Trung))
+                            / 1000));
         }
         if (player.itemTime.isDuoiKhi) {
-            sendItemTime(player, 5829, (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeDuoiKhi)) / 1000));
+            sendItemTime(player, 5829,
+                    (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeDuoiKhi)) / 1000));
         }
         if (player.itemTime.rateDragonHit) {
-            sendItemTime(player, 5138, (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimerateHit)) / 1000));
+            sendItemTime(player, 5138,
+                    (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimerateHit)) / 1000));
         }
         if (player.itemTime.rateDame) {
-            sendItemTime(player, 30595, (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeDameDr)) / 1000));
+            sendItemTime(player, 30595,
+                    (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeDameDr)) / 1000));
         }
         if (player.itemTime.rateHPKI) {
-            sendItemTime(player, 30596, (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimerateHPKI)) / 1000));
+            sendItemTime(player, 30596,
+                    (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimerateHPKI)) / 1000));
         }
         if (player.itemTime.isUseBoHuyet) {
-            sendItemTime(player, 2755, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoHuyet)) / 1000));
+            sendItemTime(player, 2755,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoHuyet)) / 1000));
         }
         if (player.itemTime.isUseBoKhi) {
-            sendItemTime(player, 2756, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoKhi)) / 1000));
+            sendItemTime(player, 2756,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoKhi)) / 1000));
         }
         if (player.itemTime.isUseGiapXen) {
-            sendItemTime(player, 2757, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeGiapXen)) / 1000));
+            sendItemTime(player, 2757,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeGiapXen)) / 1000));
         }
         if (player.itemTime.isUseCuongNo) {
-            sendItemTime(player, 2754, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeCuongNo)) / 1000));
+            sendItemTime(player, 2754,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeCuongNo)) / 1000));
         }
         if (player.itemTime.isUseAnDanh) {
-            sendItemTime(player, 2760, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeAnDanh)) / 1000));
+            sendItemTime(player, 2760,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeAnDanh)) / 1000));
         }
         if (player.itemTime.isOpenPower) {
-            sendItemTime(player, 3783, (int) ((TIME_OPEN_POWER - (System.currentTimeMillis() - player.itemTime.lastTimeOpenPower)) / 1000));
+            sendItemTime(player, 3783,
+                    (int) ((TIME_OPEN_POWER - (System.currentTimeMillis() - player.itemTime.lastTimeOpenPower))
+                            / 1000));
         }
         if (player.itemTime.isUseMayDo) {
-            sendItemTime(player, 2758, (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeUseMayDo)) / 1000));
+            sendItemTime(player, 2758,
+                    (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.lastTimeUseMayDo)) / 1000));
         }
         if (player.itemTime.isMayDo) {
-            sendItemTime(player, 11493, (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.timeMayDo)) / 1000));
+            sendItemTime(player, 11493,
+                    (int) ((TIME_MAY_DO - (System.currentTimeMillis() - player.itemTime.timeMayDo)) / 1000));
         }
         if (player.itemTime.isEatMeal) {
-            sendItemTime(player, player.itemTime.iconMeal, (int) ((TIME_EAT_MEAL - (System.currentTimeMillis() - player.itemTime.lastTimeEatMeal)) / 1000));
+            sendItemTime(player, player.itemTime.iconMeal,
+                    (int) ((TIME_EAT_MEAL - (System.currentTimeMillis() - player.itemTime.lastTimeEatMeal)) / 1000));
         }
         if (player.itemTime.isUseBanhChung) {
-            sendItemTime(player, 15043, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhChung)) / 1000));
+            sendItemTime(player, 15043,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhChung)) / 1000));
         }
         if (player.itemTime.isUseBanhTet) {
-            sendItemTime(player, 15041, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTet)) / 1000));
+            sendItemTime(player, 15041,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBanhTet)) / 1000));
         }
         if (player.itemTime.isUseBoHuyet2) {
-            sendItemTime(player, 10714, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoHuyet2)) / 1000));
+            sendItemTime(player, 10714,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoHuyet2)) / 1000));
         }
         if (player.itemTime.isUseBoKhi2) {
-            sendItemTime(player, 10715, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoKhi2)) / 1000));
+            sendItemTime(player, 10715,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeBoKhi2)) / 1000));
         }
         if (player.itemTime.isUseGiapXen2) {
-            sendItemTime(player, 10712, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeGiapXen2)) / 1000));
+            sendItemTime(player, 10712,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeGiapXen2)) / 1000));
         }
         if (player.itemTime.isUseCuongNo2) {
-            sendItemTime(player, 10716, (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeCuongNo2)) / 1000));
+            sendItemTime(player, 10716,
+                    (int) ((TIME_ITEM - (System.currentTimeMillis() - player.itemTime.lastTimeCuongNo2)) / 1000));
         }
     }
 
-    //bật tđlt
+    // bật tđlt
     public void turnOnTDLT(Player player, Item item) {
         int min = 0;
         for (ItemOption io : item.itemOptions) {
@@ -118,12 +142,13 @@ public class ItemTimeService {
         InventoryService.gI().sendItemBags(player);
     }
 
-    //tắt tđlt
+    // tắt tđlt
     public void turnOffTDLT(Player player, Item item) {
         player.itemTime.isUseTDLT = false;
         for (ItemOption io : item.itemOptions) {
             if (io.optionTemplate.id == 1) {
-                io.param = (short) ((player.itemTime.timeTDLT - (System.currentTimeMillis() - player.itemTime.lastTimeUseTDLT)) / 60 / 1000);
+                io.param = (short) ((player.itemTime.timeTDLT
+                        - (System.currentTimeMillis() - player.itemTime.lastTimeUseTDLT)) / 60 / 1000);
                 break;
             }
         }
@@ -173,26 +198,20 @@ public class ItemTimeService {
     }
 
     private void sendTextTime(Player player, byte id, String text, int seconds) {
-        Message msg;
-        try {
-            msg = new Message(65);
+        try (Message msg = new Message(65)){
             msg.writer().writeByte(id);
             msg.writer().writeUTF(text);
             msg.writer().writeShort(seconds);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }
 
     public void sendItemTime(Player player, int itemId, int time) {
-        Message msg;
-        try {
-            msg = new Message(-106);
+        try (Message msg = new Message(-106)){
             msg.writer().writeShort(itemId);
             msg.writer().writeShort(time);
             player.sendMessage(msg);
-            msg.cleanup();
         } catch (Exception e) {
         }
     }

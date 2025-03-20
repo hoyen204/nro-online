@@ -43,17 +43,17 @@ public class SummonDragon {
     }
 
     // Dragon Ball IDs
-    private static final short NGOC_RONG_1_SAO = 14;
-    private static final short NGOC_RONG_2_SAO = 15;
-    private static final short NGOC_RONG_3_SAO = 16;
-    private static final short NGOC_RONG_4_SAO = 17;
-    private static final short NGOC_RONG_5_SAO = 18;
-    private static final short NGOC_RONG_6_SAO = 19;
-    private static final short NGOC_RONG_7_SAO = 20;
-    private static final short NGOC_RONG_SIEU_CAP = 1015;
-    private static final short[] NGOC_RONG_BANG = { 2045, 2046, 2047, 2048, 2049, 2050, 2051 };
+    public static final short NGOC_RONG_1_SAO = 14;
+    public static final short NGOC_RONG_2_SAO = 15;
+    public static final short NGOC_RONG_3_SAO = 16;
+    public static final short NGOC_RONG_4_SAO = 17;
+    public static final short NGOC_RONG_5_SAO = 18;
+    public static final short NGOC_RONG_6_SAO = 19;
+    public static final short NGOC_RONG_7_SAO = 20;
+    public static final short NGOC_RONG_SIEU_CAP = 1015;
+    public static final short[] NGOC_RONG_BANG = { 2045, 2046, 2047, 2048, 2049, 2050, 2051 };
 
-    private static final Map<DragonType, short[]> REQUIRED_BALLS = new HashMap<>();
+    public static final Map<DragonType, short[]> REQUIRED_BALLS = new HashMap<>();
 
     static {
         REQUIRED_BALLS.put(DragonType.SHENRON,
